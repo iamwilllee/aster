@@ -7,7 +7,7 @@ Aster 使用 React、TanStack Router / Query、Tailwind CSS、shadcn/ui base-nov
 - `src/components/ui/` 保存可维护的基础组件源码；通用页面组件位于 `src/components/common.tsx`。
 - `src/styles.css` 管理颜色、圆角、字体和深浅主题；品牌名称与描述位于 `src/config/site.ts`。
 - Logo、favicon 与使用说明见 [品牌文档](BRAND.md)。业务图标统一使用 Lucide，品牌图形独立管理。
-- 常规布局使用 CSS Grid / Flex；动效、可拖动面板、拖拽和复杂本地状态库只在实际业务需要时添加。
+- 常规布局使用 CSS Grid / Flex；基础入场动效复用 RevealGroup 与 CSS，可拖动面板、拖拽和复杂状态/动画库按实际业务需要添加。
 
 ## 组件样板
 
@@ -15,7 +15,7 @@ Aster 使用 React、TanStack Router / Query、Tailwind CSS、shadcn/ui base-nov
 
 - 基础组件：三档尺寸、表单/禁用/错误、弹窗内 Select，以及 Checkbox、Switch、DropdownMenu、Tooltip 和 Toast。
 - 页面组合：搜索、表格分页、详情弹窗、分组设置，以及可切换的加载/空态/错误重试。7 条虚构记录用于本地交互演示。
-- 视觉方向：工具型紧凑布局和阅读型排版共用设计变量；它们是排版示例，与 Sage / Catalog 产品视觉主题分开。
+- 视觉方向：工具型紧凑布局、阅读型排版与可重播入场动效；与 Sage / Catalog 产品视觉主题分开。
 
 示例只维护当前页面的临时状态，刷新即重置，不创建项目或调用提供商。该页在预发布/生产及非匹配回环来源返回 404。
 
@@ -25,7 +25,7 @@ Button、Input、Select、Textarea、Checkbox、Switch 和 TabsTrigger 在水合
 
 ## 从产品需求确定界面
 
-先在 `PROJECT.md` 的“界面与内容”写明用户与主要操作、视觉参考或推导依据、信息密度、页面组合及品牌方向。用户已有品牌/界面时优先延续；没有参考时从场景推导，不例行追加一轮设计问卷。
+底座源目录用根目录 PROJECT.md 区分生成产品，维护底座本身的界面时将设计记录放在私有 `.local/PROJECT.md`，保留该识别保护。产品开发先在 `PROJECT.md` 的“界面与内容”写明用户与主要操作、视觉参考或推导依据、信息密度、页面组合及品牌方向。用户已有品牌/界面时优先延续；没有参考时从场景推导，不例行追加一轮设计问卷。
 
 高频操作工具优先清晰导航、可扫描列表和明确操作；内容型产品优先阅读顺序、字体层级和留白。根据内容选择结构，不让每页都变成标题加卡片。当前绿色、侧栏和示例业务不是强制品牌。品牌色和字体通过 `src/styles.css` 管理，深浅主题成对调整，页面不写零散品牌色。视觉示例不宣称不存在的功能、客户或指标。
 
@@ -50,25 +50,48 @@ Button、Input、Select、Textarea、Checkbox、Switch 和 TabsTrigger 在水合
 
 验收时等字体和样式就绪，在浏览器 100% 缩放下检查英文/中文、桌面/手机、两套主题及浅深色，关注真实字体、长标题换行、表单和表格几何、正文可读性。截图要等有限动画/颜色过渡结束并保留原始像素；压缩或缩放后的图片不能单独证明页面存在锯齿。已有产品采用此改动需按 UPGRADING.md 增量合并，不覆盖业务字体或仅更新 Skill 就宣称已修复线上。
 
+## 页面动效
+
+官网默认采用轻量、有限的动效：首屏标题 → 说明 → 主要操作 → 展示依次入场，下方内容首次进入视口时出现。后台表单、密集列表与高频操作不默认加入入场等待。Sage 使用 560ms / 70ms 分组间隔，Catalog 更克制（480ms / 50ms）；手机降低位移和时长。品牌可在 styles.css 调整统一变量，不在各页散写时间。
+
+复用 `src/components/ui/reveal.tsx` 的 RevealGroup，保留现有 Grid/Flex 与标题、列表、链接语义。它渲染 div；不能替代 ol/li 或给控件加额外几何样式。
+
+```tsx
+<RevealGroup className="grid gap-6">
+  <h1 data-reveal="enter">Product title</h1>
+  <p data-reveal="enter" data-reveal-step="1">
+    What it does.
+  </p>
+  <article data-reveal="scroll">More information.</article>
+</RevealGroup>
+```
+
+`enter` 由 CSS 执行，支持 0–4 档 data-reveal-step；`scroll` 由 Observer 渐进增强，只预先隐藏挂载时仍在视口下方的内容，一次出现后不重复。已有可见内容不闪回隐藏；新动态节点默认直接显示，需要独立入场时挂载新的组。不逐个字拆标题，不动画化行高/宽高，不模糊或缩放正文；动画结束后不保留 transform / will-change。`motion-hover` 提供桌面轻微阴影反馈，不暗示未连接的操作。
+
+系统减少动态效果时直接显示内容；用户切换偏好立即解除待出现状态。无脚本或 Observer 不可用/初始化失败时，内容仍可读。键盘焦点进入待出现区块时立即显示，不等动画完成。不要把操作是否可用、权限、加载或错误状态绑到动画结束事件。无需为基础动效引入新依赖；复杂业务编排再按需选型。
+
+本地 `/dev/ui` 的视觉方向包含可重播样例，产品与商品蓝图也展示入场/滚动效果。验收实际动画开始、渐次顺序、结束后的清晰文字、滚动仅一次、键盘、减少动态效果与无脚本降级；覆盖两套主题、语言、浅深色和手机。静态截图需等待有限动画结束；静态截图或关闭动画的测试不能单独证明动效已验收。
+
 ## 完整页面蓝图
 
 完整用户流程与内容规划见 [页面蓝图](PAGE-BLUEPRINTS.md)。本地 `/dev/blueprints` 提供产品官网、目录阅读、商品目录和数据工作台四类可交互组合；从 `/dev/ui` 也可进入。所有品牌与条目均为虚构，内存编辑刷新即重置；入口在预发布/生产关闭。可单独复用 `patterns/content-patterns.tsx` 的功能说明、步骤与 FAQ，以及 `ui/disclosure.tsx` 的键盘/SSR 原生展开行为。采用到产品时接真实内容、路由与数据，不继承演示状态或验收声明。
 
 ## 组合与组件索引
 
-| 需求             | 复用入口                                                   | 使用边界                                                         |
-| ---------------- | ---------------------------------------------------------- | ---------------------------------------------------------------- |
-| 搜索与筛选工具栏 | `ListToolbar`，`src/components/patterns/page-patterns.tsx` | search/filters/actions 插槽，URL 状态仍归业务页管理              |
-| 列表加载与无结果 | `ListSkeleton`、`EmptyState`，同上                         | 区分首次空数据与筛选无结果；错误用 ErrorNotice + 重试            |
-| 分组设置         | `SettingsSection`，同上                                    | 标题说明与内容分栏，手机纵向；每个 id 唯一                       |
-| 详情属性         | `DetailList` + Dialog，同上                                | 长文本可换行；弹窗可滚动，保持标题与描述                         |
-| 分页             | `Pagination`，同上                                         | 受控、从 1 开始；调用者限制 page/pageCount，筛选变化重置页码     |
-| 语义表格         | `ui/table.tsx`                                             | 保留 caption/th 语义，窄屏在表格内横向滚动，不撑开整页           |
-| 同页内容分组     | `ui/tabs.tsx`                                              | Tabs / TabsList / TabsTrigger / TabsContent；导航路由用 Link     |
-| 操作菜单         | `ui/dropdown-menu.tsx`                                     | Trigger 用 `render={<Button ... />}`，危险项单独分组并确认       |
-| 勾选和开关       | `ui/checkbox.tsx`、`ui/switch.tsx`                         | Label 关联或包裹控件；name 提交表单，checked 管理受控状态        |
-| 补充说明         | `ui/tooltip.tsx`                                           | Trigger 用 Button，始终保留 aria-label；关键信息不能只藏在提示里 |
-| 操作反馈         | `ui/use-toast.ts` 的 `useToast()`                          | 全局 Provider 已安装；成功后提示，表单错误仍留在字段附近         |
+| 需求               | 复用入口                                                   | 使用边界                                                         |
+| ------------------ | ---------------------------------------------------------- | ---------------------------------------------------------------- |
+| 页面入场与滚动出现 | `RevealGroup`，`ui/reveal.tsx`                             | 官网按阅读顺序分组；尊重减少动态效果、键盘和无脚本降级           |
+| 搜索与筛选工具栏   | `ListToolbar`，`src/components/patterns/page-patterns.tsx` | search/filters/actions 插槽，URL 状态仍归业务页管理              |
+| 列表加载与无结果   | `ListSkeleton`、`EmptyState`，同上                         | 区分首次空数据与筛选无结果；错误用 ErrorNotice + 重试            |
+| 分组设置           | `SettingsSection`，同上                                    | 标题说明与内容分栏，手机纵向；每个 id 唯一                       |
+| 详情属性           | `DetailList` + Dialog，同上                                | 长文本可换行；弹窗可滚动，保持标题与描述                         |
+| 分页               | `Pagination`，同上                                         | 受控、从 1 开始；调用者限制 page/pageCount，筛选变化重置页码     |
+| 语义表格           | `ui/table.tsx`                                             | 保留 caption/th 语义，窄屏在表格内横向滚动，不撑开整页           |
+| 同页内容分组       | `ui/tabs.tsx`                                              | Tabs / TabsList / TabsTrigger / TabsContent；导航路由用 Link     |
+| 操作菜单           | `ui/dropdown-menu.tsx`                                     | Trigger 用 `render={<Button ... />}`，危险项单独分组并确认       |
+| 勾选和开关         | `ui/checkbox.tsx`、`ui/switch.tsx`                         | Label 关联或包裹控件；name 提交表单，checked 管理受控状态        |
+| 补充说明           | `ui/tooltip.tsx`                                           | Trigger 用 Button，始终保留 aria-label；关键信息不能只藏在提示里 |
+| 操作反馈           | `ui/use-toast.ts` 的 `useToast()`                          | 全局 Provider 已安装；成功后提示，表单错误仍留在字段附近         |
 
 项目列表示范卡片/表格切换、菜单、详情与 URL 状态；账户设置示范 SettingsSection。两者均使用实际账户数据，开发样板的虚构内容不混入业务记录。
 
@@ -139,6 +162,12 @@ Select 在 Root 的 `items` 中提供标签映射，使受控值、初次渲染�
 | 会话与权限、订阅权益         | 服务端认证与数据库            |
 
 避免同时维护多个权威数据副本。SSR 的缓存与语言按请求隔离；退出账户后清理私有客户端状态。保存结果以服务端返回为准。
+
+## 公开页面文案
+
+交付产品前逐页清理开发残留：未经产品明确选择的“早期预览 / EARLY PREVIEW”横条、测试账号/数据、占位说明、示例套餐与框架宣传不进入正式业务页面。页面标题、按钮、状态和页脚使用当前产品的真实表达，不把云端发布状态写成“本地发布”。保留产品有意采用且有依据的 Beta 标识、内容试读与私有编辑预览，不能机械删除所有 preview 字样。
+
+功能尚不可用时隐藏对应入口，或在相关操作旁说明“暂未开放付款 / 暂不支持预约”等用户可理解的状态；不以删除提示来冒充功能已接通。开发样板与测试支付仍留在其原有隔离范围，保留演示/测试标识，不能把虚构内容改名后搬到产品。检查当前项目的最终渲染内容；更新 Skill 不等于已清理使用底座的站点。
 
 ## 页面验收
 

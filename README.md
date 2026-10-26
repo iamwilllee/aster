@@ -6,7 +6,7 @@
 
 默认不启用支付，也不需要支付账户。已有 Stripe / Creem TEST 适配作为实验代码保留，不纳入本版正式收款支持承诺；按真实需求选择时再读 [支付选型](docs/PAYMENTS.md)。
 
-源码仓库为 [iamwilllee/aster](https://github.com/iamwilllee/aster)。当前版本 **v0.2.0-beta.1，发布候选（尚未发布）**。支持范围与采用说明见 [候选版说明](docs/releases/0.2.0-beta.1.md)。本地与隔离 Worker 验收不等于每个产品的真实邮件、Google、R2 或云端部署已接通。
+源码仓库为 [iamwilllee/aster](https://github.com/iamwilllee/aster)。当前版本 **v0.2.0-beta.1，无支付公开预览版**。发布状态与下载见 [GitHub Releases](https://github.com/iamwilllee/aster/releases)，支持范围与采用方式见 [版本说明](docs/releases/0.2.0-beta.1.md)。本地与隔离 Worker 验收不等于每个产品的真实邮件、Google、R2 或云端部署已接通。
 
 ![Aster Logo](public/brand/aster-logo.svg)
 

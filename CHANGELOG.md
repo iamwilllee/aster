@@ -1,8 +1,11 @@
 # Changelog
 
-## 0.2.0-beta.1 — 2026-10-26（发布候选，未发布）
+## 0.2.0-beta.1 — 2026-10-26（公开预览）
 
-- Prepare the first non-payment public preview: disable billing in the source default, retain experimental TEST adapters and legacy billing safeguards, and align support/version documentation.
+- Add finite, staggered homepage entrances and one-time viewport reveals with Sage/Catalog timing, mobile/reduced-motion adjustments and readable no-script/unsupported-observer fallbacks. Include replayable UI examples and Agent guidance; retain control geometry and natural text rendering after motion.
+
+- Add public-page copy review to the Skill and product brief: remove development banners and placeholders from actual products while preserving truthful availability and isolated demo labels.
+- Support the first non-payment public preview: disable billing in the source default, retain experimental TEST adapters and legacy billing safeguards, and align support/version documentation.
 - Route unexpected SDK failures through the sanitized auth HTTP boundary while preserving expected API error statuses/cookies and error observability. Add actual request-path sentinel regression.
 - Make production navigation and endpoint checks capability-aware, add the plain web-app profile to CI and retain optional Google/showcase coverage.
 

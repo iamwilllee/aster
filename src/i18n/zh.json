@@ -777,5 +777,9 @@
   "admin_self_error": "不能停用或更改当前账号的访问状态。",
   "admin_changed": "账号状态或权限已变化，请刷新后重试；至少保留一位有效管理员。",
   "admin_missing": "用户不存在。",
-  "admin_display_name": "显示名称"
+  "admin_display_name": "显示名称",
+  "ui_motion_title": "动效与阅读节奏",
+  "ui_motion_description": "分组依次入场，悬停提供轻量反馈。开启减少动态效果时直接显示内容。重播只影响当前本地演示。",
+  "ui_motion_replay": "重播入场",
+  "ui_motion_scroll": "此区块到达视口时出现一次；键盘聚焦操作时直接显示。"
 }

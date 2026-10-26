@@ -1,10 +1,10 @@
 # 发布维护流程
 
-当前候选为 v0.2.0-beta.1，以无支付产品为首要支持范围。发布说明草案位于 releases/0.2.0-beta.1.md。准备候选不等于已经发布。
+v0.2.0-beta.1 以无支付产品为首要支持范围，版本说明位于 releases/0.2.0-beta.1.md。以下流程也用于后续版本；本地准备、提交与公开发布分别记录，公开状态以 GitHub Release 为准。
 
 ## 候选验证
 
-1. 对齐 package.json、starter-version.json、源站点版本、README/安全说明和变更记录；候选保留 upstreamRelease=null，实际发布后再按事实更新。
+1. 对齐 package.json、starter-version.json、源站点版本、README/安全说明和变更记录；候选阶段保留 upstreamRelease=null。获准创建版本发布时，在待发布提交中对齐预发布通道与目标 Release 链接；公开成功后核对服务端的 URL、prerelease 标记与 tag 提交。准备链接不代表已经公开发布。
 2. 验证默认无支付体验、showcase 与 web-app 初始化/恢复，确认账单入口及直接 API 关闭；保留实验支付的单元回归和旧产品账务兼容性。
 3. 运行 `pnpm check`、`pnpm format:check`、`pnpm test:e2e`、`pnpm test:production`；另运行 `pnpm test:production --profile web-app`、`pnpm test:production --profile showcase`、`pnpm test:production --profile google-only`。认证异常需验证实际 HTTP 路径不泄漏 SQL 参数/哈希/令牌，保留结构化错误日志。计费实验改动再运行 `pnpm test:production --profile creem`。
 4. 在新生成产品中运行锁定安装、恢复、构建和实际流程；不能以源目录通过代替。提供商记录只认可当前产品的真实验收。

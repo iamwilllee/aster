@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { RevealGroup } from '@/components/ui/reveal'
 import { Disclosure } from '@/components/ui/disclosure'
 
 export function ContentHeading({
@@ -27,31 +28,43 @@ export function FeatureRows({
   items: { title: string; description: string; icon: ReactNode }[]
 }) {
   return (
-    <div className="divide-y">
-      {items.map((item) => (
-        <div key={item.title} className="grid gap-4 py-6 sm:grid-cols-[2rem_1fr_1.3fr]">
+    <RevealGroup className="divide-y">
+      {items.map((item, index) => (
+        <div
+          key={item.title}
+          data-reveal="scroll"
+          data-reveal-step={Math.min(index, 4)}
+          className="grid gap-4 py-6 sm:grid-cols-[2rem_1fr_1.3fr]"
+        >
           <span className="text-primary">{item.icon}</span>
           <h3 className="font-medium">{item.title}</h3>
           <p className="text-base leading-7 text-muted-foreground">{item.description}</p>
         </div>
       ))}
-    </div>
+    </RevealGroup>
   )
 }
 
 export function ProcessSteps({ items }: { items: { title: string; description: string }[] }) {
   return (
-    <ol className="grid gap-7 sm:grid-cols-3">
-      {items.map((item, index) => (
-        <li key={item.title} className="border-t pt-5">
-          <span className="font-mono text-xs text-primary">
-            {String(index + 1).padStart(2, '0')}
-          </span>
-          <h3 className="mt-4 font-medium">{item.title}</h3>
-          <p className="mt-2 text-base leading-7 text-muted-foreground">{item.description}</p>
-        </li>
-      ))}
-    </ol>
+    <RevealGroup>
+      <ol className="grid gap-7 sm:grid-cols-3">
+        {items.map((item, index) => (
+          <li
+            key={item.title}
+            data-reveal="scroll"
+            data-reveal-step={Math.min(index, 4)}
+            className="border-t pt-5"
+          >
+            <span className="font-mono text-xs text-primary">
+              {String(index + 1).padStart(2, '0')}
+            </span>
+            <h3 className="mt-4 font-medium">{item.title}</h3>
+            <p className="mt-2 text-base leading-7 text-muted-foreground">{item.description}</p>
+          </li>
+        ))}
+      </ol>
+    </RevealGroup>
   )
 }
 

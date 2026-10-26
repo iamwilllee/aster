@@ -1,9 +1,9 @@
 {
   "version": "0.2.0-beta.1",
-  "status": "release-candidate",
+  "status": "prerelease",
   "framework": "tanstack-start",
   "runtime": "cloudflare-workers",
   "modules": ["auth", "projects", "mail", "admin", "files", "content"],
-  "upstreamRelease": null,
+  "upstreamRelease": "https://github.com/iamwilllee/aster/releases/tag/v0.2.0-beta.1",
   "experimentalModules": ["billing-test"]
 }
