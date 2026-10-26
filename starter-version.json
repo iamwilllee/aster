@@ -1,6 +1,6 @@
 {
-  "version": "0.2.0-beta.1",
-  "status": "release-candidate",
+  "version": "0.3.0-dev.0",
+  "status": "development",
   "framework": "tanstack-start",
   "runtime": "cloudflare-workers",
   "modules": ["auth", "projects", "mail", "admin", "files", "content"],

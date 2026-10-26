@@ -1,10 +1,10 @@
+import { origin } from './origin'
 import { randomUUID } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import type { APIRequestContext } from '@playwright/test'
 import { test, expect, features } from './fixtures'
 import type { AccountExport } from '../../src/modules/auth/lifecycle'
 
-const origin = 'http://127.0.0.1:3100'
 const password = 'Fixture-lifecycle-2026!'
 test.skip(!features.emailPassword, 'Requires selected local email authentication')
 async function signup(

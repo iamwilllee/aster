@@ -1,11 +1,11 @@
+import { origin } from './origin'
 import { releaseFixtureAdmin } from './local-admin'
 import { randomUUID } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import type { APIRequestContext } from '@playwright/test'
 import { test, expect, features } from './fixtures'
 import type { ContentRecord } from '../../src/modules/content/policy'
-const origin = 'http://127.0.0.1:3100',
-  password = 'Fixture-content-2026!'
+const password = 'Fixture-content-2026!'
 const png = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jL1kAAAAASUVORK5CYII=',
   'base64',

@@ -1,6 +1,6 @@
+import { origin } from './origin'
 import { test, expect, features } from './fixtures'
 import { randomUUID } from 'node:crypto'
-const origin = 'http://127.0.0.1:3100'
 const password = 'Fixture-only-password-2026!'
 
 test('English default, localized links, reload, history and canonical metadata', async ({

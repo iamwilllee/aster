@@ -6,7 +6,7 @@
 
 默认不启用支付，也不需要支付账户。已有 Stripe / Creem TEST 适配作为实验代码保留，不纳入本版正式收款支持承诺；按真实需求选择时再读 [支付选型](docs/PAYMENTS.md)。
 
-源码仓库为 [iamwilllee/aster](https://github.com/iamwilllee/aster)。当前版本 **v0.2.0-beta.1，发布候选（尚未发布）**。支持范围与采用说明见 [候选版说明](docs/releases/0.2.0-beta.1.md)。本地与隔离 Worker 验收不等于每个产品的真实邮件、Google、R2 或云端部署已接通。
+源码仓库为 [iamwilllee/aster](https://github.com/iamwilllee/aster)。当前分支 **next/0.3，v0.3.0-dev.0（开发中，未发布）**，基于 0.2.0-beta.1 候选；支付仍默认关闭且仅支持测试适配。本线计划见 [0.3 开发计划](docs/ROADMAP-0.3.md)，0.2 范围见 [候选版说明](docs/releases/0.2.0-beta.1.md)。本地与隔离 Worker 验收不等于每个产品的真实邮件、Google、R2 或云端部署已接通。
 
 ![Aster Logo](public/brand/aster-logo.svg)
 
@@ -15,6 +15,17 @@
 当前绿色主题命名为 **Sage**；新增 **Catalog** 中性商品目录主题。配置、Agent 选择及本地预览见 [主题指南](docs/THEMES.md)。私有图片库及头像/封面接入见 [图片指南](docs/FILES.md)。
 
 内容管理支持文章、帮助和公告的草稿、预览、发布/撤下，以及独立的网站封面素材。后台与发布边界见 [内容管理](docs/CONTENT.md)。模块按需开启，新产品默认关闭。
+
+## 本地双版本开发
+
+本分支用于 0.3 开发。日常 Skill 继续指向 main 所在的稳定目录，不在这里重新安装或替换全局 Skill。当前工作树预览使用 `http://localhost:3102`，与 0.2 的 `http://127.0.0.1:3100` 分开 Cookie 与本地数据库。
+
+```bash
+pnpm dev --host localhost --port 3102
+pnpm test:e2e  # 从当前 .dev.vars 的 APP_ORIGIN 选择独立地址
+```
+
+新克隆/新 worktree 先 install/setup 并设置自身的本地 APP_ORIGIN；不要复制另一工作树的密钥或数据库。普通生成产品仍默认使用 3100。
 
 ## 开始使用
 

@@ -1,3 +1,4 @@
+import { origin } from './origin'
 import { test as base, expect } from '@playwright/test'
 import { randomUUID } from 'node:crypto'
 export { default as features } from '../../src/config/features.json' with { type: 'json' }
@@ -6,8 +7,7 @@ export { default as features } from '../../src/config/features.json' with { type
 // Cloudflare overwrites this header in production; this fixture is for loopback development only.
 export const test = base.extend({
   extraHTTPHeaders: async ({ baseURL }, use) => {
-    if (baseURL !== 'http://127.0.0.1:3100')
-      throw new Error('Development fixtures require the loopback server')
+    if (baseURL !== origin) throw new Error('Development fixtures require the loopback server')
     const id = randomUUID().replaceAll('-', '')
     await use({
       'cf-connecting-ip':

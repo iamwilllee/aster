@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.0-dev.0 — 2026-10-26（开发中，未发布）
+
+- Start the next development line from the validated 0.2.0-beta.1 candidate. Keep billing off and existing adapters TEST ONLY.
+- Let local browser tests follow the checkout-specific loopback APP_ORIGIN or ASTER_TEST_ORIGIN, so parallel worktrees use separate preview/test ports.
+
 ## 0.2.0-beta.1 — 2026-10-26（发布候选，未发布）
 
 - Prepare the first non-payment public preview: disable billing in the source default, retain experimental TEST adapters and legacy billing safeguards, and align support/version documentation.

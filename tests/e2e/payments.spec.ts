@@ -1,3 +1,4 @@
+import { origin } from './origin'
 import { randomUUID } from 'node:crypto'
 import { test, expect, features } from './fixtures'
 
@@ -6,7 +7,6 @@ test.skip(!features.emailPassword || !features.billing, 'Requires selected email
 test('renders the selected provider, preserves legacy portal actions and never upgrades on a checkout return', async ({
   page,
 }) => {
-  const origin = 'http://127.0.0.1:3100'
   const email = `payment-ui-${randomUUID()}@example.test`
   const password = 'Fixture-payments-2026!'
   expect(

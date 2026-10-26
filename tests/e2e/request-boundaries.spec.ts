@@ -1,6 +1,5 @@
+import { origin } from './origin'
 import { test, expect, features } from './fixtures'
-
-const origin = 'http://127.0.0.1:3100'
 
 test('concurrent early mutation errors preserve JSON status and keep the next request healthy', async ({
   request,

@@ -1,8 +1,8 @@
+import { origin } from './origin'
 import { randomUUID } from 'node:crypto'
 import type { APIRequestContext } from '@playwright/test'
 import { test, expect, features } from './fixtures'
-const origin = 'http://127.0.0.1:3100',
-  password = 'Fixture-images-2026!'
+const password = 'Fixture-images-2026!'
 const png = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jL1kAAAAASUVORK5CYII=',
   'base64',

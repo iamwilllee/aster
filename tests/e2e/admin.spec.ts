@@ -1,10 +1,10 @@
+import { origin } from './origin'
 import { randomUUID } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import type { APIRequestContext } from '@playwright/test'
 import { test, expect, features } from './fixtures'
 import { releaseFixtureAdmin } from './local-admin'
-const origin = 'http://127.0.0.1:3100',
-  password = 'Fixture-operator-2026!'
+const password = 'Fixture-operator-2026!'
 test.skip(!features.auth || !features.emailPassword, 'Requires selected local email authentication')
 async function register(request: APIRequestContext) {
   const email = 'operator-' + randomUUID() + '@example.test'

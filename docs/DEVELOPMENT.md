@@ -4,7 +4,7 @@
 
 ## 本地工作流
 
-使用 Node.js 24 和 pnpm 12.11.2。先执行 README 的三步启动。开发地址固定为 `http://127.0.0.1:3100`，请不要混用 localhost 或其他端口；认证可信来源与本地收件箱均要求匹配 `APP_ORIGIN`。如果修改地址，同时调整 `.dev.vars`、开发脚本、Playwright 配置和测试。
+使用 Node.js 24 和 pnpm 12.11.2。先执行 README 的三步启动。默认开发地址为 `http://127.0.0.1:3100`。并行 worktree 可在各自 `.dev.vars` 设置不同的回环 `APP_ORIGIN`，并以对应 host/port 启动开发服务。Playwright 与 fixture 从当前目录的 APP_ORIGIN 读取地址，也可用 ASTER_TEST_ORIGIN 显式指定；仅允许本机 HTTP 非特权端口。认证来源、本地收件箱与实际启动地址须一致。端口不同并不能隔离浏览器 Cookie；需要两边同时登录时使用不同主机名，例如 127.0.0.1 与 localhost。
 
 `.dev.vars` 由 setup 生成，不会覆盖已有文件。只把占位示例 `.dev.vars.example` 入库。Workers 类型由 `pnpm cf:typegen` 生成，路由树在 `pnpm build` 或开发时生成。本地 D1/R2 由 Cloudflare 运行时模拟，不需要 Docker。
 

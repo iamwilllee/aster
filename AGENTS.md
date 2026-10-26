@@ -4,6 +4,10 @@
 
 TanStack Start + React + TypeScript, Cloudflare Workers/D1, Better Auth + Drizzle. Use pnpm and preserve the lockfile. Keep solutions simple; extend existing modules before adding dependencies. Do not introduce Next.js, a second component framework, state library, or database deployment branch without a concrete need.
 
+## Development line
+
+This worktree is next/0.3, based on the committed 0.2.0-beta.1 candidate. Read docs/ROADMAP-0.3.md for scope; keep the globally installed Skill on the stable source. Preserve TEST-only payment boundaries until an explicitly scoped integration is implemented and accepted. Use this checkout's loopback APP_ORIGIN for previews and E2E, with independent local data and secrets.
+
 ## Product handoff
 
 Use the bundled `aster-new` Skill in the current project by default; explicit target paths are optional. It detects missing/empty/metadata-only directories, existing Aster products and other apps. Initialize in place when safe; preserve Git, README, personal rules and editor config. Existing apps are inspected and extended rather than overwritten or forcibly migrated. The CLI can also run from the original Aster source with a target directory. Read `docs/AGENT-GUIDE.md` and the product's `PROJECT.md` before implementation. Use `docs/templates/PROJECT-BRIEF.md` to create a brief when needed; keep business scope and human handoff there. Track choices/provenance, tasks, current acceptance evidence and bootstrap checkpoints in `starter.project.json`. Use `project:doctor`/`project:status` before resuming and `project:resume` for interrupted local initialization. Never mark mock tests as real provider acceptance; reset affected cases when requirements or code change. `project:check --ready` checks records and paths, not business behavior. Preserve this guide's technical boundaries and the recorded starter source version. Keep local QA, personal research and conversation records out of the public repository; every product needs its own acceptance evidence.

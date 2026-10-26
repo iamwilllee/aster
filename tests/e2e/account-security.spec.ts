@@ -1,9 +1,9 @@
+import { origin } from './origin'
 import { randomUUID } from 'node:crypto'
 import type { APIRequestContext } from '@playwright/test'
 import { test, expect, features } from './fixtures'
 import type { AccountSecurity } from '../../src/modules/auth/security'
 
-const origin = 'http://127.0.0.1:3100'
 const password = 'Fixture-account-security-2026!'
 test.skip(!features.emailPassword, 'Requires selected local email authentication')
 
