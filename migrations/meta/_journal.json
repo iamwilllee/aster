@@ -22,6 +22,41 @@
       "when": 1792601245089,
       "tag": "0002_grey_alice",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1792851336476,
+      "tag": "0003_nervous_mauler",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1792858365100,
+      "tag": "0004_married_boom_boom",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1792900084334,
+      "tag": "0005_vengeful_captain_stacy",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1792919903227,
+      "tag": "0006_lying_black_cat",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1792950112593,
+      "tag": "0007_puzzling_the_hood",
+      "breakpoints": true
     }
   ]
 }

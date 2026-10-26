@@ -1,3 +1,4 @@
+import { hashPassword } from 'better-auth/crypto'
 import { featurePreset } from '../src/config/feature-policy.mjs'
 import { randomBytes, randomUUID } from 'node:crypto'
 import { mkdirSync, readFileSync, writeFileSync, existsSync, unlinkSync } from 'node:fs'
@@ -6,6 +7,7 @@ import { resolve, join } from 'node:path'
 import https from 'node:https'
 import net from 'node:net'
 import { parse } from 'jsonc-parser'
+import { setImmediate as flushWorkerLogs } from 'node:timers/promises'
 
 // Everything writable for this run is below a fresh, ignored directory. No developer DB or secrets are read.
 const work = resolve('.wrangler/acceptance', randomUUID())
@@ -18,10 +20,16 @@ const origin = 'https://127.0.0.1:3110'
 const args = process.argv.slice(2)
 if (
   args.length &&
-  (args.length !== 2 || args[0] !== '--profile' || !['showcase', 'google-only'].includes(args[1]))
+  (args.length !== 2 ||
+    args[0] !== '--profile' ||
+    !['web-app', 'showcase', 'google-only', 'creem'].includes(args[1]))
 )
-  throw new Error('Use test:production [--profile showcase|google-only]')
-const profile = args[1] ?? 'default'
+  throw new Error('Use test:production [--profile web-app|showcase|google-only|creem]')
+const configuredFeatures = JSON.parse(readFileSync('src/config/features.json', 'utf8'))
+// A freshly generated showcase must pass the normal command without inventing auth dependencies.
+const profile =
+  args[1] ??
+  (Object.values(configuredFeatures).every((value) => value === false) ? 'showcase' : 'default')
 const features =
   profile === 'showcase'
     ? featurePreset('showcase')
@@ -33,7 +41,16 @@ const features =
           google: true,
           projects: false,
         }
-      : { ...JSON.parse(readFileSync('src/config/features.json', 'utf8')), google: true }
+      : profile === 'web-app'
+        ? featurePreset('web-app')
+        : profile === 'creem'
+          ? featurePreset('billing-test')
+          : { ...configuredFeatures, google: configuredFeatures.auth }
+const appearanceConfig = join(work, 'appearance.json')
+writeFileSync(
+  appearanceConfig,
+  JSON.stringify({ theme: profile === 'showcase' ? 'catalog' : 'sage' }),
+)
 const featureConfig = join(work, 'features.json')
 writeFileSync(featureConfig, JSON.stringify(features))
 writeFileSync(
@@ -49,6 +66,7 @@ writeFileSync(
       MAIL_MODE: 'disabled',
       MAIL_FROM: 'Aster <no-reply@example.invalid>',
       BILLING_ENABLED: 'false',
+      BILLING_PROVIDER: profile === 'creem' ? 'creem' : 'stripe',
       GOOGLE_AUTH_ENABLED: features.google ? 'true' : 'false',
       PUBLIC_INDEXABLE: 'false',
     },
@@ -62,12 +80,15 @@ writeFileSync(
           },
         ]
       : [],
+    r2_buckets: features.files
+      ? [{ binding: 'ASSETS_BUCKET', bucket_name: 'isolated-smoke-assets' }]
+      : [],
   }),
 )
 writeFileSync(
   join(work, '.dev.vars'),
   features.auth
-    ? `BETTER_AUTH_SECRET=${randomBytes(32).toString('hex')}\nGOOGLE_CLIENT_ID=fixture-only.apps.googleusercontent.com\nGOOGLE_CLIENT_SECRET=fixture-only-not-a-real-google-secret\n`
+    ? `BETTER_AUTH_SECRET=${randomBytes(32).toString('hex')}\nGOOGLE_CLIENT_ID=fixture-only.apps.googleusercontent.com\nGOOGLE_CLIENT_SECRET=fixture-only-not-a-real-google-secret\n${profile === 'creem' ? 'CREEM_API_KEY=fixture-test-only\nCREEM_WEBHOOK_SECRET=fixture-webhook-only\nCREEM_PRODUCT_ID=prod_fixture\n' : ''}`
     : '',
   { mode: 0o600 },
 )
@@ -76,6 +97,11 @@ const previous = existsSync(redirect) ? readFileSync(redirect) : null
 const taskEnv = {
   ...process.env,
   STARTER_SMOKE_PROFILE: profile,
+  STARTER_SMOKE_CONTENT: String(features.content),
+  STARTER_SMOKE_FILES: String(features.files),
+  STARTER_SMOKE_BILLING: String(features.billing),
+  STARTER_SMOKE_GOOGLE: String(features.google),
+  STARTER_SMOKE_APPEARANCE: appearanceConfig,
   STARTER_SMOKE_FEATURES: featureConfig,
   STARTER_SMOKE_CONFIG: config,
   STARTER_SMOKE_OUT: output,
@@ -85,7 +111,7 @@ const taskEnv = {
 }
 for (const key of Object.keys(taskEnv)) {
   if (
-    /^(GOOGLE_|STRIPE_|BREVO_|RESEND_)/.test(key) ||
+    /^(GOOGLE_|STRIPE_|CREEM_|BREVO_|RESEND_)/.test(key) ||
     [
       'BETTER_AUTH_SECRET',
       'CLOUDFLARE_ENV',
@@ -111,6 +137,19 @@ function assertPortAvailable() {
 function run(args) {
   const result = spawnSync('pnpm', args, { stdio: 'inherit', env: taskEnv })
   if (result.status !== 0) throw new Error(`Command failed: pnpm ${args.join(' ')}`)
+}
+function runBrowserTests() {
+  return new Promise((done, reject) => {
+    const child = spawn(
+      'pnpm',
+      ['exec', 'playwright', 'test', '--config', 'playwright.production.config.ts'],
+      { stdio: 'inherit', env: taskEnv },
+    )
+    child.once('error', reject)
+    child.once('close', (code) =>
+      code === 0 ? done() : reject(new Error('Isolated production browser checks failed')),
+    )
+  })
 }
 function ready() {
   return new Promise((done) => {
@@ -141,6 +180,76 @@ try {
       '--persist-to',
       state,
     ])
+  if (features.content) {
+    const publicDraft = {
+      title: 'Published fixture guide',
+      slug: 'fixture-guide',
+      locale: 'en',
+      kind: 'help',
+      category: 'Fixture',
+      summary: 'Local production fixture only',
+      body: 'Published fixture body',
+      seoTitle: 'Fixture content SEO',
+      seoDescription: 'Fixture public description',
+      coverAssetId: null,
+    }
+    const pendingDraft = {
+      ...publicDraft,
+      slug: 'never-published',
+      title: 'Private fixture draft',
+      body: 'PRIVATE-DRAFT-SENTINEL',
+    }
+    const hex = (value) =>
+      "CAST(X'" + Buffer.from(JSON.stringify(value)).toString('hex') + "' AS TEXT)"
+    const sql = join(work, 'content-fixture.sql')
+    writeFileSync(
+      sql,
+      `INSERT INTO content_entry(id,draft,live,live_slug,live_locale,published_at,revision,created_at,updated_at) VALUES ('fixture-live',${hex(pendingDraft)},${hex(publicDraft)},'fixture-guide','en',1,1,1,1); INSERT INTO content_entry(id,draft,revision,created_at,updated_at) VALUES ('fixture-draft',${hex(pendingDraft)},1,1,1);`,
+    )
+    run([
+      'exec',
+      'wrangler',
+      'd1',
+      'execute',
+      'starter-smoke-db',
+      '--config',
+      config,
+      '--local',
+      '--persist-to',
+      state,
+      '--file',
+      sql,
+    ])
+  }
+  if (['default', 'web-app'].includes(profile) && features.emailPassword) {
+    const password = await hashPassword('Production-fixture-2026!')
+    const hex = (value) => "CAST(X'" + Buffer.from(value).toString('hex') + "' AS TEXT)"
+    const sql = join(work, 'operator-fixture.sql')
+    writeFileSync(
+      sql,
+      ['operator', 'target']
+        .map(
+          (id) =>
+            `INSERT INTO user(id,name,email,email_verified,created_at,updated_at)VALUES('fixture-${id}','Fixture ${id}','${id}@fixture.test',1,1,1); INSERT INTO account(id,account_id,provider_id,user_id,password,created_at,updated_at)VALUES('credential-${id}','fixture-${id}','credential','fixture-${id}',${hex(password)},1,1);`,
+        )
+        .join('\n') +
+        ` INSERT INTO admin_user(user_id)VALUES('fixture-operator'); INSERT INTO verification(id,identifier,value,expires_at,created_at,updated_at)VALUES('reset-fixture','reset-password:production-reset-fixture-only','fixture-target',${Date.now() + 600000},1,1);`,
+    )
+    run([
+      'exec',
+      'wrangler',
+      'd1',
+      'execute',
+      'starter-smoke-db',
+      '--config',
+      config,
+      '--local',
+      '--persist-to',
+      state,
+      '--file',
+      sql,
+    ])
+  }
   server = spawn(
     'pnpm',
     [
@@ -154,20 +263,44 @@ try {
       '3110',
       '--local-protocol',
       'https',
+      // Keep the proxy's internal request/Origin scheme aligned with APP_ORIGIN.
+      '--upstream-protocol',
+      'https',
       '--persist-to',
       state,
     ],
     { stdio: ['ignore', 'pipe', 'pipe'], env: taskEnv, detached: true },
   )
-  server.stdout.on('data', () => {})
-  server.stderr.on('data', () => {})
+  let logWindow = '',
+    unsafeLog = false,
+    sanitizedStorageError = false
+  const inspectLog = (chunk) => {
+    logWindow = (logWindow + String(chunk)).slice(-65536)
+    unsafeLog ||=
+      /# SERVER_ERROR:|Failed query:|params:|Production-new-fixture-2026!|\b[a-f0-9]{32}:[a-f0-9]{64,}\b/.test(
+        logWindow,
+      )
+    sanitizedStorageError ||= /"event":"auth_sdk","severity":"error","category":"storage"/.test(
+      logWindow,
+    )
+  }
+  server.stdout.on('data', inspectLog)
+  server.stderr.on('data', inspectLog)
   const deadline = Date.now() + 30_000
   while (!(await ready())) {
     if (Date.now() > deadline || server.exitCode !== null)
       throw new Error('Isolated production Worker did not become healthy')
     await new Promise((resolve) => setTimeout(resolve, 250))
   }
-  run(['exec', 'playwright', 'test', '--config', 'playwright.production.config.ts'])
+  await runBrowserTests()
+  await flushWorkerLogs()
+  if (unsafeLog)
+    throw new Error('Worker logs contained raw authentication error details; values withheld')
+  if (['default', 'web-app'].includes(profile) && features.emailPassword && !sanitizedStorageError)
+    throw new Error(
+      'Expected a structured storage error from the controlled auth exception fixture',
+    )
+  console.log('Isolated Worker log checks passed; raw error details were not printed.')
   code = 0
 } catch (error) {
   console.error(error.message)

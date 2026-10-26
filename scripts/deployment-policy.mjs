@@ -1,3 +1,8 @@
+import {
+  paymentProvider,
+  paymentProviders,
+  paymentSecrets,
+} from '../src/modules/billing/config.mjs'
 import { legacyFeatures } from './project-features.mjs'
 import { validateFeatures } from '../src/config/feature-policy.mjs'
 import { z } from 'zod'
@@ -104,15 +109,37 @@ export function deploymentPolicy(base, target, plan, selected) {
   )
   if (features.database && db?.database_id && db.database_id === otherDb?.database_id)
     problems.push('Staging and production must use different D1 databases')
+  if (features.content && !target && !verified('content-live'))
+    problems.push(
+      'Selected content needs content-live real target environment acceptance before publishing',
+    )
+  if (features.files) {
+    const bucket = config.r2_buckets?.find((item) => item.binding === 'ASSETS_BUCKET')
+    const other = (target ? base : base.env?.staging)?.r2_buckets?.find(
+      (item) => item.binding === 'ASSETS_BUCKET',
+    )
+    if (!bucket?.bucket_name || bucket.bucket_name.startsWith('replace-'))
+      problems.push('Select a real private ASSETS_BUCKET for this environment')
+    if (bucket?.bucket_name && bucket.bucket_name === other?.bucket_name)
+      problems.push('Staging and production must use different R2 buckets')
+    if (!target && !verified('files-live'))
+      problems.push('Selected files needs files-live real provider acceptance before publishing')
+  }
   if (selected && features.billing) {
-    requiredSecrets.push('STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'STRIPE_PRICE_ID')
-    if (!target && !verified('billing-test-live'))
+    const selectedProvider = paymentProvider(vars)
+    const providers = paymentProviders(vars)
+    if (!providers)
+      problems.push('Select BILLING_PROVIDER=stripe|creem and valid BILLING_LEGACY_PROVIDERS')
+    else for (const provider of providers) requiredSecrets.push(...paymentSecrets(provider))
+    const acceptance =
+      selectedProvider === 'creem' ? 'billing-creem-test-live' : 'billing-test-live'
+    if (!target && !verified(acceptance))
       problems.push(
-        'Selected test billing needs billing-test-live real sandbox acceptance before publishing',
+        `Selected ${selectedProvider ?? 'unknown'} test billing needs ${acceptance} real sandbox acceptance before publishing`,
       )
   }
   if (selected)
-    for (const key of ['ai', 'files', 'usage'])
+    for (const key of ['ai', 'usage'])
       if (plan?.modules?.[key]?.selection === 'required')
         problems.push(`Selected module ${key} is not implemented; complete it before publishing`)
   if (selected)
@@ -120,7 +147,7 @@ export function deploymentPolicy(base, target, plan, selected) {
       if (
         key in features &&
         choice.selection !== 'undecided' &&
-        !['ai', 'files', 'usage'].includes(key) &&
+        !['ai', 'usage'].includes(key) &&
         features[key] !== (choice.selection === 'required')
       )
         problems.push(`Selected module and runtime configuration disagree: ${key}`)

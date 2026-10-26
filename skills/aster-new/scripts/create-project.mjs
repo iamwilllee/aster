@@ -1,4 +1,5 @@
 import { featuresFromPlan, featurePreset } from '../../../src/config/feature-policy.mjs'
+import { parseAppearance } from '../../../src/config/appearance-policy.mjs'
 import { randomBytes } from 'node:crypto'
 import {
   cpSync,
@@ -192,7 +193,17 @@ export function createProject({
     plan ? JSON.parse(readFileSync(resolve(plan), 'utf8')) : profilePlan,
   )
   const selectedFeatures = featuresFromPlan(productPlan)
-  for (const key of ['database', 'projects', 'emailPassword'])
+  const visual = productPlan.decisions.find((item) => item.id === 'visual-theme')
+  const appearance = parseAppearance({
+    theme: visual?.status === 'resolved' ? visual.value : 'sage',
+  })
+  const payment = productPlan.decisions.find((item) => item.id === 'payment-provider')
+  const billingProvider = payment?.status === 'resolved' ? payment.value : 'stripe'
+  if (selectedFeatures.billing && !['stripe', 'creem'].includes(billingProvider))
+    throw new Error(
+      'Selected payment-provider is not implemented; use stripe or creem in test mode',
+    )
+  for (const key of ['database', 'projects', 'emailPassword', 'content'])
     if (!productPlan.modules[key])
       productPlan.modules[key] = {
         selection: selectedFeatures[key] ? 'required' : 'deferred',
@@ -276,6 +287,7 @@ export function createProject({
         : `https://${slug}-staging.example.invalid`,
     MAIL_MODE: 'disabled',
     BILLING_ENABLED: 'false',
+    BILLING_PROVIDER: selectedFeatures.billing ? billingProvider : 'stripe',
     GOOGLE_AUTH_ENABLED: 'false',
     PUBLIC_INDEXABLE: 'false',
     MAIL_FROM: 'Product <no-reply@example.invalid>',
@@ -297,16 +309,31 @@ export function createProject({
     observability: { enabled: true, head_sampling_rate: 0.1 },
     vars: vars('production'),
     ...(selectedFeatures.database ? { d1_databases: database(false) } : {}),
+    ...(selectedFeatures.files
+      ? {
+          r2_buckets: [
+            { binding: 'ASSETS_BUCKET', bucket_name: 'replace-with-production-assets-bucket' },
+          ],
+        }
+      : {}),
     env: {
       staging: {
         name: `${slug}-staging`,
         vars: vars('staging'),
         ...(selectedFeatures.database ? { d1_databases: database(true) } : {}),
+        ...(selectedFeatures.files
+          ? {
+              r2_buckets: [
+                { binding: 'ASSETS_BUCKET', bucket_name: 'replace-with-staging-assets-bucket' },
+              ],
+            }
+          : {}),
       },
     },
   })
   writeJson(join(target, 'src/config/features.json'), selectedFeatures)
-  const local = `ENVIRONMENT=local\nAPP_ORIGIN=http://127.0.0.1:3100\nMAIL_MODE=${selectedFeatures.mail && selectedFeatures.database ? 'local' : 'disabled'}\nBILLING_ENABLED=false\nGOOGLE_AUTH_ENABLED=false\nPUBLIC_INDEXABLE=false\n`
+  writeJson(join(target, 'src/config/appearance.json'), appearance)
+  const local = `ENVIRONMENT=local\nAPP_ORIGIN=http://127.0.0.1:3100\nMAIL_MODE=${selectedFeatures.mail && selectedFeatures.database ? 'local' : 'disabled'}\nBILLING_ENABLED=false\nBILLING_PROVIDER=${selectedFeatures.billing ? billingProvider : 'stripe'}\nGOOGLE_AUTH_ENABLED=false\nPUBLIC_INDEXABLE=false\n`
   writeFileSync(
     join(target, '.dev.vars'),
     local +
@@ -359,7 +386,7 @@ export function createProject({
     `# ${markdown(name)}\n\n基于 Aster 创建的本地产品，需求与交接见 [PROJECT.md](PROJECT.md)。\n\n` +
       '```bash\npnpm project:resume\npnpm dev\n```\n\n' +
       '英文：http://127.0.0.1:3100 · 中文：http://127.0.0.1:3100/zh\n\n' +
-      '保留了底座示例业务；首次需求尚未实现。云资源、Google、真实邮件与 Stripe 均未配置或验收。\n\n' +
+      '保留了底座示例业务；首次需求尚未实现。云资源、Google、真实邮件与支付渠道均未配置或验收。\n\n' +
       '[开发手册](docs/DEVELOPMENT.md) · [Agent 指南](docs/AGENT-GUIDE.md) · [部署手册](docs/DEPLOYMENT.md)\n\n' +
       '底座来源版本见 starter-version.json；本产品需独立完成业务验收。\n',
   )

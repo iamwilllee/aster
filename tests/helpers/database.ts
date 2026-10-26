@@ -1,6 +1,6 @@
 import { Miniflare } from 'miniflare'
 import { readdir, readFile } from 'node:fs/promises'
-export async function testDatabase() {
+export async function testDatabase(options: { files?: boolean } = {}) {
   const runtime = new Miniflare({
     workers: [
       {
@@ -16,7 +16,12 @@ export async function testDatabase() {
               },
             },
           },
-          env: { DB: { type: 'd1', id: 'isolated-tests' } },
+          env: {
+            DB: { type: 'd1', id: 'isolated-tests' },
+            ...(options.files
+              ? { ASSETS_BUCKET: { type: 'r2' as const, name: 'isolated-assets' } }
+              : {}),
+          },
         },
       },
     ],
@@ -29,5 +34,6 @@ export async function testDatabase() {
     ))
       if (statement.trim()) await db.prepare(statement).run()
   }
-  return { db, dispose: () => runtime.dispose() }
+  const bucket = options.files ? await runtime.getR2Bucket('ASSETS_BUCKET') : undefined
+  return { db, bucket, dispose: () => runtime.dispose() }
 }

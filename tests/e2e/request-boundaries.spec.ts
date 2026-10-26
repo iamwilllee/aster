@@ -25,7 +25,7 @@ test('concurrent early mutation errors preserve JSON status and keep the next re
       projects ? 401 : 404,
       features.auth ? 401 : 404,
       projects ? 401 : 404,
-      features.auth && features.billing ? 503 : 404,
+      features.auth && features.billing ? 400 : 404,
     ])
     for (const response of responses) {
       expect(response.headers()['content-type']).toContain('application/json')

@@ -40,13 +40,17 @@ export const moduleCatalog = {
     needs: featureDependencies.google,
   },
   billing: {
-    capability: '仅 Stripe 测试；托管结账待真实测试账户验收',
+    capability: 'Stripe / Creem TEST；托管结账待真实测试账户验收',
     needs: featureDependencies.billing,
   },
   ai: { capability: '模型调用与业务尚未实现', needs: featureDependencies.ai },
   files: {
-    capability: '私有文件业务尚未实现；需补 R2 与权限/配额',
+    capability: '私有图片上传、资源库与引用已实现；R2 云端需按产品验收',
     needs: featureDependencies.files,
+  },
+  content: {
+    capability: '文章、帮助、公告与独立公开素材；真实环境按产品验收',
+    needs: featureDependencies.content,
   },
   usage: { capability: '消费额度账本尚未实现', needs: featureDependencies.usage },
 }
@@ -64,7 +68,7 @@ const selection = z
   .strict()
 const defaultModules = Object.fromEntries(
   Object.keys(moduleCatalog)
-    .filter((key) => !['database', 'projects', 'emailPassword'].includes(key))
+    .filter((key) => !['database', 'projects', 'emailPassword', 'content'].includes(key))
     .map((key) => [
       key,
       {
@@ -106,7 +110,7 @@ export const planSchema = z
         Object.fromEntries(
           Object.keys(moduleCatalog).map((key) => [
             key,
-            ['database', 'projects', 'emailPassword'].includes(key)
+            ['database', 'projects', 'emailPassword', 'content'].includes(key)
               ? selection.optional()
               : selection.default(() => ({ ...defaultModules[key] })),
           ]),
@@ -294,7 +298,7 @@ export function planProblems(root, plan) {
     )
       pending.push(`本地初始化未完成：${key}`)
   for (const [key, choice] of Object.entries(plan.modules)) {
-    if (['ai', 'files', 'usage'].includes(key) && choice.selection === 'required')
+    if (['ai', 'usage'].includes(key) && choice.selection === 'required')
       pending.push(`模块待实现与验收：${key}`)
     if (choice.selection === 'undecided') pending.push(`决定 ${key} 是否需要`)
     if (choice.selection === 'required')

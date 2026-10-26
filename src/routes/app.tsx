@@ -3,6 +3,8 @@ import { notFound } from '@tanstack/react-router'
 import { createFileRoute, Link, Outlet, redirect, useRouter } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import {
+  Image,
+  FileText,
   LayoutDashboard,
   FolderKanban,
   CreditCard,
@@ -41,9 +43,15 @@ function AppShell() {
   const router = useRouter()
   const cache = useQueryClient()
   const navigation = [
+    ...(features.content && viewer.admin
+      ? [{ to: '/app/content' as const, icon: FileText, label: t('content_manage') }]
+      : []),
     { to: '/app' as const, icon: LayoutDashboard, label: t('overview'), exact: true },
     ...(features.projects
       ? [{ to: '/app/projects' as const, icon: FolderKanban, label: t('projects_2') }]
+      : []),
+    ...(features.files
+      ? [{ to: '/app/files' as const, icon: Image, label: t('files_title') }]
       : []),
     ...(features.billing
       ? [{ to: '/app/billing' as const, icon: CreditCard, label: t('billing') }]
@@ -88,7 +96,11 @@ function AppShell() {
         <div className="mx-4 mt-3 rounded-lg border bg-background p-3">
           <div className="flex items-center gap-2.5">
             <span className="grid size-8 place-items-center rounded-lg bg-accent font-medium text-primary">
-              {viewer.user.name.slice(0, 1).toUpperCase()}
+              {viewer.user.image ? (
+                <img src={viewer.user.image} alt="" className="size-8 rounded-lg object-cover" />
+              ) : (
+                viewer.user.name.slice(0, 1).toUpperCase()
+              )}
             </span>
             <div className="min-w-0">
               <p className="truncate text-xs font-semibold">

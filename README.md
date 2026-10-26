@@ -2,11 +2,19 @@
 
 **给 Agent 一个可靠的起点。** 基于 TanStack Start 和 Cloudflare 的开源产品底座，MIT 许可，中文文档，适合独立开发与 AI 辅助开发。
 
-主要服务**海外 Web / AI 工具，兼顾国内**。先验证 Cloudflare 部署与 Stripe 测试订阅；国内访问、登录和支付按具体产品适配。已有项目不强制迁移。
+主要服务**海外 Web / AI 工具，兼顾国内**。首个公开预览版优先支持不带支付的展示站与普通 Web 应用；国内访问、登录与后续支付按具体产品适配。已有项目不强制迁移。
 
-源码仓库为 [iamwilllee/aster](https://github.com/iamwilllee/aster)。当前版本 **v0.2.0，本地预览版**：已实现并验证本地流程，尚未部署到 Cloudflare。Stripe 仅允许测试密钥，未完成真实测试账户的托管结账验收。
+默认不启用支付，也不需要支付账户。已有 Stripe / Creem TEST 适配作为实验代码保留，不纳入本版正式收款支持承诺；按真实需求选择时再读 [支付选型](docs/PAYMENTS.md)。
+
+源码仓库为 [iamwilllee/aster](https://github.com/iamwilllee/aster)。当前版本 **v0.2.0-beta.1，发布候选（尚未发布）**。支持范围与采用说明见 [候选版说明](docs/releases/0.2.0-beta.1.md)。本地与隔离 Worker 验收不等于每个产品的真实邮件、Google、R2 或云端部署已接通。
 
 ![Aster Logo](public/brand/aster-logo.svg)
+
+本地 `/dev/blueprints` 提供官网、目录阅读、商品目录、数据工作台四类可交互页面蓝图，中英文及深浅主题可用；仅演示、不保存到服务端，生产入口关闭。Agent 选用方式见 [页面规划与组合](docs/PAGE-BLUEPRINTS.md)。
+
+当前绿色主题命名为 **Sage**；新增 **Catalog** 中性商品目录主题。配置、Agent 选择及本地预览见 [主题指南](docs/THEMES.md)。私有图片库及头像/封面接入见 [图片指南](docs/FILES.md)。
+
+内容管理支持文章、帮助和公告的草稿、预览、发布/撤下，以及独立的网站封面素材。后台与发布边界见 [内容管理](docs/CONTENT.md)。模块按需开启，新产品默认关闭。
 
 ## 开始使用
 
@@ -26,18 +34,22 @@ pnpm dev
 
 ## 首版能力
 
-| 模块                                       | 状态                                              |
-| ------------------------------------------ | ------------------------------------------------- |
-| 邮箱注册、验证、重发、登录、退出、重置密码 | 已实现；本地邮件收件箱已验收                      |
-| 私有项目增删改查、筛选、状态               | 已实现；D1 持久化、账户隔离                       |
-| 个人资料、会话、管理员只读用户列表         | 已实现；管理员需显式授予                          |
-| 示例 Free / Pro 权益                       | 服务端强制项目上限，原子检查并发创建              |
-| Stripe 测试订阅、账单门户、Webhook         | 代码及签名/D1 测试已通过；托管结账待测试账户验收  |
-| Cloudflare 发信                            | binding 适配已实现；真实投递未验收                |
-| 首页、套餐页、工作台、中英切换、深浅主题   | 英文默认，中文 URL；SSR、邮件、错误、SEO 已本地化 |
-| Google OAuth                               | 默认不展示；可选接入，真实账户回调待验收          |
-| 预发布隔离、私有写入限流                   | 独立 staging 配置；每用户每分钟 30 次私有写入     |
-| R2 文件、AI、消费额度账本                  | 功能未接入；按真实产品需要增加                    |
+| 模块                                       | 状态                                                   |
+| ------------------------------------------ | ------------------------------------------------------ |
+| 邮箱注册、验证、重发、登录、退出、重置密码 | 已实现；本地邮件收件箱已验收                           |
+| 私有项目增删改查、筛选、状态               | 已实现；D1 持久化、账户隔离                            |
+| 个人资料、会话、用户运营与操作记录         | 已实现；管理员需显式授予                               |
+| 已登录改密、设备摘要、撤销其他会话         | 按真实密码凭据展示；账户隔离、令牌不进入设备列表       |
+| 个人 JSON 导出、账号注销                   | 白名单导出；身份与支付核对通过后注销，保留最小账务归档 |
+| 单账号项目数量上限                         | 服务端原子检查；默认 3 个，可按产品调整                |
+| Stripe / Creem 实验计费代码                | 默认关闭，仅 TEST；不属于首版支付支持承诺              |
+| Cloudflare 发信                            | binding 适配已实现；真实投递未验收                     |
+| 首页、套餐页、工作台、中英切换、深浅主题   | 英文默认，中文 URL；SSR、邮件、错误、SEO 已本地化      |
+| Google OAuth                               | 默认不展示；可选接入，真实账户回调待验收               |
+| 预发布隔离、私有写入限流                   | 独立 staging 配置；每用户每分钟 30 次私有写入          |
+| 私有图片库、头像与项目封面                 | 本地持久化、配额与账号隔离；真实 R2 云端待验收         |
+| Sage / Catalog 主题                        | 工具 SaaS / 中性商品目录；均支持浅深色                 |
+| AI、消费额度账本                           | 功能未接入；按真实产品需要增加                         |
 
 前端：React、TanStack Router / Query、Tailwind CSS、shadcn/ui base-nova、Base UI、Lucide。服务端：Workers、Better Auth、Drizzle、D1。没有同时引入另一套 UI、表单或全局状态框架；拖拽/动画按真实需求再引入。
 
@@ -54,22 +66,35 @@ pnpm check                 # plan → locale → build → lint → typecheck �
 pnpm exec playwright install chromium
 pnpm test:e2e              # 本地浏览器与 API 验收，自动启动开发服务
 pnpm test:production       # 隔离 D1 / 假 OAuth 配置 / HTTPS 生产构建验收
+pnpm test:production --profile web-app  # 无支付、无 Google 的普通应用组合
 pnpm format:check
-pnpm admin:grant you@example.test    # 仅本地 D1；账户须先注册
-pnpm admin:revoke you@example.test
+pnpm admin:grant you@example.test    # 仅本地 D1；账户须先注册、验证且未停用
+pnpm admin:revoke you@example.test  # 必须保留另一位有效管理员
 ```
 
-`test:production` 不读取开发库或开发密钥，不访问 Google 登录页；会临时占用 3110 端口。Google、邮件和 Stripe 的真实供应商验收仍需另做。
+`test:production` 不读取开发库或开发密钥，不访问 Google 登录页；会临时占用 3110 端口。Google、邮件和支付渠道的真实供应商验收仍需另做。
+
+运营入口 `/app/admin` 支持搜索、筛选、详情、停用/恢复及操作记录，保护自己与最后一位有效管理员。停用撤销会话，保留数据与账务；详情及接入见 [运营后台](docs/ADMIN.md)。
 
 登录方式默认称呼 + 邮箱 + 密码，Google 按需选择，未配置时不向访客展示占位按钮。公开注册发布前须完成所选邮箱和/或 OAuth 的配置与真实验收；公开展示站不要求注册能力；未就绪的数据预览先使用 staging。发布检查会校验当前项目认证验收记录，实际部署还只读核对远端 secret 名称。详见 [认证发布时序](docs/DEPLOYMENT.md#认证选择与发布时序)。
 
 邮件支持本地收件箱、Cloudflare、Brevo 和 Resend。优先用户选择或已有服务；没有既有选择且已核实适用的 Workers Paid 时默认优先 CF，否则按偏好与环境比较 Brevo / Resend 免费档。两种外部适配已实现，真实账号/域名及收信仍待产品各自验收。配置与已有产品增量接入见 [邮件指南](docs/MAIL.md)。
 
-首次 `typecheck` 前先运行 `setup` 与 `build`，生成 bindings 和路由类型。测试使用独立 fixture 用户，不调用实际 Stripe 或发真实邮件；浏览器测试会在本地 D1 留下测试账户。源码、迁移、测试、锁文件和生成的类型均可查看。
+首次 `typecheck` 前先运行 `setup` 与 `build`，生成 bindings 和路由类型。测试使用独立 fixture 用户，不调用实际支付渠道或发真实邮件；浏览器测试会在本地 D1 留下测试账户。源码、迁移、测试、锁文件和生成的类型均可查看。
 
 ## 用于自己的项目
 
 按需求选择能力：公开展示站可关闭认证、D1、邮件和支付；普通数据应用选择 web-app；AI 不默认启用。初始化支持 `--profile showcase|web-app|billing-test`，已有产品用 `project:modules` 预览并增量调整。页面、接口、配置和发布检查遵循同一份公开能力配置，见 [按需组合](docs/MODULES.md)。
+
+在源目录体验后，可创建不带支付的独立产品：
+
+```bash
+pnpm aster:new ../my-app --name "My App" --profile web-app
+# 纯展示站，无数据库、账号、邮件或支付
+pnpm aster:new ../my-site --name "My Site" --profile showcase
+```
+
+`web-app` 默认选择 D1、账号、邮箱密码、邮件和私有项目示例；Google、支付、AI、图片与内容管理按需选择。源预览额外开启图片与内容示例，但不启用支付。新产品不会自动接通外部服务。
 
 在底座源目录一次安装 Skill：
 
@@ -127,6 +152,8 @@ Skill 根据上下文填写机器计划并保留判断依据，Agent 按业务�
 - [开发手册](docs/DEVELOPMENT.md) · [前端约定](docs/FRONTEND.md)
 - [Cloudflare 架构](docs/CLOUDFLARE.md) · [部署手册](docs/DEPLOYMENT.md)
 - [数据库隔离、迁移发布与恢复](docs/DATABASE.md)
+- [账号安全、设备与会话管理](docs/ACCOUNT-SECURITY.md)
+- [个人数据导出与账号注销](docs/ACCOUNT-LIFECYCLE.md)
 - [免费起步与按需升级](docs/COSTS.md)
 - [品牌与 Logo](docs/BRAND.md) · [更新记录](CHANGELOG.md)
 - [贡献](CONTRIBUTING.md) · [安全说明](SECURITY.md) · [MIT 许可](LICENSE)

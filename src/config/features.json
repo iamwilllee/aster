@@ -5,8 +5,9 @@
   "google": false,
   "mail": true,
   "projects": true,
-  "billing": true,
+  "billing": false,
   "ai": false,
-  "files": false,
-  "usage": false
+  "files": true,
+  "usage": false,
+  "content": true
 }

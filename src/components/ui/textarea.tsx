@@ -9,7 +9,11 @@ function Textarea({ className, rows = 3, ...props }: ComponentProps<'textarea'>)
     <textarea
       data-slot="textarea"
       rows={rows}
-      className={cn(controlVariants({ size: null }), 'block min-h-24 resize-y py-2', className)}
+      className={cn(
+        controlVariants({ size: null }),
+        'block min-h-24 resize-y py-2 [--control-radius:var(--radius-lg)]',
+        className,
+      )}
       {...props}
       disabled={!hydrated || props.disabled}
     />

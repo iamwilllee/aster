@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/app'
+import { Route as ContentRouteImport } from './routes/content'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as PricingRouteImport } from './routes/pricing'
@@ -22,9 +23,14 @@ import { Route as ApiSplatRouteImport } from './routes/api/$'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppAdminRouteImport } from './routes/app.admin'
 import { Route as AppBillingRouteImport } from './routes/app.billing'
+import { Route as AppContentRouteImport } from './routes/app.content'
+import { Route as AppFilesRouteImport } from './routes/app.files'
 import { Route as AppProjectsRouteImport } from './routes/app.projects'
 import { Route as AppServicesRouteImport } from './routes/app.services'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
+import { Route as ContentIndexRouteImport } from './routes/content.index'
+import { Route as ContentSlugRouteImport } from './routes/content.$slug'
+import { Route as DevBlueprintsRouteImport } from './routes/dev/blueprints'
 import { Route as DevInboxRouteImport } from './routes/dev/inbox'
 import { Route as DevUiRouteImport } from './routes/dev/ui'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -37,6 +43,11 @@ const IndexRoute = IndexRouteImport.update({
 const AppRoute = AppRouteImport.update({
   id: '/app',
   path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContentRoute = ContentRouteImport.update({
+  id: '/content',
+  path: '/content',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -94,6 +105,16 @@ const AppBillingRoute = AppBillingRouteImport.update({
   path: '/billing',
   getParentRoute: () => AppRoute,
 } as any)
+const AppContentRoute = AppContentRouteImport.update({
+  id: '/content',
+  path: '/content',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFilesRoute = AppFilesRouteImport.update({
+  id: '/files',
+  path: '/files',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppProjectsRoute = AppProjectsRouteImport.update({
   id: '/projects',
   path: '/projects',
@@ -108,6 +129,21 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
   getParentRoute: () => AppRoute,
+} as any)
+const ContentIndexRoute = ContentIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ContentRoute,
+} as any)
+const ContentSlugRoute = ContentSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => ContentRoute,
+} as any)
+const DevBlueprintsRoute = DevBlueprintsRouteImport.update({
+  id: '/dev/blueprints',
+  path: '/dev/blueprints',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const DevInboxRoute = DevInboxRouteImport.update({
   id: '/dev/inbox',
@@ -128,6 +164,7 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/content': typeof ContentRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
@@ -138,12 +175,17 @@ export interface FileRoutesByFullPath {
   '/api/$': typeof ApiSplatRoute
   '/app/admin': typeof AppAdminRoute
   '/app/billing': typeof AppBillingRoute
+  '/app/content': typeof AppContentRoute
+  '/app/files': typeof AppFilesRoute
   '/app/projects': typeof AppProjectsRoute
   '/app/services': typeof AppServicesRoute
   '/app/settings': typeof AppSettingsRoute
+  '/content/$slug': typeof ContentSlugRoute
+  '/dev/blueprints': typeof DevBlueprintsRoute
   '/dev/inbox': typeof DevInboxRoute
   '/dev/ui': typeof DevUiRoute
   '/app/': typeof AppIndexRoute
+  '/content/': typeof ContentIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
@@ -158,18 +200,24 @@ export interface FileRoutesByTo {
   '/api/$': typeof ApiSplatRoute
   '/app/admin': typeof AppAdminRoute
   '/app/billing': typeof AppBillingRoute
+  '/app/content': typeof AppContentRoute
+  '/app/files': typeof AppFilesRoute
   '/app/projects': typeof AppProjectsRoute
   '/app/services': typeof AppServicesRoute
   '/app/settings': typeof AppSettingsRoute
+  '/content/$slug': typeof ContentSlugRoute
+  '/dev/blueprints': typeof DevBlueprintsRoute
   '/dev/inbox': typeof DevInboxRoute
   '/dev/ui': typeof DevUiRoute
   '/app': typeof AppIndexRoute
+  '/content': typeof ContentIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/content': typeof ContentRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
@@ -180,12 +228,17 @@ export interface FileRoutesById {
   '/api/$': typeof ApiSplatRoute
   '/app/admin': typeof AppAdminRoute
   '/app/billing': typeof AppBillingRoute
+  '/app/content': typeof AppContentRoute
+  '/app/files': typeof AppFilesRoute
   '/app/projects': typeof AppProjectsRoute
   '/app/services': typeof AppServicesRoute
   '/app/settings': typeof AppSettingsRoute
+  '/content/$slug': typeof ContentSlugRoute
+  '/dev/blueprints': typeof DevBlueprintsRoute
   '/dev/inbox': typeof DevInboxRoute
   '/dev/ui': typeof DevUiRoute
   '/app/': typeof AppIndexRoute
+  '/content/': typeof ContentIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
@@ -193,6 +246,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
+    | '/content'
     | '/forgot-password'
     | '/login'
     | '/pricing'
@@ -203,12 +257,17 @@ export interface FileRouteTypes {
     | '/api/$'
     | '/app/admin'
     | '/app/billing'
+    | '/app/content'
+    | '/app/files'
     | '/app/projects'
     | '/app/services'
     | '/app/settings'
+    | '/content/$slug'
+    | '/dev/blueprints'
     | '/dev/inbox'
     | '/dev/ui'
     | '/app/'
+    | '/content/'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -223,17 +282,23 @@ export interface FileRouteTypes {
     | '/api/$'
     | '/app/admin'
     | '/app/billing'
+    | '/app/content'
+    | '/app/files'
     | '/app/projects'
     | '/app/services'
     | '/app/settings'
+    | '/content/$slug'
+    | '/dev/blueprints'
     | '/dev/inbox'
     | '/dev/ui'
     | '/app'
+    | '/content'
     | '/api/auth/$'
   id:
     | '__root__'
     | '/'
     | '/app'
+    | '/content'
     | '/forgot-password'
     | '/login'
     | '/pricing'
@@ -244,18 +309,24 @@ export interface FileRouteTypes {
     | '/api/$'
     | '/app/admin'
     | '/app/billing'
+    | '/app/content'
+    | '/app/files'
     | '/app/projects'
     | '/app/services'
     | '/app/settings'
+    | '/content/$slug'
+    | '/dev/blueprints'
     | '/dev/inbox'
     | '/dev/ui'
     | '/app/'
+    | '/content/'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  ContentRoute: typeof ContentRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   PricingRoute: typeof PricingRoute
@@ -264,6 +335,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiSplatRoute: typeof ApiSplatRoute
+  DevBlueprintsRoute: typeof DevBlueprintsRoute
   DevInboxRoute: typeof DevInboxRoute
   DevUiRoute: typeof DevUiRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -283,6 +355,13 @@ declare module '@tanstack/react-router' {
       path: '/app'
       fullPath: '/app'
       preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/content': {
+      id: '/content'
+      path: '/content'
+      fullPath: '/content'
+      preLoaderRoute: typeof ContentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -362,6 +441,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBillingRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/content': {
+      id: '/app/content'
+      path: '/content'
+      fullPath: '/app/content'
+      preLoaderRoute: typeof AppContentRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/files': {
+      id: '/app/files'
+      path: '/files'
+      fullPath: '/app/files'
+      preLoaderRoute: typeof AppFilesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/projects': {
       id: '/app/projects'
       path: '/projects'
@@ -382,6 +475,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/settings'
       preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/content/': {
+      id: '/content/'
+      path: '/'
+      fullPath: '/content/'
+      preLoaderRoute: typeof ContentIndexRouteImport
+      parentRoute: typeof ContentRoute
+    }
+    '/content/$slug': {
+      id: '/content/$slug'
+      path: '/$slug'
+      fullPath: '/content/$slug'
+      preLoaderRoute: typeof ContentSlugRouteImport
+      parentRoute: typeof ContentRoute
+    }
+    '/dev/blueprints': {
+      id: '/dev/blueprints'
+      path: '/dev/blueprints'
+      fullPath: '/dev/blueprints'
+      preLoaderRoute: typeof DevBlueprintsRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/dev/inbox': {
       id: '/dev/inbox'
@@ -410,6 +524,8 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRoute
   AppBillingRoute: typeof AppBillingRoute
+  AppContentRoute: typeof AppContentRoute
+  AppFilesRoute: typeof AppFilesRoute
   AppProjectsRoute: typeof AppProjectsRoute
   AppServicesRoute: typeof AppServicesRoute
   AppSettingsRoute: typeof AppSettingsRoute
@@ -419,6 +535,8 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAdminRoute: AppAdminRoute,
   AppBillingRoute: AppBillingRoute,
+  AppContentRoute: AppContentRoute,
+  AppFilesRoute: AppFilesRoute,
   AppProjectsRoute: AppProjectsRoute,
   AppServicesRoute: AppServicesRoute,
   AppSettingsRoute: AppSettingsRoute,
@@ -427,9 +545,23 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface ContentRouteChildren {
+  ContentSlugRoute: typeof ContentSlugRoute
+  ContentIndexRoute: typeof ContentIndexRoute
+}
+
+const ContentRouteChildren: ContentRouteChildren = {
+  ContentSlugRoute: ContentSlugRoute,
+  ContentIndexRoute: ContentIndexRoute,
+}
+
+const ContentRouteWithChildren =
+  ContentRoute._addFileChildren(ContentRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  ContentRoute: ContentRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   PricingRoute: PricingRoute,
@@ -438,6 +570,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiSplatRoute: ApiSplatRoute,
+  DevBlueprintsRoute: DevBlueprintsRoute,
   DevInboxRoute: DevInboxRoute,
   DevUiRoute: DevUiRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,

@@ -1,11 +1,15 @@
+import { features } from '@/config/features'
+import { AvatarSettings } from '@/components/avatar-settings'
 import { formText } from '@/lib/forms'
-import { createFileRoute, getRouteApi, useRouter, Link } from '@tanstack/react-router'
+import { createFileRoute, getRouteApi, useRouter } from '@tanstack/react-router'
 import { useMutation } from '@tanstack/react-query'
 import type { FormEvent } from 'react'
-import { CheckCircle2, ShieldCheck, KeyRound } from 'lucide-react'
+import { CheckCircle2, ShieldCheck } from 'lucide-react'
+import { AccountSecuritySettings } from '@/components/account-security'
+import { AccountLifecycleSettings } from '@/components/account-lifecycle'
 import { PageHeading, ErrorNotice } from '@/components/common'
 import { useI18n } from '@/components/providers'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { api } from '@/lib/api'
@@ -14,7 +18,6 @@ import { SettingsSection } from '@/components/patterns/page-patterns'
 export const Route = createFileRoute('/app/settings')({ component: Settings })
 function Settings() {
   const viewer = getRouteApi('/app').useLoaderData()
-  const { registrationReady } = getRouteApi('__root__').useLoaderData()
   const { t } = useI18n()
   const router = useRouter()
   const save = useMutation({
@@ -70,28 +73,17 @@ function Settings() {
           </Button>
         </form>
       </SettingsSection>
-      <SettingsSection
-        id="security-settings"
-        title={t('password_security')}
-        description={t('reset_via_email_all_sessions_are_revoked_after_a_password_reset')}
-      >
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex gap-3">
-            <KeyRound className="mt-0.5 size-5 text-muted-foreground" />
-            <div>
-              <p className="text-sm font-medium">{t('email_address')}</p>
-              <p className="mt-2 break-all text-xs text-muted-foreground">{viewer.user.email}</p>
-            </div>
-          </div>
-          {registrationReady ? (
-            <Link to="/forgot-password" className={buttonVariants({ variant: 'outline' })}>
-              {t('reset_password')}
-            </Link>
-          ) : (
-            <p className="text-xs text-muted-foreground">{t('email_access_unavailable')}</p>
-          )}
-        </div>
-      </SettingsSection>
+      {features.files && (
+        <SettingsSection
+          id="avatar-settings"
+          title={t('files_avatar')}
+          description={t('files_avatar_body')}
+        >
+          <AvatarSettings userId={viewer.user.id} image={viewer.user.image} />
+        </SettingsSection>
+      )}
+      <AccountSecuritySettings userId={viewer.user.id} mailReady={viewer.mailReady} />
+      <AccountLifecycleSettings userId={viewer.user.id} />
     </>
   )
 }

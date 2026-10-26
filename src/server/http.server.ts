@@ -29,7 +29,7 @@ export function isLocalRequest(request: Request) {
     url.origin === origin.origin
   )
 }
-async function boundedBytes(request: Request, maxBytes: number) {
+export async function boundedBytes(request: Request, maxBytes: number) {
   const reader = request.body?.getReader()
   if (!reader) return new Uint8Array()
   let size = 0
@@ -65,12 +65,16 @@ export async function bufferRequestBody(request: Request, maxBytes = 16_384) {
   if (!request.body) return request
   return new Request(request, { body: await boundedBytes(request, maxBytes) })
 }
-export async function body<T extends z.ZodType>(request: Request, schema: T): Promise<z.infer<T>> {
+export async function body<T extends z.ZodType>(
+  request: Request,
+  schema: T,
+  maxBytes = 16_384,
+): Promise<z.infer<T>> {
   if (!request.headers.get('content-type')?.startsWith('application/json'))
     throw new HttpError(415, '请使用 JSON 请求')
   let value: unknown
   try {
-    value = JSON.parse(await boundedText(request))
+    value = JSON.parse(await boundedText(request, maxBytes))
   } catch (error) {
     if (error instanceof HttpError) throw error
     throw new HttpError(400, 'JSON 格式不正确')

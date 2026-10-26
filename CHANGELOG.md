@@ -1,6 +1,31 @@
 # Changelog
 
-## 0.2.0 — 2026-10-23（本地候选，未发布）
+## 0.2.0-beta.1 — 2026-10-26（发布候选，未发布）
+
+- Prepare the first non-payment public preview: disable billing in the source default, retain experimental TEST adapters and legacy billing safeguards, and align support/version documentation.
+- Route unexpected SDK failures through the sanitized auth HTTP boundary while preserving expected API error statuses/cookies and error observability. Add actual request-path sentinel regression.
+- Make production navigation and endpoint checks capability-aware, add the plain web-app profile to CI and retain optional Google/showcase coverage.
+
+- 2026-10-26: Replace the unloaded default Inter declaration with an OS UI font stack; retain Catalog's deliberate Arial direction and existing control sizes. Improve public hero tracking/weight and reading copy sizes, preserve normal Chinese headline tracking, and document actual font loading/rendered acceptance in the Agent workflow.
+
+- 2026-10-26: Add searchable, paginated administrator user operations with safe account details, suspend/restore confirmation and minimal audit history. Commit access revision, session revocation and audit atomically; retain business data and signed billing reconciliation.
+- Fence disabled-account auth mutations and new sessions, preserve sanitized auth event severity, and protect self and the last active administrator across suspension, local role revoke and account deletion. Add isolated runtime, concurrency, rollback, browser and lifecycle regression coverage.
+
+- Add optional article/help/announcement management with revision-guarded drafts and published snapshots, SSR public search/detail/SEO, explicit publish/withdraw and isolated site-image assets. Keep private files private; preserve shared editorial data with contributor-deletion confirmation and nullable actor references. New profiles default content off; real target content-live acceptance remains pending.
+- Make local administrator role commands use the current project DB and reject remote bindings.
+
+- Add Sage and Catalog visual themes, per-product initialization, local-only preview selection and a fictional product catalog blueprint; preserve shared controls, light/dark and locale behavior.
+- Add optional private PNG/JPEG/WebP assets with local R2 simulation, owner-scoped streaming, atomic quotas, avatar/project-cover references, pending recovery and retriable deletion. Export metadata and clean storage before account deletion; real cloud R2 acceptance remains pending.
+
+- Add optional product, directory/reading and data-workbench blueprints at a loopback-only development route. Include reusable content/disclosure patterns, bilingual in-memory journeys, explicit fictional-data boundaries and Agent page-planning guidance; no new service, dependency or business capability is enabled.
+- Add explicit Stripe/Creem test-provider selection, fixed Creem sandbox checkout/portal/HMAC reconciliation, provider-scoped history and account-deletion review. Preserve legacy Stripe obligations across switching, require additive migration 0004 and provider-specific release evidence. No live billing or real-provider acceptance is claimed.
+- Add payment eligibility guidance for individuals, sole proprietors and companies; separate project-specific identity, provider implementation, onboarding and payout acceptance. Keep unimplemented providers explicitly pending and separate applicant eligibility from approval/payout evidence.
+
+- Extend account deletion to settled Stripe test histories: fresh bounded subscription/checkout/invoice review, explicit checkout expiration, per-account leases, atomic pseudonymous billing archives and late signed webhook reconciliation. Preserve unresolved/pending blockers and require the additive 0003 migration; no new dependency or real-provider acceptance claim.
+
+- Add owner-scoped JSON export and confirmed account deletion with password verification or a recent Google-only app login. Atomically remove owned data and reset tokens, bind verification links to account IDs, revoke all sessions and close native deletion paths. Reserve pending checkout before provider calls and preserve ambiguous reservations for reconciliation. Bounded exports exclude authentication secrets; existing outstanding verification links require resend. Payment-history deletion uses the additive migration described above.
+
+- Add account security settings: credential-aware password changes, fixed device summaries and owner-scoped session revocation. Force old-session revocation while rotating the current HttpOnly cookie, close raw native session/password management HTTP paths, redact metadata and add per-account password limits. Cover multi-session persistence, cross-account denial and UI failure states; no new dependencies or migration.
 
 - Keep tabs disabled until hydration so the first click after a locale reload is not lost. Add a delayed-script regression and retain CI HTML reports, failure screenshots and traces.
 - Support existing products with named production databases while preserving their root local database and explicit restore target; validate staging/production isolation against the actual remote environments.

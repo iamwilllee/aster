@@ -35,6 +35,7 @@ export const getPublicConfig = createServerFn({ method: 'GET' }).handler(async (
   setResponseHeader('Cache-Control', 'private, no-store')
   return {
     origin: new URL(env.APP_ORIGIN).origin,
+    local: (await import('./http.server')).isLocalRequest(getRequest()),
     indexable: String(env.PUBLIC_INDEXABLE) === 'true',
     features,
     registrationReady:

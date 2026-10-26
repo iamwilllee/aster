@@ -20,7 +20,7 @@ export async function workspace(request: Request) {
       : Promise.resolve(null),
   ])
   return {
-    user: { id: user.id, name: user.name, email: user.email },
+    user: { id: user.id, name: user.name, email: user.email, image: user.image ?? null },
     admin,
     billing,
     projectCount: count?.count ?? 0,

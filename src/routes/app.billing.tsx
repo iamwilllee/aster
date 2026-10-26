@@ -14,7 +14,12 @@ export const Route = createFileRoute('/app/billing')({
     if (!features.billing) throw notFound()
   },
   validateSearch: (search: Record<string, unknown>): { checkout?: string; canceled?: boolean } => ({
-    checkout: typeof search.checkout === 'string' ? search.checkout : '',
+    checkout:
+      typeof search.checkout === 'string'
+        ? search.checkout
+        : typeof search.checkout_id === 'string' && search.checkout_id.length <= 128
+          ? 'creem:' + search.checkout_id
+          : '',
     canceled: search.canceled === '1' || search.canceled === 1 || search.canceled === true,
   }),
   component: Billing,
@@ -56,7 +61,9 @@ function Billing() {
         <div className="flex items-center gap-2 text-sm font-medium text-primary">
           <ShieldCheck size={17} />
           {current.provider.ready
-            ? t('stripe_test_mode_no_real_charges')
+            ? t('provider_test_mode', {
+                provider: current.provider.name === 'creem' ? 'Creem' : 'Stripe',
+              })
             : t('payments_not_configured_checkout_disabled')}
         </div>
         <p className="mt-2 text-xs leading-6 text-muted-foreground">
@@ -108,7 +115,7 @@ function Billing() {
             features: [
               t('50_private_projects'),
               t('server_enforced_limits'),
-              t('stripe_test_subscriptions_billing_portal'),
+              t('test_subscriptions_billing_portal'),
             ],
           },
         ].map((plan) => (
@@ -131,7 +138,7 @@ function Billing() {
               <p className="mt-2 text-[10px] text-muted-foreground">
                 {plan.id === 'free'
                   ? t('built_in_free_allowance')
-                  : t('price_is_defined_by_your_stripe_test_price')}
+                  : t('price_is_defined_by_provider_test_product')}
               </p>
             </div>
             <ul className="mb-7 space-y-3">
@@ -163,28 +170,36 @@ function Billing() {
           </section>
         ))}
       </div>
-      {current.subscription && (
-        <section className="mt-6 flex max-w-3xl flex-wrap items-center justify-between gap-4 rounded-xl border bg-card p-5">
+      {current.subscriptions.map((subscription) => (
+        <section
+          key={subscription.provider}
+          className="mt-6 flex max-w-3xl flex-wrap items-center justify-between gap-4 rounded-xl border bg-card p-5"
+        >
           <div>
             <p className="text-sm font-medium">
-              {t('subscription_status')} · {current.subscription.status}
+              {t('subscription_status')} · {subscription.provider === 'creem' ? 'Creem' : 'Stripe'}{' '}
+              · {subscription.status}
             </p>
             <p className="mt-2 text-xs text-muted-foreground">
-              {current.subscription.cancelAtPeriodEnd
+              {subscription.cancelAtPeriodEnd
                 ? t('cancels_at_period_end')
-                : t('synchronized_from_stripe')}
+                : t('synchronized_from_payment_provider')}
             </p>
           </div>
           <Button
             variant="outline"
-            disabled={!current.provider.configured || action.isPending}
-            onClick={() => action.mutate('/api/billing/portal')}
+            disabled={!subscription.configured || action.isPending}
+            onClick={() =>
+              action.mutate(
+                '/api/billing/portal?provider=' + encodeURIComponent(subscription.provider),
+              )
+            }
           >
             {t('billing_portal')}
             <ExternalLink size={13} />
           </Button>
         </section>
-      )}
+      ))}
     </>
   )
 }

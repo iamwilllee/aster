@@ -8,18 +8,22 @@ Aster 用于普通 Web 与 AI 产品。先确定用户流程，再选择能力�
 
 `starter.project.json.modules` 保留选择及 user/context/default 依据，check 会核对它和运行配置。配置存在不等于已接通；provider 的实际就绪仍由所选环境的凭据、域名和真实验收决定。旧产品没有配置文件时，检查工具保留旧行为，不自动关闭现有业务；先按升级指南合并能力及其依赖，再显式选择。
 
-| 开关               | 能力与依赖                                                                        |
-| ------------------ | --------------------------------------------------------------------------------- |
-| database           | D1 数据；公开展示站可关闭                                                         |
-| auth               | 认证基础，依赖 database；至少选一种登录方法                                       |
-| emailPassword      | 邮箱密码注册、验证与找回，依赖 auth、mail；称呼不是用户名登录                     |
-| google             | Google 登录，依赖 auth；不依赖邮件模块                                            |
-| mail               | 已有 CF/Brevo/Resend 适配；本地测试收件箱另需 database                            |
-| projects           | 私有项目示例，依赖 auth、database                                                 |
-| billing            | Stripe TEST ONLY，依赖 auth、database；与新结账运行开关分开                       |
-| ai / files / usage | 尚未实现，保持 false；需求可记 required，完成实现/边界/真实验收后再扩展策略并启用 |
+| 开关          | 能力与依赖                                                                                            |
+| ------------- | ----------------------------------------------------------------------------------------------------- |
+| database      | D1 数据；公开展示站可关闭                                                                             |
+| auth          | 认证基础，依赖 database；至少选一种登录方法                                                           |
+| emailPassword | 邮箱密码注册、验证与找回，依赖 auth、mail；称呼不是用户名登录                                         |
+| google        | Google 登录，依赖 auth；不依赖邮件模块                                                                |
+| mail          | 已有 CF/Brevo/Resend 适配；本地测试收件箱另需 database                                                |
+| projects      | 私有项目示例，依赖 auth、database                                                                     |
+| billing       | Stripe / Creem TEST ONLY，依赖 auth、database；与新结账运行开关分开                                   |
+| files         | 私有 PNG/JPEG/WebP 图片、头像/项目封面，依赖 auth、database；按需绑定私有 R2，见 [图片指南](FILES.md) |
+| content       | 文章/帮助/公告、草稿与发布，依赖 auth/database；封面另需 files，见 [内容管理](CONTENT.md)             |
+| ai / usage    | 尚未实现，保持 false；需求可记 required，完成实现/边界/真实验收后再扩展策略并启用                     |
 
 这是一组产品能力开关，代码和依赖保留在仓库以便后续增量接入，不承诺删除所有关闭模块的构建产物。关闭模块会关闭页面入口和直接接口，避免仅隐藏按钮仍能调用。公开站不会查询认证或 D1；已有数据库、迁移和数据不因关闭能力而删除。
+
+支付选型先按 [主体与供应商指南](PAYMENTS.md) 核对个人/个体/公司、地区及结算资格。覆盖不同主体是底座目标，当前 billing 支持 Stripe / Creem TEST；通过 BILLING_PROVIDER 显式选择，其他供应商须实际开发适配，不能把某个开发者的身份或某家渠道固定为所有项目的选择。
 
 ## 三种起步组合
 
@@ -27,7 +31,7 @@ Aster 用于普通 Web 与 AI 产品。先确定用户流程，再选择能力�
 | ------------ | -------------------------------------- | ------------------------------------------------- |
 | showcase     | 所有可选模块关闭                       | 官网、作品集、展示站；页面、双语、主题和 SEO 保留 |
 | web-app      | D1、认证、邮箱密码、邮件、私有项目示例 | 普通会员/数据应用；Google、支付、AI 等关闭        |
-| billing-test | web-app 加 Stripe 测试计费模块         | 需要测试订阅与权益的产品；仍不启用真实收款        |
+| billing-test | web-app 加所选渠道的测试计费模块       | 需要测试订阅与权益的产品；仍不启用真实收款        |
 
 ```bash
 # 从 Aster 源创建新产品；也可由 Skill 直接整理 --plan
@@ -73,6 +77,9 @@ pnpm project:modules --input /tmp/module-choices.json --apply
 
 ## 页面与接口
 
+auth 同时包含 [账号安全设置](ACCOUNT-SECURITY.md)：按当前账号实际凭据展示改密，支持设备摘要和撤销其他会话。Google-only 不要求邮件或密码表单；auth 关闭时私有安全接口一起关闭。
+auth 也包含 [数据导出与注销](ACCOUNT-LIFECYCLE.md)：只导出当前用户的白名单数据，注销前重新验证身份；有历史支付关联时需重新核对供应商，未解决账务仍阻止注销；核对通过后原子归档最小账务记录。关闭模块不移除历史账务检查或所需迁移。Google-only 使用近期应用登录，auth 关闭时生命周期接口一起关闭。
+
 - auth 关闭：登录、注册、找回、工作台等页面及认证/私有 API 关闭，公开导航和行动入口不指向它们。
 - Google-only：邮箱表单和找回入口关闭，直接调用邮箱接口也拒绝；公开注册不要求邮件服务，但需要选中 Google 的真实回调验收。
 - billing 关闭：套餐页、账单入口与接口关闭，sitemap 不包含套餐页；普通数据应用不展示测试订阅。
@@ -88,15 +95,25 @@ pnpm project:modules --input /tmp/module-choices.json --apply
 
 发布前检查按已选能力执行：
 
-| 组合         | 必需配置/验收                                                                 |
-| ------------ | ----------------------------------------------------------------------------- |
-| showcase     | 有效环境与公开 origin；不要求认证密钥、D1、邮件或 Google 记录                 |
-| web-app      | DB、认证密钥、所选邮件配置；生产要求 auth-email-live                          |
-| Google-only  | DB、认证密钥、Google 凭据与开启状态；生产要求 auth-google-live                |
-| billing-test | 上述认证要求加 Stripe 测试所需配置；生产要求 billing-test-live 的真实沙箱证据 |
+| 组合         | 必需配置/验收                                                                                                      |
+| ------------ | ------------------------------------------------------------------------------------------------------------------ |
+| showcase     | 有效环境与公开 origin；不要求认证密钥、D1、邮件或 Google 记录                                                      |
+| web-app      | DB、认证密钥、所选邮件配置；生产要求 auth-email-live                                                               |
+| Google-only  | DB、认证密钥、Google 凭据与开启状态；生产要求 auth-google-live                                                     |
+| billing-test | 上述认证要求加当前及存量渠道的测试配置；生产按渠道要求 billing-test-live 或 billing-creem-test-live 的真实沙箱证据 |
 
-staging 允许为所选能力准备尚未完成真实验收的版本，仍遵守用户禁止部署等限制。AI/files/usage 尚未实现时，记录必需需求会阻止宣称 ready 和正式发布，不能靠隐藏页面伪装已完成。未选模块的配置/用例不阻塞发布；敏感信息放进公开 JSON、远端 local 收件箱等通用错误仍拒绝。
+staging 允许为所选能力准备尚未完成真实验收的版本，仍遵守用户禁止部署等限制。AI/usage 尚未实现时，记录必需需求会阻止宣称 ready 和正式发布，不能靠隐藏页面伪装已完成。未选模块的配置/用例不阻塞发布；敏感信息放进公开 JSON、远端 local 收件箱等通用错误仍拒绝。
 
-验证命令：`pnpm check`、`pnpm format:check`、`pnpm test:e2e`；隔离生产组合分别执行 `pnpm test:production`、`pnpm test:production --profile showcase`、`pnpm test:production --profile google-only`。这些使用本地 Worker 与假 OAuth 凭据，不证明 CF 云端 CPU、真实 Google、邮件或收款资格。
+验证命令：`pnpm check`、`pnpm format:check`、`pnpm test:e2e`；隔离生产组合分别执行 `pnpm test:production`、`pnpm test:production --profile web-app`、`pnpm test:production --profile showcase`、`pnpm test:production --profile google-only`、`pnpm test:production --profile creem`。全关闭能力的展示站运行普通 `test:production` 时使用 showcase 检查；不凭空增加认证依赖。这些使用本地 Worker 与假 OAuth 凭据，不证明 CF 云端 CPU、真实 Google、邮件或收款资格。
 
 必须在生成后的产品目录实际运行检查，不能用底座源码通过的结果替代。浏览器测试读取本产品能力配置：未选的功能验证页面/API 关闭，认证或支付场景只在对应能力选中时执行；支付单元夹具单独启用测试模块，保持其签名与对账覆盖，不迫使普通 web-app 开启支付。关闭不相关用例不能跳过产品的核心业务流程。
+
+## 视觉与图片的独立选择
+
+视觉主题在 `src/config/appearance.json`，见 [主题指南](THEMES.md)，不自动选择任何外部模块。files 选中时需要独立 ASSETS_BUCKET；生产要求 files-live 的真实目标环境证据。源预览已启用图片以便体验，所有新产品 profile 仍默认 files=false。已有资源不能仅通过关开关免除清理责任。
+
+content 在所有新起步组合中默认关闭。文字内容无需 R2，封面按需选 files；生产要求 content-live 的真实目标环境证据。后台管理员不能通过访客输入授予，普通访客不需登录即可读取公开版本。站点共享内容/素材在编辑者注销后保留并清除账号关联，不能按个人文件误删。
+
+## 用户运营后台
+
+已有 auth/database 支持按角色访问 `/app/admin`，无需新增模块开关或外部服务。展示站关闭 auth 时直达页面及 API 也关闭。仅有效管理员可查询用户、停用/恢复及读最小操作记录；不自动授予角色、不代替产品独立验收。接入、迁移与保护规则见 [ADMIN.md](ADMIN.md)。

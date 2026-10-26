@@ -1,3 +1,4 @@
+import { createRequire } from 'node:module'
 import { readFeatures } from './project-features.mjs'
 import { createHash } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
@@ -30,10 +31,16 @@ export function localBootstrapEnv() {
   const env = { ...process.env }
   for (const key of Object.keys(env))
     if (
-      /^(?:CLOUDFLARE_|CF_|GOOGLE_|STRIPE_|BREVO_|RESEND_)/.test(key) ||
-      ['BETTER_AUTH_SECRET', 'ENVIRONMENT', 'APP_ORIGIN', 'MAIL_MODE', 'BILLING_ENABLED'].includes(
-        key,
-      )
+      /^(?:CLOUDFLARE_|CF_|GOOGLE_|STRIPE_|CREEM_|BREVO_|RESEND_)/.test(key) ||
+      [
+        'BETTER_AUTH_SECRET',
+        'ENVIRONMENT',
+        'APP_ORIGIN',
+        'MAIL_MODE',
+        'BILLING_ENABLED',
+        'BILLING_PROVIDER',
+        'BILLING_LEGACY_PROVIDERS',
+      ].includes(key)
     )
       delete env[key]
   return { ...env, WRANGLER_SEND_METRICS: 'false', CLOUDFLARE_LOAD_DEV_VARS_FROM_DOT_ENV: 'false' }
@@ -60,6 +67,16 @@ export function assertLocalProject(root) {
   if (!existsSync(join(root, '.dev.vars')))
     throw new Error('缺少 .dev.vars；先恢复本产品本地配置，不自动重置密钥')
   const { features } = readFeatures(root)
+  // Doctor can read vars before dependencies exist; only bootstrap needs the JSONC parser.
+  const { parse: parseJsonc } = createRequire(import.meta.url)('jsonc-parser')
+  const errors = []
+  const config = parseJsonc(readFileSync(join(root, 'wrangler.jsonc'), 'utf8'), errors, {
+    allowTrailingComma: true,
+  })
+  if (errors.length || !config || typeof config !== 'object')
+    throw new Error('Invalid local Worker configuration')
+  if (config.r2_buckets?.some((item) => item.remote === true))
+    throw new Error('Local bootstrap refuses remote R2 bindings')
   const vars = parseLocalVars(readFileSync(join(root, '.dev.vars'), 'utf8'))
   let origin
   try {

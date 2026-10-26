@@ -1,9 +1,9 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Miniflare } from 'miniflare'
-import { readFile } from 'node:fs/promises'
+import { readFile, readdir } from 'node:fs/promises'
 import Stripe from 'stripe'
 import { env } from 'cloudflare:workers'
-import { webhook, getBilling } from '../../src/modules/billing/billing.server'
+import { webhook, getBilling, checkout } from '../../src/modules/billing/billing.server'
 import { handleApi } from '../../src/server/api.server'
 
 // Exercise billing itself even when a generated product has opted out of that module.
@@ -60,12 +60,13 @@ beforeAll(async () => {
     ],
   })
   db = await runtime.getD1Database('DB')
-  const sql = await readFile(
-    new URL('../../migrations/0000_tan_tarot.sql', import.meta.url),
-    'utf8',
-  )
-  for (const statement of sql.split('--> statement-breakpoint'))
-    if (statement.trim()) await db.prepare(statement).run()
+  const migrations = new URL('../../migrations/', import.meta.url)
+  for (const file of (await readdir(migrations)).filter((name) => name.endsWith('.sql')).sort()) {
+    for (const statement of (await readFile(new URL(file, migrations), 'utf8')).split(
+      '--> statement-breakpoint',
+    ))
+      if (statement.trim()) await db.prepare(statement).run()
+  }
   Object.assign(env, {
     DB: db,
     BILLING_ENABLED: 'true',
@@ -79,6 +80,9 @@ beforeEach(async () => {
   await db.batch(
     [
       'DELETE FROM billing_event',
+      'DELETE FROM billing_account_state',
+      'DELETE FROM billing_subscription_archive',
+      'DELETE FROM billing_checkout_archive',
       'DELETE FROM checkout',
       'DELETE FROM subscription',
       'DELETE FROM user',
@@ -205,4 +209,77 @@ describe('signed Stripe events against real local D1', () => {
     expect(providerReads).toBe(3)
     expect(await db.prepare('SELECT COUNT(*) AS count FROM billing_event').first('count')).toBe(3)
   })
+})
+
+it('reserves checkout before contacting Stripe, blocking concurrent deletion and replacing the reservation on success', async () => {
+  let proceed: (() => void) | undefined
+  const waiting = new Promise<void>((resolve) => {
+    proceed = resolve
+  })
+  let contacted: (() => void) | undefined
+  const started = new Promise<void>((resolve) => {
+    contacted = resolve
+  })
+  vi.stubGlobal('fetch', async () => {
+    contacted!()
+    await waiting
+    return Response.json({ id: 'cs_reserved', url: 'https://checkout.stripe.com/fixture' })
+  })
+  const pending = checkout('user_fixture', 'billing@example.test')
+  await started
+  try {
+    expect(
+      await db
+        .prepare("SELECT id FROM checkout WHERE user_id='user_fixture' AND status='pending'")
+        .first(),
+    ).toBeTruthy()
+    const deletion = await db
+      .prepare(
+        "DELETE FROM user WHERE id='user_fixture' AND NOT EXISTS (SELECT 1 FROM checkout WHERE user_id='user_fixture')",
+      )
+      .run()
+    expect(deletion.meta.changes).toBe(0)
+  } finally {
+    proceed!()
+  }
+  expect(await pending).toEqual({ url: 'https://checkout.stripe.com/fixture' })
+  expect(await db.prepare("SELECT id FROM checkout WHERE status='pending'").first()).toBeNull()
+  expect(await db.prepare("SELECT user_id FROM checkout WHERE id='cs_reserved'").first()).toEqual({
+    user_id: 'user_fixture',
+  })
+})
+it('a deleted account never reaches Stripe; an ambiguous provider failure retains its pending reservation', async () => {
+  const provider = vi.fn(() => Promise.resolve(new Response('{}', { status: 503 })))
+  vi.stubGlobal('fetch', provider)
+  await expect(checkout('missing-user', 'absent@example.test')).rejects.toMatchObject({
+    status: 401,
+  })
+  expect(provider).not.toHaveBeenCalled()
+  vi.stubGlobal('fetch', () => Promise.resolve(Response.json({ id: 'cs_no_url' })))
+  await expect(checkout('user_fixture', 'billing@example.test')).rejects.toMatchObject({
+    status: 502,
+  })
+  expect(
+    await db
+      .prepare("SELECT id FROM checkout WHERE user_id='user_fixture' AND status='pending'")
+      .first(),
+  ).toBeTruthy()
+})
+
+it('continues signed billing reconciliation for a suspended account without changing access status', async () => {
+  await db
+    .prepare(
+      "INSERT INTO account_access(user_id,disabled_at,revision,updated_at)VALUES('user_fixture',1,1,1)",
+    )
+    .run()
+  await webhook(eventRequest('evt_suspended_account', 'checkout.session.completed'))
+  expect(
+    await db.prepare("SELECT status FROM checkout WHERE id='cs_fixture'").first('status'),
+  ).toBe('complete')
+  expect((await getBilling('user_fixture')).plan).toBe('pro')
+  expect(
+    await db
+      .prepare("SELECT disabled_at FROM account_access WHERE user_id='user_fixture'")
+      .first('disabled_at'),
+  ).toBe(1)
 })

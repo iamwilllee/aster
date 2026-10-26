@@ -1,3 +1,4 @@
+import { paymentProvider, paymentSecrets } from '../src/modules/billing/config.mjs'
 import { readFeatures } from './project-features.mjs'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -210,29 +211,30 @@ export async function doctor(root, { portProbe = probePort, pnpmVersion } = {}) 
         ? '本地 Google 配置形状齐备；真实登录/回调未验证'
         : 'Google 待配置：GOOGLE_AUTH_ENABLED、GOOGLE_CLIENT_ID、GOOGLE_CLIENT_SECRET',
   )
-  const stripeConfigured = ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'STRIPE_PRICE_ID'].every(
-    present,
-  )
+  const provider = paymentProvider(vars)
+  const paymentConfigured = provider && paymentSecrets(provider).every(present)
   add(
-    'stripe',
-    vars.STRIPE_SECRET_KEY?.startsWith('sk_live_')
+    'billing',
+    !provider || vars.STRIPE_SECRET_KEY?.startsWith('sk_live_')
       ? 'error'
-      : !features.billing
-        ? 'unknown'
-        : stripeConfigured
-          ? 'warn'
-          : required('billing')
-            ? 'warn'
-            : 'unknown',
-    vars.STRIPE_SECRET_KEY?.startsWith('sk_live_')
-      ? '禁止使用 Stripe live 密钥'
-      : !features.billing
-        ? '支付模块未选；不要求支付配置或验收'
-        : stripeConfigured
-          ? '本地 Stripe 配置存在；仅支持测试，结账/Webhook 尚待真实测试验收'
-          : 'Stripe 测试待配置：STRIPE_SECRET_KEY、STRIPE_WEBHOOK_SECRET、STRIPE_PRICE_ID；新结账另需 BILLING_ENABLED',
+      : features.billing && paymentConfigured
+        ? 'warn'
+        : 'unknown',
+    !provider
+      ? 'BILLING_PROVIDER 仅支持 stripe 或 creem'
+      : vars.STRIPE_SECRET_KEY?.startsWith('sk_live_')
+        ? '禁止使用 Stripe live 密钥'
+        : !features.billing
+          ? '支付模块未选；不要求新支付配置或验收'
+          : paymentConfigured
+            ? `本地 ${provider} 配置存在；仅测试，真实结账/回调/审核/结算分别待验收`
+            : `${provider} 测试待配置：${paymentSecrets(provider).join('、')}；新结账另需 BILLING_ENABLED`,
   )
-  for (const key of ['ai', 'files', 'usage'])
+  if (features.content)
+    add('content', 'warn', '内容模块已选；核对管理员权限、已发布页面及 content-live 真实环境验收')
+  if (features.files)
+    add('files', 'warn', '已选私有图片模块；检查 ASSETS_BUCKET，云端上传/隔离/删除仍需独立验收')
+  for (const key of ['ai', 'usage'])
     if (required(key))
       add(`module-${key}`, 'warn', `${key} 的业务尚未实现；需补实现、权限和用量/失败验收`)
   for (const port of [3100, 3110]) {
@@ -248,7 +250,7 @@ export async function doctor(root, { portProbe = probePort, pnpmVersion } = {}) 
   add(
     'remote',
     'unknown',
-    '未读取远端 secrets、资格或资源；云端邮件/Google/Stripe 需独立配置与真实验收',
+    '未读取远端 secrets、资格或资源；云端邮件/Google/支付渠道需独立配置与真实验收',
   )
   if (features.database) {
     try {

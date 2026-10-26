@@ -150,3 +150,98 @@ test('local preflight has no remote calls, and missing remote auth secrets stops
     'exec wrangler secret list --format json',
   ])
 })
+
+test('Creem selection requires its own sandbox evidence and secrets, retaining explicitly named legacy channels', () => {
+  const base = config()
+  base.vars.BILLING_PROVIDER = 'creem'
+  base.vars.BILLING_LEGACY_PROVIDERS = 'stripe'
+  const flags = {
+    database: true,
+    auth: true,
+    emailPassword: true,
+    mail: true,
+    billing: true,
+    google: false,
+    projects: true,
+    ai: false,
+    files: false,
+    usage: false,
+  }
+  const selected = livePlan()
+  selected.acceptance.push({
+    id: 'billing-test-live',
+    kind: 'business',
+    scope: 'provider',
+    status: 'passed',
+    verification: 'real',
+    evidence: ['provider-evidence.md'],
+  })
+  let result = deploymentPolicy(base, undefined, selected, flags)
+  assert.ok(result.problems.some((problem) => problem.includes('billing-creem-test-live')))
+  assert.ok(result.requiredSecrets.includes('CREEM_API_KEY'))
+  assert.ok(result.requiredSecrets.includes('STRIPE_WEBHOOK_SECRET'))
+  selected.acceptance.push({
+    id: 'billing-creem-test-live',
+    kind: 'business',
+    scope: 'provider',
+    status: 'passed',
+    verification: 'real',
+    evidence: ['provider-evidence.md'],
+  })
+  result = deploymentPolicy(base, undefined, selected, flags)
+  assert.equal(
+    result.problems.some((problem) => problem.includes('billing-creem-test-live')),
+    false,
+  )
+  base.vars.BILLING_LEGACY_PROVIDERS = 'unknown'
+  assert.ok(
+    deploymentPolicy(base, undefined, selected, flags).problems.some((problem) =>
+      problem.includes('BILLING_PROVIDER'),
+    ),
+  )
+})
+
+test('selected private images require distinct real bucket configuration and current provider evidence', () => {
+  const base = config(),
+    features = {
+      database: true,
+      auth: true,
+      emailPassword: true,
+      mail: true,
+      google: false,
+      projects: true,
+      billing: false,
+      files: true,
+      ai: false,
+      usage: false,
+    }
+  const plan = livePlan()
+  assert.ok(
+    deploymentPolicy(base, 'staging', plan, features).problems.some((p) =>
+      p.includes('ASSETS_BUCKET'),
+    ),
+  )
+  base.r2_buckets = [{ binding: 'ASSETS_BUCKET', bucket_name: 'production-fixture-assets' }]
+  base.env.staging.r2_buckets = [
+    { binding: 'ASSETS_BUCKET', bucket_name: 'staging-fixture-assets' },
+  ]
+  assert.ok(
+    deploymentPolicy(base, undefined, plan, features).problems.some((p) =>
+      p.includes('files-live'),
+    ),
+  )
+  plan.acceptance.push({ ...plan.acceptance[0], id: 'files-live' })
+  assert.deepEqual(deploymentPolicy(base, undefined, plan, features).problems, [])
+  plan.acceptance.at(-1).verification = 'mock'
+  assert.ok(
+    deploymentPolicy(base, undefined, plan, features).problems.some((p) =>
+      p.includes('files-live'),
+    ),
+  )
+  base.env.staging.r2_buckets[0].bucket_name = base.r2_buckets[0].bucket_name
+  assert.ok(
+    deploymentPolicy(base, 'staging', plan, features).problems.some((p) =>
+      p.includes('different R2'),
+    ),
+  )
+})

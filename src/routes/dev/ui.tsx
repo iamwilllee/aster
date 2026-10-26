@@ -1,10 +1,10 @@
-import { createFileRoute, notFound } from '@tanstack/react-router'
+import { createFileRoute, Link, notFound } from '@tanstack/react-router'
 import { useState, type FormEvent } from 'react'
 import { ArrowUpRight, LoaderCircle, Plus } from 'lucide-react'
 import { getAuthInfo } from '@/server/functions'
 import { Logo, Preferences, PageHeading, ErrorNotice } from '@/components/common'
 import { useI18n } from '@/components/providers'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
@@ -62,6 +62,16 @@ function UiReference() {
         eyebrow="ASTER UI"
         title={t('ui_reference_title')}
         description={t('ui_reference_description')}
+        action={
+          <Link
+            to="/dev/blueprints"
+            search={{ kind: 'product' }}
+            className={buttonVariants({ variant: 'outline' })}
+          >
+            {t('bp_title')}
+            <ArrowUpRight />
+          </Link>
+        }
       />
       <p className="mb-8 rounded-lg border bg-accent px-4 py-3 text-sm text-accent-foreground">
         {t('ui_local_only')}

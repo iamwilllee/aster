@@ -26,6 +26,7 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
       - run: pnpm test:production
+      - run: pnpm test:production --profile web-app
       - run: pnpm test:production --profile showcase
       - run: pnpm test:production --profile google-only
       - uses: actions/upload-artifact@v7.0.2

@@ -6,11 +6,19 @@ MAIL_MODE=local
 # Store only the selected provider's BREVO_API_KEY or RESEND_API_KEY as a Worker secret.
 # Local development defaults to the private test inbox and needs no provider key.
 BILLING_ENABLED=false
+BILLING_PROVIDER=stripe
+# When switching new checkout, list retained channels (stripe,creem) in BILLING_LEGACY_PROVIDERS.
+# Keep their secrets and webhooks until existing obligations are resolved.
 BETTER_AUTH_SECRET=replace-with-a-random-secret-at-least-32-characters
 # Optional Stripe TEST credentials. Never use live keys in this starter.
 # STRIPE_SECRET_KEY=sk_test_...
 # STRIPE_WEBHOOK_SECRET=whsec_...
 # STRIPE_PRICE_ID=price_...
+
+# Optional Creem sandbox credentials. Requests only use test-api.creem.io.
+# CREEM_API_KEY=your-test-api-key
+# CREEM_WEBHOOK_SECRET=your-test-webhook-secret
+# CREEM_PRODUCT_ID=prod_...
 
 # Optional Google OAuth. Use separate credentials for local/staging/production.
 GOOGLE_AUTH_ENABLED=false

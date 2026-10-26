@@ -1,3 +1,4 @@
+import { AssetPreview, FilePicker } from '@/components/file-library'
 import { features } from '@/config/features'
 import { notFound } from '@tanstack/react-router'
 import { formText } from '@/lib/forms'
@@ -94,6 +95,7 @@ function Projects() {
   const viewer = getRouteApi('/app').useLoaderData()
   const router = useRouter()
   const cache = useQueryClient()
+  const [cover, setCover] = useState<string | null>(null)
   const [editor, setEditor] = useState(false)
   const [editing, setEditing] = useState<Project | null>(null)
   const [deleting, setDeleting] = useState<Project | null>(null)
@@ -115,6 +117,7 @@ function Projects() {
     new Date(value).toLocaleDateString(locale === 'zh' ? 'zh-CN' : 'en-US')
   async function refresh() {
     await cache.invalidateQueries({ queryKey: ['projects'] })
+    if (features.files) await cache.invalidateQueries({ queryKey: ['files', viewer.user.id] })
     await router.invalidate()
   }
   const save = useMutation({
@@ -139,6 +142,7 @@ function Projects() {
     },
   })
   function openEditor(project: Project | null) {
+    setCover(project?.cover_asset_id ?? null)
     setEditing(project)
     save.reset()
     setEditor(true)
@@ -150,6 +154,7 @@ function Projects() {
       name: formText(data, 'name'),
       description: formText(data, 'description'),
       status: formText(data, 'status') as ProjectInput['status'],
+      ...(features.files ? { coverAssetId: cover } : {}),
     })
   }
   return (
@@ -360,6 +365,15 @@ function Projects() {
                   key={project.id}
                   className="group flex min-h-56 flex-col rounded-xl border bg-card p-5 transition-shadow hover:shadow-sm"
                 >
+                  {features.files && project.cover_asset_id && (
+                    <div className="mb-5 aspect-video overflow-hidden rounded-lg border">
+                      <AssetPreview
+                        key={project.cover_asset_id}
+                        id={project.cover_asset_id}
+                        alt={project.name}
+                      />
+                    </div>
+                  )}
                   <div className="mb-6 flex items-center justify-between">
                     <span className="grid size-10 place-items-center rounded-lg border bg-background font-mono text-base text-primary">
                       {project.name.slice(0, 1).toUpperCase()}
@@ -442,20 +456,31 @@ function Projects() {
             <DialogDescription>{t('project_details_description')}</DialogDescription>
           </DialogHeader>
           {detail && (
-            <DetailList
-              items={[
-                {
-                  label: t('status'),
-                  value: <Badge variant="secondary">{labels[detail.status]}</Badge>,
-                },
-                {
-                  label: t('a_short_description'),
-                  value: detail.description || t('no_description'),
-                },
-                { label: t('created'), value: date(detail.created_at) },
-                { label: t('updated'), value: date(detail.updated_at) },
-              ]}
-            />
+            <>
+              {features.files && detail?.cover_asset_id && (
+                <div className="aspect-video overflow-hidden rounded-lg border">
+                  <AssetPreview
+                    key={detail.cover_asset_id}
+                    id={detail.cover_asset_id}
+                    alt={detail.name}
+                  />
+                </div>
+              )}
+              <DetailList
+                items={[
+                  {
+                    label: t('status'),
+                    value: <Badge variant="secondary">{labels[detail.status]}</Badge>,
+                  },
+                  {
+                    label: t('a_short_description'),
+                    value: detail.description || t('no_description'),
+                  },
+                  { label: t('created'), value: date(detail.created_at) },
+                  { label: t('updated'), value: date(detail.updated_at) },
+                ]}
+              />
+            </>
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setDetail(null)}>
@@ -516,6 +541,17 @@ function Projects() {
               </Select>
             </div>
             {save.error && <ErrorNotice>{save.error.message}</ErrorNotice>}
+            {features.files && (
+              <div className="grid gap-2">
+                <Label>{t('files_cover')}</Label>
+                <FilePicker
+                  userId={viewer.user.id}
+                  value={cover}
+                  onChange={setCover}
+                  disabled={save.isPending}
+                />
+              </div>
+            )}
             <DialogFooter>
               <Button
                 type="button"

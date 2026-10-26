@@ -22,6 +22,7 @@ export function AuthForm({
   emailPasswordEnabled = true,
   mailReady = true,
   oauthError = false,
+  deleted = false,
 }: {
   mode: 'login' | 'signup' | 'forgot' | 'reset'
   local: boolean
@@ -31,6 +32,7 @@ export function AuthForm({
   googleReady?: boolean
   mailReady?: boolean
   oauthError?: boolean
+  deleted?: boolean
 }) {
   const { t, locale } = useI18n()
   const [error, setError] = useState('')
@@ -122,6 +124,11 @@ export function AuthForm({
           </Link>
           <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
           <p className="mb-8 mt-3 text-sm leading-6 text-muted-foreground">{subtitle}</p>
+          {mode === 'login' && deleted && (
+            <p role="status" className="mb-5 text-sm text-primary">
+              {t('account_deleted_notice')}
+            </p>
+          )}
           {!emailPasswordEnabled && !googleReady && (
             <p className="mb-5 text-sm text-muted-foreground">{t('sign_in_unavailable')}</p>
           )}

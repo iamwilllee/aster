@@ -2,7 +2,7 @@
 
 # Cloudflare 部署手册
 
-Aster v0.2.0 提供本地开发与隔离生产构建测试。部署前检查操作者的 Cloudflare 账户、D1 与发信权限，并完成下文的远端验收。不要把密钥发送到聊天或写入仓库。
+Aster v0.2.0-beta.1 发布候选优先支持不带支付的展示站与普通 Web 应用，提供本地开发与隔离生产构建测试。未选择 billing 时无需支付配置或支付供应商验收；本文的计费步骤仅适用于明确选择的实验模块。部署前检查操作者的 Cloudflare 账户、D1 与发信权限，并完成下文的远端验收。不要把密钥发送到聊天或写入仓库。
 
 ## 0. 默认从免费云资源开始
 
@@ -78,7 +78,7 @@ pnpm exec wrangler secret put GOOGLE_CLIENT_SECRET --env staging
 
 选择 CF 发信后，确认 [Cloudflare Email Service](https://developers.cloudflare.com/email-service/) 账户资格、发信域名和对应 EMAIL binding；免费 Email Routing 转发不能视为任意外发邮件能力。配置 `MAIL_MODE=cloudflare` 与已验证的 `MAIL_FROM`，完成中英文验证/重置邮件真实收信、链接和失败检查。模板同时提供纯文本和 HTML。供应商接受发送不等于收件成功。
 
-Stripe 仅限测试账户，依次保存 `STRIPE_SECRET_KEY`、`STRIPE_WEBHOOK_SECRET`、`STRIPE_PRICE_ID`（都使用同样的 `--env staging`）。启用测试 Portal，Webhook 指向 `/api/billing/webhook`，再打开 `BILLING_ENABLED=true`。禁用新结账不会停止已配置的门户与事件同步。live key 不受支持。
+支付渠道配置详见 [PAYMENTS.md](PAYMENTS.md)，Creem 使用 CREEM_API_KEY / CREEM_WEBHOOK_SECRET / CREEM_PRODUCT_ID，固定 sandbox API。BILLING_PROVIDER 每环境明确选择 stripe 或 creem；有存量义务时保留旧密钥并设置 BILLING_LEGACY_PROVIDERS。两种渠道均 TEST ONLY。Stripe 依次保存 `STRIPE_SECRET_KEY`、`STRIPE_WEBHOOK_SECRET`、`STRIPE_PRICE_ID`（都使用同样的 `--env staging`）。启用测试 Portal，Webhook 指向 `/api/billing/webhook/stripe`（原 `/api/billing/webhook` 继续可用），Creem 指向 `/api/billing/webhook/creem`，再打开 `BILLING_ENABLED=true`。禁用新结账不会停止已配置的门户与事件同步。live key 不受支持。
 
 ## 3. 检查与部署
 
@@ -113,6 +113,12 @@ INSERT INTO admin_user (user_id) VALUES ('目标用户ID') ON CONFLICT(user_id) 
 
 在真实 HTTPS 域名完成：英文/中文直接访问和刷新；邮箱注册、收信、重发冷却、验证、登录与重置撤销旧会话；Google 登录/失败回调；项目创建刷新持久化；跨账户隔离；普通用户管理员 403；两种语言的开发收件箱与开发邮件 API 均不可用。
 
-Stripe 测试账户需要真实托管测试结账、取消/门户改套餐、失败/重试和 Webhook 数据核对。返回 success 页面不能直接授予权益。另检查日志、CPU 时间、D1 扫描行数、备份/恢复与资源用量；套餐选择依据实际负载测量。
+所选支付渠道的测试账户需要真实托管测试结账、取消/门户改套餐、失败/重试和 Webhook 数据核对。返回 success 页面不能直接授予权益。另检查日志、CPU 时间、D1 扫描行数、备份/恢复与资源用量；套餐选择依据实际负载测量。
 
-目前仍未完成这些远端验收。真实收费、退款、争议、税务、账户删除、数据保留与隐私策略由后续具体产品补齐。
+目前仍未完成这些远端验收。真实收费、退款、争议、税务、真实供应商账务注销验收、数据保留与隐私策略由后续具体产品补齐。账号注销和个人数据导出见 [账号生命周期](ACCOUNT-LIFECYCLE.md)，新业务需补全其数据归属及清理范围。
+
+## 可选私有图片
+
+files 选中时按 [图片指南](FILES.md) 在授权内配置 ASSETS_BUCKET；预发布与生产使用不同私有 bucket。先审查并应用 additive migration 0005，再发布兼容代码。deploy 不创建 bucket，拒绝占位/共用目标，正式发布还要求当前产品 files-live 的真实目标环境证据。本地 R2 模拟不证明云端可用或账单安全。关闭入口不删除历史资源，也不绕过账号注销的对象清理。
+
+产品主题通过 appearance.json 构建，生产忽略本地预览参数 _style；主题选择不新增外部服务，见 [主题指南](THEMES.md)。

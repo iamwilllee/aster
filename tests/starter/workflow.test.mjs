@@ -350,7 +350,7 @@ test('doctor redacts credentials and port occupancy is a warning, not permission
     'GOOGLE_AUTH_ENABLED=true',
   )
   vars +=
-    'GOOGLE_CLIENT_ID=private-client-fixture\nGOOGLE_CLIENT_SECRET=private-secret-fixture\nSTRIPE_SECRET_KEY=sk_live_private-fixture\nBREVO_API_KEY=private-brevo-fixture\nRESEND_API_KEY=private-resend-fixture\n'
+    'GOOGLE_CLIENT_ID=private-client-fixture\nGOOGLE_CLIENT_SECRET=private-secret-fixture\nSTRIPE_SECRET_KEY=sk_live_private-fixture\nBREVO_API_KEY=private-brevo-fixture\nRESEND_API_KEY=private-resend-fixture\nCREEM_API_KEY=private-creem-fixture\nCREEM_WEBHOOK_SECRET=private-creem-webhook-fixture\n'
   writeFileSync(join(root, '.dev.vars'), vars)
   const report = await doctor(root, { pnpmVersion: '12.11.2', portProbe: async () => 'occupied' })
   const output = JSON.stringify(report)
@@ -360,9 +360,11 @@ test('doctor redacts credentials and port occupancy is a warning, not permission
     'sk_live_private-fixture',
     'private-brevo-fixture',
     'private-resend-fixture',
+    'private-creem-fixture',
+    'private-creem-webhook-fixture',
   ])
     assert.ok(!output.includes(secret))
-  assert.equal(report.checks.find((item) => item.id === 'stripe').status, 'error')
+  assert.equal(report.checks.find((item) => item.id === 'billing').status, 'error')
   assert.equal(report.checks.find((item) => item.id === 'port-3100').status, 'warn')
   assert.equal(existsSync(join(root, '.wrangler')), false)
 })

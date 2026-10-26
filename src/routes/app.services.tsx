@@ -68,7 +68,7 @@ function Services() {
     },
     {
       icon: CreditCard,
-      name: 'Stripe',
+      name: viewer.billing.provider.name === 'creem' ? 'Creem' : 'Stripe',
       text: t('test_keys_only_entitlements_change_after_verified_webhook_synchronization'),
       status: viewer.billing.provider.ready ? t('test_mode') : t('unconfigured'),
       ready: viewer.billing.provider.ready,
@@ -76,8 +76,8 @@ function Services() {
     {
       icon: Box,
       name: 'Cloudflare R2',
-      text: t('storage_binding_provided_file_workflows_are_planned_for_v0_2_and_are_not_co'),
-      status: t('reserved'),
+      text: t('files_private_notice'),
+      status: viewer.local ? t('local_test') : t('not_verified'),
       ready: false,
     },
     {
@@ -93,6 +93,7 @@ function Services() {
         'Transactional email': features.mail,
         'Google OAuth': features.google,
         Stripe: features.billing,
+        Creem: features.billing,
         'Cloudflare R2': features.files,
         'Workers AI': features.ai,
       })[service.name] ?? true,

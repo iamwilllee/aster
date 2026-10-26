@@ -19,19 +19,27 @@ import { buttonVariants } from '@/components/ui/button'
 
 export const Route = createFileRoute('/')({ component: Home })
 function Home() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const { registrationReady, features } = getRouteApi('__root__').useLoaderData()
   return (
     <div className="min-h-screen">
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-6 sm:px-8">
+      <header className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-6 sm:px-8">
         <Logo />
-        <div className="flex items-center gap-4">
+        <div className="flex min-w-0 flex-wrap items-center justify-end gap-2 sm:gap-4">
           {features.billing && (
             <Link
               to="/pricing"
               className="hidden text-sm text-muted-foreground hover:text-foreground sm:block"
             >
               {t('pricing')}
+            </Link>
+          )}
+          {features.content && (
+            <Link
+              to="/content"
+              className="text-sm whitespace-nowrap text-muted-foreground hover:underline"
+            >
+              {t('content_title')}
             </Link>
           )}
           <Preferences />
@@ -51,12 +59,14 @@ function Home() {
             >
               <span className="size-1.5 rounded-full bg-primary" /> OPEN SOURCE · CLOUDFLARE NATIVE
             </Badge>
-            <h1 className="text-[clamp(2.8rem,5.5vw,4.4rem)] leading-[1.18] font-semibold tracking-[-0.055em]">
+            <h1
+              className={`text-[clamp(2.8rem,5.5vw,4.4rem)] leading-[1.18] font-bold ${locale === 'zh' ? 'tracking-normal' : 'tracking-[-0.03em]'}`}
+            >
               {t('less_setup')}
               <br />
               <span className="text-primary">{t('more_possibility')}</span>
             </h1>
-            <p className="mt-6 max-w-md text-base leading-8 text-muted-foreground">
+            <p className="mt-6 max-w-md text-base leading-8 text-muted-foreground sm:text-lg">
               {t('selected_product_foundation')}
             </p>
             {features.auth && (
@@ -88,7 +98,7 @@ function Home() {
             </div>
           </div>
           <div className="relative pb-5">
-            <div className="absolute -inset-5 -z-10 rounded-full bg-accent blur-3xl" />
+            <div className="absolute inset-0 -z-10 rounded-full bg-accent blur-3xl" />
             <div className="overflow-hidden rounded-xl border bg-card shadow-xl shadow-primary/10">
               <div className="flex items-center justify-between border-b px-4 py-3">
                 <div className="flex gap-1.5">

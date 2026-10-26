@@ -25,7 +25,7 @@
 
 修改 schema 后执行 `pnpm db:generate`，检查新 SQL，再执行 `pnpm db:migrate`（本地）。迁移不会在普通请求内执行。已经应用过的迁移保持不变，使用新迁移变更数据。生产迁移见部署手册。
 
-默认 Free 最多 3 个项目，Pro 测试订阅最多 50 个。配额位于 `src/config/site.ts`；前端套餐示例文字也需同步。并发创建使用同一条 `INSERT SELECT WHERE COUNT(...)` 原子判断，不依赖先读后写或 KV 锁。项目列表和管理员列表首版最多返回 100 条，规模增长后补分页与搜索索引，不将此实现视为无限规模后台。
+无支付版默认每个账号最多 3 个项目，配额位于 `src/config/site.ts`，可按产品调整。实验计费模块另有 Pro 测试上限，不因保留这些常量就显示套餐或要求支付配置。并发创建使用同一条 `INSERT SELECT WHERE COUNT(...)` 原子判断，不依赖先读后写或 KV 锁。项目示例最多返回 100 条；管理员列表使用服务端搜索、状态筛选与每页 20 条分页。规模增长后按业务补索引和配额，不将示例视为无限规模后台。
 
 ## 国际化与认证
 
@@ -33,9 +33,9 @@
 
 消息位于 `src/i18n/en.json` 与 `zh.json`，组件使用类型化 `t(key, values)`。运行 `pnpm locale:check` 检查键与占位符一致。语言切换使用完整导航，保留 query/hash；认证/支付回跳保留前缀。API 与 Better Auth 请求发送语言 header，服务端只将已知公共错误映射到字典，不直接显示供应商原始错误。
 
-根配置 `PUBLIC_INDEXABLE=false` 时 robots 禁止索引、sitemap 为空；公开发布时显式开启，只列首页/套餐页。私有页面始终 noindex。
+根配置 `PUBLIC_INDEXABLE=false` 时 robots 禁止索引、sitemap 为空；公开发布时显式开启，只列已选择能力的公开页面与已发布内容，未选支付时不列套餐页。私有页面始终 noindex。
 
-本地 Google 联调需要 `.dev.vars` 中同时设置 `GOOGLE_AUTH_ENABLED=true`、`GOOGLE_CLIENT_ID`、`GOOGLE_CLIENT_SECRET`，回调为 `http://127.0.0.1:3100/api/auth/callback/google`。重启服务后验证。未配置时禁用 Google 按钮并标明原因。
+本地 Google 联调需要 `.dev.vars` 中同时设置 `GOOGLE_AUTH_ENABLED=true`、`GOOGLE_CLIENT_ID`、`GOOGLE_CLIENT_SECRET`，回调为 `http://127.0.0.1:3100/api/auth/callback/google`。重启服务后验证。未选择或未配置时不向访客显示 Google 占位按钮；选择 Google 后需先在 staging 配置并真实验收，再发布。
 
 验证邮件重发按规范化邮箱的 SHA-256 键做 D1 原子 60 秒冷却，失败释放只属于本次请求的预留。认证仍有数据库速率限制。私有写 API 按已认证用户每分钟 30 次限流，读接口不消耗此额度；独立于项目数量配额。
 
@@ -45,19 +45,23 @@
 
 ```bash
 pnpm admin:grant you@example.test
-# 刷新工作台，可看到只读用户列表
+# 刷新工作台，进入用户运营后台；先保留另一位有效管理员再撤销角色
 pnpm admin:revoke you@example.test
 ```
 
-脚本固定 `--local`，不会改云端账户。管理员由独立 `admin_user` 表判断，默认首位注册者不自动成为管理员。云端需要操作者显式对目标 D1 写入角色，见部署手册。
+脚本读取当前项目的本地 DB，仅操作 `--local`，要求已验证且未停用的账号，不能撤销最后一位有效管理员，不会改云端账户。后台支持搜索、停用/恢复与最小操作记录，见 [ADMIN.md](ADMIN.md)。管理员由独立 `admin_user` 表判断，默认首位注册者不自动成为管理员。云端需要操作者显式对目标 D1 写入角色，见部署手册。
 
 ## 请求体与开发运行时
 
-API 入口在来源、鉴权等早返回前读取请求体，普通 API 上限 16KiB，Stripe Webhook 上限 256KiB。重建 Request 使用原始字节，Webhook 仍在验签后处理；不要先解析/改写签名载荷。超限拒绝并取消输入，不做无界缓存或记录请求体。认证入口也有有界读取。开发代理可能在未消费输入流就返回时重置连接，HTTP 回归必须同时覆盖拒绝响应与后续请求。
+API 入口在来源、鉴权等早返回前读取请求体，普通 API 上限 16KiB，Stripe Webhook 上限 256KiB。重建 Request 使用原始字节，Webhook 仍在验签后处理；不要先解析/改写签名载荷。超限拒绝并取消输入，不做无界缓存或记录请求体。认证入口也有有界读取。未知 SDK 异常越过下层原始错误打印，由认证 HTTP 边界记录固定分类/级别/请求 ID 并返回通用错误；APIError 保留原本状态与响应头。不得打印原始数据库错误、SQL 参数或凭据，也不通过关闭 logger 隐藏故障。开发代理可能在未消费输入流就返回时重置连接，HTTP 回归必须同时覆盖拒绝响应与后续请求。
 
 `vite.config.ts` 对当前 Base UI 子路径在 client/SSR 环境预打包，减少首次访问懒加载路由时的依赖重建。不要用客户端渲染替代 SSR、降低并发、吞异常或增加重试来掩盖失败。修改运行时后，在独立项目和生产构建中验收；热更新或旧测试数据不能替代冷启动检查。
 
-## Stripe 测试
+## 实验计费（默认关闭）
+
+首版无支付产品无需本节配置。仅在明确选择 billing/billing-test 后，按 [PAYMENTS.md](PAYMENTS.md) 选择供应商并分别验收。源预览与 web-app 默认 billing=false；不要为了通过测试打开支付。保留已有产品的历史账务、门户与签名回调，关闭新结账与完整退役不是同一操作。
+
+### Stripe TEST
 
 在 `.dev.vars` 添加自己的测试配置，重启开发服务：
 
@@ -90,8 +94,8 @@ pnpm test:production
 
 `test:production` 使用全新的 `.wrangler/acceptance/<UUID>` 配置、D1、随机认证密钥和假 Google 凭据；构建生产 Worker，在 HTTPS 3110 上验收后停止自己的进程。端口已占用则退出，不中断已有服务。不读取开发 `.dev.vars` 或数据库，清除继承的供应商密钥，禁用发信和支付。授权 URL 检查不等于真实 Google 登录。测试产物不入库。
 
-CI 已配置这些步骤，但尚无远端执行结果；无供应商秘密，使用本地模拟服务。更改 UI 时还应查看桌面/手机渲染及交互，不能只以编译成功代替验收。
+CI 使用本地模拟服务与假凭据，包含默认、web-app、showcase、Google-only 组合；每次发布需核对实际候选提交的远端结果，旧提交通过不能证明当前工作区通过。更改 UI 时还应查看桌面/手机渲染及交互，不能只以编译成功代替验收。
 
 ## 后续复用与升级
 
-当前是单应用源码模板，不是多租户业务平台、托管服务或自动迁移框架。复制时每个产品独立数据库/密钥/域名；不要复用开发数据。通过 `starter-version.json` 记录起点，后续逐项对照变更与迁移；自动升级 CLI 暂未实现。
+当前是单应用源码模板，不是多租户业务平台、托管服务或自动迁移框架。复制时每个产品独立数据库/密钥/域名；不要复用开发数据。通过 `starter-version.json` 和 `.aster/baseline.json` 记录起点，使用已实现的扫描、备份合并、采用记录和回退流程，见 [UPGRADING.md](UPGRADING.md)。联网发现/自动获取新发布版本尚未实现；不能直接覆盖已有产品。

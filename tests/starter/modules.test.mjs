@@ -319,3 +319,98 @@ test('public bootstrap records database as skipped and reactivation requires set
   const change = moduleChange(root, choices(featurePreset('web-app')))
   assert.equal(change.plan.bootstrap.database.status, 'pending')
 })
+
+test('initializer carries an explicit Creem choice into every environment without inheriting keys or enabling checkout', (t) => {
+  const temp = mkdtempSync(join(tmpdir(), 'aster-payment-choice-'))
+  t.after(() => rmSync(temp, { recursive: true, force: true }))
+  const plan = join(temp, 'plan.json')
+  writeFileSync(
+    plan,
+    JSON.stringify({
+      modules: choices(featurePreset('billing-test')),
+      decisions: [
+        {
+          id: 'payment-provider',
+          question: 'Payment provider',
+          status: 'resolved',
+          value: 'creem',
+          basis: 'user',
+          reason: 'Selected sandbox provider',
+          blocking: false,
+        },
+      ],
+    }),
+  )
+  const target = join(temp, 'product')
+  createProject({ source, target, plan, install: false })
+  const config = JSON.parse(readFileSync(join(target, 'wrangler.jsonc'), 'utf8'))
+  for (const vars of [config.vars, config.env.staging.vars]) {
+    assert.equal(vars.BILLING_PROVIDER, 'creem')
+    assert.equal(vars.BILLING_ENABLED, 'false')
+    assert.equal(vars.CREEM_API_KEY, undefined)
+  }
+  assert.match(readFileSync(join(target, '.dev.vars'), 'utf8'), /BILLING_PROVIDER=creem/)
+  assert.doesNotMatch(readFileSync(join(target, '.dev.vars'), 'utf8'), /CREEM_API_KEY/)
+  const input = JSON.parse(readFileSync(plan, 'utf8'))
+  input.decisions[0].value = 'paddle'
+  writeFileSync(plan, JSON.stringify(input))
+  assert.throws(
+    () => createProject({ source, target: join(temp, 'unsupported'), plan, install: false }),
+    /not implemented/,
+  )
+  assert.equal(existsSync(join(temp, 'unsupported')), false)
+})
+
+test('private images require auth/database, get isolated placeholders and refuse remote local storage', (t) => {
+  assert.throws(() => validateFeatures({ ...featurePreset('showcase'), files: true }), /requires/)
+  const temp = mkdtempSync(join(tmpdir(), 'aster-files-module-'))
+  t.after(() => rmSync(temp, { recursive: true, force: true }))
+  const selected = { ...featurePreset('web-app'), files: true }
+  const plan = join(temp, 'plan.json')
+  writeFileSync(plan, JSON.stringify({ modules: choices(selected) }))
+  const root = createProject({ source, target: join(temp, 'images'), plan, install: false }).target
+  assert.equal(readFeatures(root).features.files, true)
+  const path = join(root, 'wrangler.jsonc'),
+    config = JSON.parse(readFileSync(path, 'utf8'))
+  assert.equal(config.r2_buckets[0].binding, 'ASSETS_BUCKET')
+  assert.notEqual(config.r2_buckets[0].bucket_name, config.env.staging.r2_buckets[0].bucket_name)
+  assert.doesNotThrow(() => assertLocalProject(root))
+  config.r2_buckets[0].remote = true
+  writeFileSync(path, JSON.stringify(config))
+  assert.throws(() => assertLocalProject(root), /remote R2/)
+})
+
+test('content is opt-in, old configs stay disabled, and text content needs no R2 binding', (t) => {
+  const old = featurePreset('web-app')
+  delete old.content
+  assert.equal(validateFeatures(old).content, false)
+  assert.equal(featurePreset('showcase').content, false)
+  assert.throws(() => validateFeatures({ ...featurePreset('showcase'), content: true }), /requires/)
+  const temp = mkdtempSync(join(tmpdir(), 'aster-content-module-'))
+  t.after(() => rmSync(temp, { recursive: true, force: true }))
+  const plan = join(temp, 'plan.json')
+  writeFileSync(
+    plan,
+    JSON.stringify({ modules: choices({ ...featurePreset('web-app'), content: true }) }),
+  )
+  const root = createProject({ source, target: join(temp, 'content'), plan, install: false }).target
+  assert.equal(readFeatures(root).features.content, true)
+  assert.equal(JSON.parse(readFileSync(join(root, 'wrangler.jsonc'), 'utf8')).r2_buckets, undefined)
+  assert.equal(loadPlan(root).modules.content.selection, 'required')
+  assert.ok(
+    deploymentPolicy(
+      {
+        vars: {
+          ENVIRONMENT: 'production',
+          APP_ORIGIN: 'https://content.example',
+          MAIL_MODE: 'disabled',
+          GOOGLE_AUTH_ENABLED: 'false',
+          PUBLIC_INDEXABLE: 'false',
+        },
+      },
+      undefined,
+      {},
+      readFeatures(root).features,
+    ).problems.some((p) => p.includes('content-live')),
+  )
+})

@@ -1,8 +1,9 @@
 {
-  "version": "0.2.0",
-  "status": "local-preview",
+  "version": "0.2.0-beta.1",
+  "status": "release-candidate",
   "framework": "tanstack-start",
   "runtime": "cloudflare-workers",
-  "modules": ["auth", "projects", "billing-test", "mail", "admin-readonly"],
-  "upstreamRelease": null
+  "modules": ["auth", "projects", "mail", "admin", "files", "content"],
+  "upstreamRelease": null,
+  "experimentalModules": ["billing-test"]
 }

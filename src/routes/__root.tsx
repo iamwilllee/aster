@@ -9,21 +9,26 @@ import {
 import type { ReactNode } from 'react'
 import css from '../styles.css?url'
 import { Providers, useI18n } from '@/components/providers'
+import { appearance } from '@/config/appearance'
+import type { VisualTheme } from '@/config/appearance-policy.mjs'
 import { site } from '@/config/site'
 import { translate, localizePath, type Locale } from '@/i18n/core'
 import { getPublicConfig } from '@/server/functions'
 import { Button } from '@/components/ui/button'
 
 export const Route = createRootRoute({
-  validateSearch: (search: Record<string, unknown>): { _locale?: Locale } => ({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { _locale?: Locale; _style?: VisualTheme } => ({
     _locale: search._locale === 'zh' ? 'zh' : 'en',
+    ...(search._style === 'sage' || search._style === 'catalog' ? { _style: search._style } : {}),
   }),
-  search: { middlewares: [retainSearchParams(['_locale'])] },
+  search: { middlewares: [retainSearchParams(['_locale', '_style'])] },
   loader: () => getPublicConfig(),
   head: ({ match, matches, loaderData }) => {
     const locale = match.search._locale ?? 'en'
     const path = matches.at(-1)?.pathname ?? '/'
-    const publicPage = ['/', '/pricing'].includes(path)
+    const publicPage = ['/', '/pricing', '/content'].includes(path) || path.startsWith('/content/')
     const origin = loaderData?.origin ?? ''
     return {
       meta: [
@@ -82,9 +87,21 @@ function Failure({ reset }: { reset: () => void }) {
     </main>
   )
 }
-function Document({ children, locale }: { children: ReactNode; locale: Locale }) {
+function Document({
+  children,
+  locale,
+  theme,
+}: {
+  children: ReactNode
+  locale: Locale
+  theme: VisualTheme
+}) {
   return (
-    <html lang={locale === 'zh' ? 'zh-CN' : 'en'} suppressHydrationWarning>
+    <html
+      data-visual-theme={theme}
+      lang={locale === 'zh' ? 'zh-CN' : 'en'}
+      suppressHydrationWarning
+    >
       <head>
         <HeadContent />
         <script
@@ -101,9 +118,12 @@ function Document({ children, locale }: { children: ReactNode; locale: Locale })
   )
 }
 function Root() {
-  const locale = Route.useSearch()._locale ?? 'en'
+  const search = Route.useSearch()
+  const locale = search._locale ?? 'en'
+  const config = Route.useLoaderData()
+  const theme = config.local ? (search._style ?? appearance.theme) : appearance.theme
   return (
-    <Document locale={locale}>
+    <Document locale={locale} theme={theme}>
       <Providers locale={locale}>
         <Outlet />
       </Providers>

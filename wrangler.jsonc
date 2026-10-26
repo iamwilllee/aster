@@ -13,6 +13,7 @@
     "APP_ORIGIN": "http://127.0.0.1:3100",
     "MAIL_MODE": "disabled",
     "BILLING_ENABLED": "false",
+    "BILLING_PROVIDER": "stripe",
     "GOOGLE_AUTH_ENABLED": "false",
     "PUBLIC_INDEXABLE": "false",
     "MAIL_FROM": "Aster <no-reply@example.invalid>",
@@ -33,6 +34,7 @@
         "APP_ORIGIN": "https://starter-staging.example.invalid",
         "MAIL_MODE": "disabled",
         "BILLING_ENABLED": "false",
+        "BILLING_PROVIDER": "stripe",
         "GOOGLE_AUTH_ENABLED": "false",
         "PUBLIC_INDEXABLE": "false",
         "MAIL_FROM": "Aster <no-reply@example.invalid>",
@@ -45,6 +47,12 @@
           "migrations_dir": "migrations",
         },
       ],
+      "r2_buckets": [
+        { "binding": "ASSETS_BUCKET", "bucket_name": "replace-with-staging-assets-bucket" },
+      ],
     },
   },
+  "r2_buckets": [
+    { "binding": "ASSETS_BUCKET", "bucket_name": "replace-with-production-assets-bucket" },
+  ],
 }

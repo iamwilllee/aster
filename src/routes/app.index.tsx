@@ -39,7 +39,9 @@ function Overview() {
       title: t('current_plan'),
       value: viewer.billing.plan === 'pro' ? 'Pro' : 'Free',
       caption: viewer.billing.provider.ready
-        ? t('stripe_test_mode')
+        ? t('provider_test_mode', {
+            provider: viewer.billing.provider.name === 'creem' ? 'Creem' : 'Stripe',
+          })
         : t('payments_unconfigured_no_charges'),
     },
   ].filter(

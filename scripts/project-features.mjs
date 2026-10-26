@@ -15,6 +15,7 @@ export const legacyFeatures = {
   ai: false,
   files: false,
   usage: false,
+  content: false,
 }
 export function readFeatures(root) {
   const path = join(root, featureFile)
@@ -37,9 +38,12 @@ export function caseFeature(item) {
   return (
     item.module ??
     {
+      'files-live': 'files',
+      'content-live': 'content',
       'auth-email-live': 'emailPassword',
       'auth-google-live': 'google',
       'billing-test-live': 'billing',
+      'billing-creem-test-live': 'billing',
     }[item.id]
   )
 }

@@ -24,6 +24,9 @@ export default defineConfig({
   build: process.env.STARTER_SMOKE_OUT ? { outDir: process.env.STARTER_SMOKE_OUT } : {},
   resolve: {
     alias: {
+      ...(process.env.STARTER_SMOKE_APPEARANCE
+        ? { '@/config/appearance.json': process.env.STARTER_SMOKE_APPEARANCE }
+        : {}),
       ...(process.env.STARTER_SMOKE_FEATURES
         ? { '@/config/features.json': process.env.STARTER_SMOKE_FEATURES }
         : {}),

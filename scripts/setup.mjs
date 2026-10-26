@@ -7,7 +7,7 @@ import { spawnSync } from 'node:child_process'
 if (!existsSync('.dev.vars')) {
   writeFileSync(
     '.dev.vars',
-    `ENVIRONMENT=local\nAPP_ORIGIN=http://127.0.0.1:3100\nMAIL_MODE=${features.mail && features.database ? 'local' : 'disabled'}\nBILLING_ENABLED=false\n${features.auth ? `BETTER_AUTH_SECRET=${randomBytes(32).toString('hex')}\n` : ''}`,
+    `ENVIRONMENT=local\nAPP_ORIGIN=http://127.0.0.1:3100\nMAIL_MODE=${features.mail && features.database ? 'local' : 'disabled'}\nBILLING_ENABLED=false\nBILLING_PROVIDER=stripe\n${features.auth ? `BETTER_AUTH_SECRET=${randomBytes(32).toString('hex')}\n` : ''}`,
     { mode: 0o600 },
   )
   console.log('Created .dev.vars with a fresh local secret (not printed).')

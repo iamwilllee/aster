@@ -294,3 +294,40 @@ test('Skill rebrand migrates only this checkout legacy link and preserves unrela
   installSkill(skillSource, skills)
   assert.equal(realpathSync(join(skills, 'starter-new')), join(root, 'other'))
 })
+
+test('appearance is selected per product and unknown themes fail before creating files', (t) => {
+  const root = scratch(t)
+  const plan = join(root, 'theme.json')
+  const decisions = [
+    {
+      id: 'visual-theme',
+      question: 'Visual direction',
+      status: 'resolved',
+      value: 'catalog',
+      basis: 'user',
+      reason: 'Product catalog',
+      blocking: false,
+    },
+  ]
+  writeFileSync(plan, JSON.stringify({ decisions }))
+  const selected = createProject({
+    source,
+    target: join(root, 'catalog'),
+    plan,
+    install: false,
+  }).target
+  assert.deepEqual(JSON.parse(readFileSync(join(selected, 'src/config/appearance.json'), 'utf8')), {
+    theme: 'catalog',
+  })
+  const regular = createProject({ source, target: join(root, 'default'), install: false }).target
+  assert.deepEqual(JSON.parse(readFileSync(join(regular, 'src/config/appearance.json'), 'utf8')), {
+    theme: 'sage',
+  })
+  decisions[0].value = 'unknown'
+  writeFileSync(plan, JSON.stringify({ decisions }))
+  assert.throws(
+    () => createProject({ source, target: join(root, 'invalid-theme'), plan, install: false }),
+    /Invalid appearance/,
+  )
+  assert.equal(existsSync(join(root, 'invalid-theme')), false)
+})

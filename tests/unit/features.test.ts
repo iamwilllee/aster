@@ -34,10 +34,21 @@ it('public health and closed direct APIs do not need a DB binding or auth secret
   expect(await health.json()).toMatchObject({ storage: 'none', ok: true })
   for (const path of [
     '/api/projects',
+    '/api/content',
+    '/api/admin/content',
+    '/api/files',
+    '/api/files/00000000-0000-0000-0000-000000000000/content',
     '/api/workspace',
     '/api/profile',
     '/api/billing',
     '/api/dev/mail',
+    '/api/account/security',
+    '/api/account/lifecycle',
+    '/api/account/billing-review',
+    '/api/account/close-checkouts',
+    '/api/account/export',
+    '/api/account/delete',
+    '/api/account/password',
   ]) {
     expect((await handleApi(new Request(origin + path))).status).toBe(404)
     expect(

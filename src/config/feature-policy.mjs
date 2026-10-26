@@ -9,6 +9,7 @@ export const featureKeys = [
   'ai',
   'files',
   'usage',
+  'content',
 ]
 export const featureDependencies = {
   database: [],
@@ -19,11 +20,15 @@ export const featureDependencies = {
   projects: ['auth', 'database'],
   billing: ['auth', 'database'],
   ai: [],
-  files: [],
+  files: ['auth', 'database'],
   usage: [],
+  content: ['auth', 'database'],
 }
-export const unsupportedFeatures = ['ai', 'files', 'usage']
+export const unsupportedFeatures = ['ai', 'usage']
 export function validateFeatures(value) {
+  // Older explicit configs predate the optional editorial module.
+  if (value && typeof value === 'object' && !Array.isArray(value) && !('content' in value))
+    value = { ...value, content: false }
   if (
     !value ||
     typeof value !== 'object' ||

@@ -75,6 +75,16 @@ export function moduleChange(root, choices) {
     throw new Error(
       'Existing billing is required; retain the module for portals/webhooks. Disable only new checkout with BILLING_ENABLED=false, or explicitly retire billing after inspecting active subscriptions',
     )
+  if (
+    before.features.content &&
+    !features.content &&
+    plan.modules.content?.selection === 'required'
+  )
+    throw new Error(
+      'Existing content requires publication, reference and retention review before retirement',
+    )
+  if (before.features.files && !features.files && plan.modules.files?.selection === 'required')
+    throw new Error('Existing files require reference and storage cleanup review before retirement')
   if (changed.includes('database') && features.database)
     nextPlan.bootstrap.database = { status: 'pending' }
   for (const item of nextPlan.acceptance) {
@@ -109,6 +119,26 @@ function applyLocalModuleChange(root, change) {
       [['env', 'staging'], config.env?.staging],
     ]) {
       if (!configPart) continue
+      const objects = configPart.r2_buckets ?? []
+      if (change.features.files && !objects.some((item) => item.binding === 'ASSETS_BUCKET'))
+        configText = applyEdits(
+          configText,
+          modify(
+            configText,
+            [...path, 'r2_buckets'],
+            [
+              ...objects,
+              {
+                binding: 'ASSETS_BUCKET',
+                bucket_name: path.length
+                  ? 'replace-with-staging-assets-bucket'
+                  : 'replace-with-production-assets-bucket',
+              },
+            ],
+            {},
+          ),
+        )
+      // Retain existing object bindings on shutdown: old assets may still need account cleanup.
       const bindings = configPart.d1_databases ?? []
       if (!change.features.database) {
         const retained = bindings.filter(

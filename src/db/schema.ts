@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm'
-import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core'
 
 export const user = sqliteTable('user', {
   id: text('id').primaryKey(),
@@ -76,6 +76,23 @@ export const accountRelations = relations(account, ({ one }) => ({
   user: one(user, { fields: [account.userId], references: [user.id] }),
 }))
 
+export const fileAssets = sqliteTable(
+  'file_asset',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'restrict' }),
+    objectKey: text('object_key').notNull().unique(),
+    name: text('name').notNull(),
+    contentType: text('content_type').notNull(),
+    size: integer('size').notNull(),
+    state: text('state', { enum: ['pending', 'ready', 'deleting'] }).notNull(),
+    createdAt: integer('created_at').notNull(),
+  },
+  (table) => [index('file_asset_owner_idx').on(table.userId, table.state)],
+)
+
 export const projects = sqliteTable(
   'project',
   {
@@ -84,6 +101,7 @@ export const projects = sqliteTable(
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
+    coverAssetId: text('cover_asset_id').references(() => fileAssets.id, { onDelete: 'set null' }),
     description: text('description').notNull().default(''),
     status: text('status', { enum: ['idea', 'building', 'live'] })
       .notNull()
@@ -109,6 +127,7 @@ export const subscriptions = sqliteTable(
   'subscription',
   {
     id: text('id').primaryKey(),
+    provider: text('provider').notNull().default('stripe'),
     userId: text('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
@@ -132,12 +151,51 @@ export const billingEvents = sqliteTable('billing_event', {
 })
 export const checkouts = sqliteTable('checkout', {
   id: text('id').primaryKey(),
+  provider: text('provider').notNull().default('stripe'),
   userId: text('user_id')
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),
   status: text('status').notNull().default('open'),
   createdAt: integer('created_at').notNull(),
 })
+
+// No user FK: closed accounts retain only pseudonymous provider reconciliation records.
+export const billingAccountState = sqliteTable('billing_account_state', {
+  userId: text('user_id').primaryKey(),
+  lockId: text('lock_id'),
+  lockUntil: integer('lock_until').notNull().default(0),
+  closedAt: integer('closed_at'),
+})
+export const archivedSubscriptions = sqliteTable(
+  'billing_subscription_archive',
+  {
+    id: text('id').primaryKey(),
+    provider: text('provider').notNull().default('stripe'),
+    ownerRef: text('owner_ref').notNull(),
+    customerId: text('customer_id').notNull(),
+    status: text('status').notNull(),
+    priceId: text('price_id').notNull(),
+    currentPeriodEnd: integer('current_period_end').notNull(),
+    cancelAtPeriodEnd: integer('cancel_at_period_end').notNull(),
+    revision: integer('revision').notNull(),
+    syncId: text('sync_id').notNull(),
+    updatedAt: integer('updated_at').notNull(),
+    archivedAt: integer('archived_at').notNull(),
+  },
+  (table) => [index('billing_archive_owner_idx').on(table.ownerRef)],
+)
+export const archivedCheckouts = sqliteTable(
+  'billing_checkout_archive',
+  {
+    id: text('id').primaryKey(),
+    provider: text('provider').notNull().default('stripe'),
+    ownerRef: text('owner_ref').notNull(),
+    status: text('status').notNull(),
+    createdAt: integer('created_at').notNull(),
+    archivedAt: integer('archived_at').notNull(),
+  },
+  (table) => [index('checkout_archive_owner_idx').on(table.ownerRef)],
+)
 
 // Per-recipient resend cooldown; hashed keys avoid storing another copy of email addresses.
 export const verificationResends = sqliteTable('verification_resend', {
@@ -154,4 +212,65 @@ export const apiRateLimits = sqliteTable(
     resetAt: integer('reset_at').notNull(),
   },
   (table) => [index('api_rate_limit_reset_idx').on(table.resetAt)],
+)
+
+// Editorial records belong to the site. Removing a contributor does not delete public site content.
+export const contentAssets = sqliteTable('content_asset', {
+  id: text('id').primaryKey(),
+  objectKey: text('object_key').notNull().unique(),
+  name: text('name').notNull(),
+  contentType: text('content_type').notNull(),
+  size: integer('size').notNull(),
+  state: text('state', { enum: ['pending', 'ready', 'deleting'] }).notNull(),
+  uploadedBy: text('uploaded_by').references(() => user.id, { onDelete: 'set null' }),
+  createdAt: integer('created_at').notNull(),
+})
+export const contentEntries = sqliteTable(
+  'content_entry',
+  {
+    id: text('id').primaryKey(),
+    draft: text('draft').notNull(),
+    coverAssetId: text('cover_asset_id').references(() => contentAssets.id, {
+      onDelete: 'restrict',
+    }),
+    live: text('live'),
+    liveCoverAssetId: text('live_cover_asset_id').references(() => contentAssets.id, {
+      onDelete: 'restrict',
+    }),
+    liveSlug: text('live_slug'),
+    liveLocale: text('live_locale'),
+    publishedAt: integer('published_at'),
+    revision: integer('revision').notNull().default(1),
+    createdBy: text('created_by').references(() => user.id, { onDelete: 'set null' }),
+    updatedBy: text('updated_by').references(() => user.id, { onDelete: 'set null' }),
+    createdAt: integer('created_at').notNull(),
+    updatedAt: integer('updated_at').notNull(),
+  },
+  (table) => [uniqueIndex('content_live_path_unique').on(table.liveLocale, table.liveSlug)],
+)
+
+export const accountAccess = sqliteTable('account_access', {
+  userId: text('user_id')
+    .primaryKey()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  disabledAt: integer('disabled_at'),
+  revision: integer('revision').notNull().default(0),
+  operationId: text('operation_id'),
+  updatedAt: integer('updated_at').notNull(),
+})
+export const adminAudit = sqliteTable(
+  'admin_audit',
+  {
+    id: text('id').primaryKey(),
+    actorId: text('actor_id').references(() => user.id, { onDelete: 'set null' }),
+    targetId: text('target_id').references(() => user.id, { onDelete: 'set null' }),
+    action: text('action').notNull(),
+    reason: text('reason').notNull(),
+    source: text('source').notNull(),
+    createdAt: integer('created_at').notNull(),
+  },
+  (table) => [
+    index('admin_audit_created_idx').on(table.createdAt),
+    index('admin_audit_target_idx').on(table.targetId, table.createdAt),
+  ],
 )
