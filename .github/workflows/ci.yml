@@ -7,7 +7,8 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Browser dependencies can take several minutes; retain time for every Worker profile.
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v7.0.1
         with:

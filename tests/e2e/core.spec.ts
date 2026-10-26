@@ -219,10 +219,33 @@ test('browser workflow: sign in, create, edit, reload, filter, settings, delete,
   await expect(page.getByLabel('项目名称', { exact: true })).toHaveValue('已编辑的想法')
   await page.getByRole('button', { name: '取消', exact: true }).click()
   await page.getByRole('tab', { name: '卡片', exact: true }).click()
-  await page.getByRole('link', { name: '账户设置', exact: true }).click()
-  await page.getByLabel('你的称呼').fill('已经保存的称呼')
-  await page.getByRole('button', { name: '保存修改' }).click()
-  await expect(page.getByRole('status')).toHaveText('个人资料已保存')
+  // Saving the profile must remain observable while independent security queries load.
+  let releaseSecurity = () => {}
+  const securityReady = new Promise<void>((resolve) => {
+    releaseSecurity = resolve
+  })
+  await page.route('**/api/account/security', async (route) => {
+    await securityReady
+    await route.continue()
+  })
+  const securityLoading = page.getByRole('status', {
+    name: '正在加载账号安全信息…',
+    exact: true,
+  })
+  try {
+    await page.getByRole('link', { name: '账户设置', exact: true }).click()
+    await expect(securityLoading).toHaveCount(2)
+    await page.getByLabel('你的称呼').fill('已经保存的称呼')
+    await page.getByRole('button', { name: '保存修改' }).click()
+    await expect(
+      page.getByRole('region', { name: '个人资料', exact: true }).getByRole('status'),
+    ).toHaveText('个人资料已保存')
+    await expect(securityLoading).toHaveCount(2)
+  } finally {
+    releaseSecurity()
+  }
+  await expect(securityLoading).toHaveCount(0)
+  await page.unroute('**/api/account/security')
   await page.reload()
   await expect(page.getByLabel('你的称呼')).toHaveValue('已经保存的称呼')
   await page.getByRole('link', { name: '我的项目', exact: true }).click()

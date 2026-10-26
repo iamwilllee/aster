@@ -2,6 +2,9 @@
 
 ## 0.2.0-beta.1 — 2026-10-26（公开预览）
 
+- Scope the profile-save browser assertion to its settings region and reproduce concurrent security loading, keeping CI independent of unrelated live status messages.
+- Reserve CI time for slow browser dependency installation and the full Worker-profile matrix; keep every release check enabled.
+
 - Add finite, staggered homepage entrances and one-time viewport reveals with Sage/Catalog timing, mobile/reduced-motion adjustments and readable no-script/unsupported-observer fallbacks. Include replayable UI examples and Agent guidance; retain control geometry and natural text rendering after motion.
 
 - Add public-page copy review to the Skill and product brief: remove development banners and placeholders from actual products while preserving truthful availability and isolated demo labels.
