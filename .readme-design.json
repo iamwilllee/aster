@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "project": "aster",
+  "theme": "Sage 模块构筑",
+  "ratio": "16:9",
+  "palette": [
+    "#236b4b",
+    "#e5ecdf",
+    "#f6f5ee"
+  ],
+  "assets": [
+    {
+      "file": "docs/readme/assets/cover.png",
+      "kind": "AI concept",
+      "tool": "built-in image_gen",
+      "prompt": "Use case: stylized-concept. Asset type: AI conceptual hero cover for the README of Aster, an open-source product foundation for AI-assisted developers. Create a full-bleed 16:9 horizontal artwork, approximately 1600x900. A beautifully precise miniature architectural composition of modular building blocks and connected translucent green planes, representing a reliable starting foundation from which many individual web products can be built. Small distinct groups joined by purposeful paths, a steady broad foundation, one elegant upward branching structure, tactile pale ceramic, forest green and sage glass, thin technical drafting lines integrated into the ivory surface. Calm analytical premium editorial style, clear geometry, soft daylight with crisp soft shadows, restrained real materials, generous purposeful composition yet details extending to every edge. This is conceptual artwork, not a product screenshot. No text, letters, code, labels, diagrams with writing, generated application UI, new logo, browser windows, borders, blank strips, watermarks, or fake feature claims. Keep the focal architecture clear at small card size. Preserve Aster's existing sage/forest-green identity; do not replace it with neon or purple."
+    },
+    {
+      "file": "docs/readme/assets/product-path.svg",
+      "kind": "source-based vector diagram"
+    }
+  ],
+  "originalGuide": "docs/project-guide.md",
+  "status": "local draft"
+}
