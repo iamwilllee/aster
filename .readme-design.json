@@ -3,11 +3,7 @@
   "project": "aster",
   "theme": "Sage 模块构筑",
   "ratio": "16:9",
-  "palette": [
-    "#236b4b",
-    "#e5ecdf",
-    "#f6f5ee"
-  ],
+  "palette": ["#236b4b", "#e5ecdf", "#f6f5ee"],
   "assets": [
     {
       "file": "docs/readme/assets/cover.png",

@@ -4,12 +4,12 @@
 
 ## 事实与边界
 
-| 内容 | 读取来源 | 本稿取舍 |
-| --- | --- | --- |
-| 产品定位与版本 | README.md、package.json、docs/releases/0.2.0-beta.1.md | 开源 Web 产品底座，当前公开版本为无支付 beta。 |
-| 按需模块和默认值 | src/config/features.json、docs/MODULES.md | 源码预览与生成 profile 区分；支付关闭，AI/usage 未接入。 |
+| 内容                  | 读取来源                                                   | 本稿取舍                                                            |
+| --------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------- |
+| 产品定位与版本        | README.md、package.json、docs/releases/0.2.0-beta.1.md     | 开源 Web 产品底座，当前公开版本为无支付 beta。                      |
+| 按需模块和默认值      | src/config/features.json、docs/MODULES.md                  | 源码预览与生成 profile 区分；支付关闭，AI/usage 未接入。            |
 | 本地命令与 Agent 使用 | package.json、skills/aster-new/、scripts/install-skill.mjs | 本地命令、初始化与 Skill 安装存在；不重新执行初始化或接管其他项目。 |
-| 主题与图片 | docs/THEMES.md、docs/FILES.md | Sage/Catalog 与可选图片功能以源码说明为准。 |
+| 主题与图片            | docs/THEMES.md、docs/FILES.md                              | Sage/Catalog 与可选图片功能以源码说明为准。                         |
 
 源文档：[原 README](https://github.com/iamwilllee/aster/blob/d5f0ee8d16ae39e736f4d7f1e0c0fb37ac03ca3a/README.md)、[工程清单](https://github.com/iamwilllee/aster/blob/d5f0ee8d16ae39e736f4d7f1e0c0fb37ac03ca3a/package.json)、[版本说明](https://github.com/iamwilllee/aster/blob/d5f0ee8d16ae39e736f4d7f1e0c0fb37ac03ca3a/docs/releases/0.2.0-beta.1.md)。
 
