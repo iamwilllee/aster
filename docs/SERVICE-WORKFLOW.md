@@ -1,5 +1,7 @@
 # 外部配置与真实验收的断点续做
 
+[English](en/SERVICE-WORKFLOW.md)
+
 用户要求接通邮件或 Google 时，Agent 在已有授权内执行配置和真实验收。`starter.project.json.integrations` 保存目标、阶段、证据指纹和具体人工接力；`project:service` 只管理本地进度，不登录供应商、改 DNS、部署或发送邮件。实际操作仍由 Agent 使用可用连接完成，不能在写完记录后提前交付。
 
 ## 继续已有任务

@@ -1,0 +1,12 @@
+{
+  "name": "aster-website",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "node --test render.test.mjs && node check.mjs"
+  },
+  "devDependencies": {
+    "marked": "18.1.2"
+  }
+}

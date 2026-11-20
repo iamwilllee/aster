@@ -1,5 +1,7 @@
 # 邮件服务选择与接入
 
+[English](en/MAIL.md)
+
 Aster 支持 `local`、`cloudflare`、`brevo`、`resend`，未选远端服务时保持 `disabled`。邮箱验证和密码找回共用中英文 HTML / 纯文本模板，不改变 Better Auth、D1 或会话模型。
 
 ## 按账户和环境选择

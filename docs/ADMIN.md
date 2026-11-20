@@ -1,5 +1,7 @@
 # 运营后台与账号访问管理
 
+[English](en/ADMIN.md)
+
 管理员入口为 `/app/admin`，中文为 `/zh/app/admin`。依赖现有 auth/database；不单独启用收费服务、不要求 R2，也不会自动授予第一个注册者权限。`admin_user` 是服务端角色来源；已验证且未停用的管理员才能访问。
 
 ## 本地起步与 Agent 用法

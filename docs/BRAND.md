@@ -1,5 +1,7 @@
 # Aster 品牌
 
+[English](en/BRAND.md)
+
 **给 Agent 一个可靠的起点。**
 
 Aster 是面向 AI Agent 的开源产品底座，基于 TanStack Start 与 Cloudflare。英文介绍：An open-source product foundation for AI agents, built on TanStack Start and Cloudflare.
@@ -23,4 +25,4 @@ Aster 是面向 AI Agent 的开源产品底座，基于 TanStack Start 与 Cloud
 
 `starter:new` 是兼容命令。`starter-version.json`、`starter.project.json`、`starter-db`、内部协议头和主题存储键保留原标识，避免影响已有产品的数据与恢复流程；它们不是对外品牌名。已有 README 时，新的初始化说明写入 `ASTER.md`。
 
-新产品通过 `src/config/site.ts` 修改名称与描述，并按自身品牌替换 `public/favicon.svg`、`public/brand/` 中的素材。保留底座版本与开源许可。
+新产品通过 `src/config/site.ts` 修改名称与描述，通过 `src/config/brand.json` 配置导航图标、可选深色图标、favicon 与按需主屏图标。资源放在 `public/`，默认 Aster 素材只是占位；按 [产品图标流程](BRAND-WORKFLOW.md) 根据上下文完成设计、接入和实际验收。保留底座版本与开源许可。

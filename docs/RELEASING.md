@@ -1,5 +1,7 @@
 # 发布维护流程
 
+[English](en/RELEASING.md)
+
 v0.2.0-beta.1 以无支付产品为首要支持范围，版本说明位于 releases/0.2.0-beta.1.md。以下流程也用于后续版本；本地准备、提交与公开发布分别记录，公开状态以 GitHub Release 为准。
 
 ## 候选验证

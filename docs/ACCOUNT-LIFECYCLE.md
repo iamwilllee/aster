@@ -1,5 +1,7 @@
 # 数据导出与账号注销
 
+[English](en/ACCOUNT-LIFECYCLE.md)
+
 属于既有 auth 能力，入口在 `/app/settings`（中文 `/zh/app/settings`）末尾。无需新增付费服务或依赖；采用本版注销的所有 auth 产品（包括未选支付的产品）都需要新增的 `0003_nervous_mauler.sql` 与 `0004_married_boom_boom.sql` 迁移。auth 关闭时页面和全部私有接口一起关闭。
 
 ## 用户流程

@@ -1,5 +1,7 @@
 # 已有产品的底座升级
 
+[English](en/UPGRADING.md)
+
 在产品项目中直接调用：
 
 ```text

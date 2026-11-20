@@ -1,8 +1,10 @@
 发布前先读 [能力选择](MODULES.md)。下文的认证、DB、邮件与支付要求仅适用于选中模块；showcase 不要求认证密钥、D1 或注册验收。Google-only 不要求事务邮件；所选方法仍须真实验收。旧产品未采用能力配置时保留原检查行为，不能只改计划绕过运行时能力。
 
+[English](en/DEPLOYMENT.md)
+
 # Cloudflare 部署手册
 
-Aster v0.2.0-beta.1 发布候选优先支持不带支付的展示站与普通 Web 应用，提供本地开发与隔离生产构建测试。未选择 billing 时无需支付配置或支付供应商验收；本文的计费步骤仅适用于明确选择的实验模块。部署前检查操作者的 Cloudflare 账户、D1 与发信权限，并完成下文的远端验收。不要把密钥发送到聊天或写入仓库。
+Aster v0.2.0-beta.1 公开预览版优先支持不带支付的展示站与普通 Web 应用，提供本地开发与隔离生产构建测试。未选择 billing 时无需支付配置或支付供应商验收；本文的计费步骤仅适用于明确选择的实验模块。部署前检查操作者的 Cloudflare 账户、D1 与发信权限，并完成下文的远端验收。不要把密钥发送到聊天或写入仓库。
 
 ## 0. 默认从免费云资源开始
 
@@ -48,7 +50,7 @@ pnpm exec wrangler d1 create starter-staging-db --env staging
 
 保留 `ENVIRONMENT=staging`、`PUBLIC_INDEXABLE=false`、`BILLING_ENABLED=false`。未接邮件时保持 `MAIL_MODE=disabled`，注册/验证重发/重置接口会返回服务未配置，页面也会显示提示。`MAIL_MODE=local` 只允许开发，不能部署。
 
-底座默认不声明 R2 或 `send_email` 绑定。使用 CF 发信时按官方说明添加 EMAIL binding；文件业务另行开发后再配置 R2，先核验对应计费与资源。已有产品若保留了未使用的绑定，先检查用途再移除。改动 binding 后运行 `pnpm cf:typegen`。邮件模块检查可选 EMAIL binding，不凭模式标记宣称已发信。
+新产品默认不声明未选的 R2 或 `send_email` 绑定；源码预览可能保留可选图片的占位绑定。使用 CF 发信时按官方说明添加 EMAIL binding；选择私有图片业务后再按需配置 R2，先核验对应计费与资源。已有产品若保留了未使用的绑定，先检查用途再移除。改动 binding 后运行 `pnpm cf:typegen`。邮件模块检查可选 EMAIL binding，不凭模式标记宣称已发信。
 
 兼容日期固定 `2026-10-19`，升级 Wrangler/Vite 插件和运行时后统一调整并回归。本版不自动绑定 DNS 或自定义域名。
 

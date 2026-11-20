@@ -1,5 +1,7 @@
 # 账号安全设置
 
+[English](en/ACCOUNT-SECURITY.md)
+
 选中 auth 的产品可在 `/app/settings`（中文 `/zh/app/settings`）使用账号安全设置，无需新供应商、绑定或数据库迁移。展示站关闭 auth 时，这些页面和私有 API 一起关闭。沿用 Better Auth、已有 session/account 表、D1 和共享 UI。
 
 ## 用户流程

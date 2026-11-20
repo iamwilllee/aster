@@ -204,7 +204,12 @@ function protectedFile(path) {
     path.startsWith('public/') ||
     path.startsWith('migrations/') ||
     path.startsWith('src/db/') ||
-    ['src/config/site.ts', 'src/config/features.json', 'src/styles.css'].includes(path)
+    [
+      'src/config/site.ts',
+      'src/config/brand.json',
+      'src/config/features.json',
+      'src/styles.css',
+    ].includes(path)
   )
 }
 

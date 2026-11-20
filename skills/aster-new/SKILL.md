@@ -1,101 +1,104 @@
 ---
 name: aster-new
-description: 在当前项目使用 Aster 开发产品，识别新目录、已有应用或 Aster，原地初始化、增量开发或按模块升级底座，并记录验收。用户说“用 Aster 做站点”或“更新 Aster 底座”时使用；已有文件与项目规则优先保留。
+description: Build products with Aster in the current project, inspect new folders or existing applications, initialize safely, develop incrementally, or adopt selected starter upgrades with acceptance evidence. Use when a user asks to build a site with Aster or update its foundation. Preserve existing files and project rules.
 ---
 
-# Aster 新建产品
+# Build a product with Aster
 
-将用户的产品目标变成独立项目并推进到本地可验收。模板和执行脚本来自本 Skill 所属的 Aster 源目录，使用软链接安装后仍依赖该目录，不下载商业模板或假定有已发布的 npm CLI。
+Turn the user's goal into a locally runnable, accepted product. Locate templates/scripts relative to this Skill's real Aster source directory; a symlink installation still depends on that directory. Do not download a commercial template or assume an npm CLI has been published. Communicate in the user's language; English instructions do not require English conversation or business copy. English technical guides are under `docs/en/`; legacy Chinese paths remain supported.
 
-## 先识别当前项目
+## Inspect the current project first
 
-- 用户通常已新建项目并打开根目录。未指定其他目录时，默认使用当前工作目录；不要例行追问路径，也不要要求用户重建文件夹、切换任务或再建一个子目录。
-- 用本 Skill 的真实目录中的 `scripts/create-project.mjs <目标绝对路径> --inspect` 先只读识别。它会报告 missing、empty、metadata、starter、starter-incomplete、existing 或 source。Node 从脚本位置定位底座源，不以目标目录充当模板。
-- 用户明确指定新路径时使用该路径，缺失的父目录可以自动创建。当前目录若正是底座源或其内部，保留底座；从用户的名称/目标推导独立站点目录，确实无法确定位置时再问。不能把底座本身改成站点。
-- 先读当前已有 AGENTS.md、README 和相关项目规则；把用户已写下的需求纳入上下文。
+- Default to the current working directory. Users often already created/opened a project root; do not routinely ask for a path, require a new chat/folder or add another nested application directory.
+- Run `scripts/create-project.mjs <absolute-target> --inspect` from this Skill's real directory. It reports missing, empty, metadata, starter, starter-incomplete, existing or source. The script locates the template from its own path, never from the target.
+- Honor an explicit target and create missing parents when safe. If working inside the Aster source, preserve it and infer an independent product directory from context; ask only when location cannot be determined. Never turn the foundation itself into a customer site.
+- Read existing AGENTS.md, README and applicable rules; incorporate requirements already present.
 
-## 新目录、空目录或仅含项目元数据
+## Record development task usage
 
-开始时读 [流程与计划格式](references/workflow.md)。整理目标、用户、核心流程、不做事项与模块选择，保留 user/context/default 依据和理由。把临时计划写到系统临时目录，避免先在空目标中放 plan.json 导致它被误判为已有应用。关键未定项只阻塞依赖它的部分，其余工作继续。
+Use [Task usage](../../docs/en/AGENT-USAGE.md) for Codex development tasks unless the user opts out. Inspect first; run the target's `project:usage` or this real source's `scripts/agent-usage.mjs --root <existing-target>` if not installed. Resume the same open objective, reconcile prior closing records, and begin a new category before implementation. For empty/missing targets, initialize first, then begin immediately; the current whole-turn window includes initialization without contaminating directory inspection. Mark real waiting/rework when useful. Close with the truthful outcome before handoff; the final reply may leave it `closing` until the next request refreshes it. Report measured/partial/unavailable honestly, with no invented zero or dollar cost. Collect only the identified current thread's allowlisted metadata into ignored `.local/agent-usage/`; never retain/upload conversation bodies. Unsupported formats/access remain unavailable without blocking product work. This is separate from the product AI usage ledger.
+
+## Missing, empty or metadata-only targets
+
+Read [Workflow and plan format](references/workflow.md). Capture goal, audience, core flow, exclusions and capabilities with user/context/default provenance and reasons. Write temporary input plans outside the empty target so plan.json does not make it look like an existing app. Unresolved critical choices block only dependent work.
 
 ```text
-node <本 Skill 的真实目录>/scripts/create-project.mjs <目标绝对路径> --name <产品名> --brief <用户需求> --plan <临时计划JSON绝对路径>
+node <real-skill-directory>/scripts/create-project.mjs <absolute-target> --name <product-name> --brief <requirements> --plan <absolute-temporary-plan.json>
 ```
 
-也可省略目标参数并让命令工作目录为用户当前项目根目录；执行参数用数组传入，避免 shell 插值。首次使用需底座源已安装锁定依赖。
+The target argument may be omitted when running from the user's project root. Pass executable arguments as arrays, avoiding shell interpolation. The source must first have its locked dependencies installed.
 
-- missing/empty：在该目录初始化，不要求用户先建或先删目录。
-- metadata：只有 Git、README.md、AGENTS.md、.gitignore、.gitkeep、.DS_Store 或 Agent/编辑器配置时，保留 Git 与原 README；新说明写入 ASTER.md，AGENTS.md 和 .gitignore 只追加底座约定与排除规则，不替换原规则。元数据软链接或异常类型会转已有项目检查，避免越界写入。
-- 初始化生成品牌、PROJECT.md、starter.project.json、独立本地密钥，安装依赖与迁移本地 D1。`--no-install` 只初始化文件。选择与需求未明确时保留待定；不继承输入计划中的任务/验收完成声明。
+- missing/empty: initialize in place without asking users to create/delete the directory first.
+- metadata: preserve Git, README, personal AGENTS/.gitignore and editor/Agent settings. Write new notes to ASTER.md if README exists; append foundation rules/ignores. Symlinked/unusual metadata requires existing-app inspection rather than unsafe writes.
+- Initialization writes names/brand configuration (default icons still need product design), PROJECT.md, starter.project.json and independent local secrets, installs dependencies and migrates local D1. `--no-install` writes files only. Do not inherit task/provider acceptance from the input plan or call undecided requirements complete.
 
-## 已有内容与恢复
+## Existing content and recovery
 
-- starter：读取原 PROJECT.md 和 starter.project.json，用 project:status、project:doctor 检查，再按用户新需求增量继续。原计划、密钥、Git 和业务不重新生成；新需求合并进现有记录，重置受影响用例。
-- starter-incomplete：先检查缺少什么，保留代码与配置，逐项补齐可确定的缺项；不能再次全量复制。
-- existing：初始化器只返回只读检查结果。Agent 继续读取现有 package.json、入口、规则和数据结构，按现有架构增量开发；不因为调用本 Skill 就覆盖源码、改框架或强制搬到另一个目录。使用该项目实际存在的脚本和交接方式，不盲目运行尚未接入的 project:* 命令。需要接入底座能力或迁移时先形成具体差异，并按用户已授权范围执行。
-- `project:doctor` 不显示密钥、不停止服务或创建资源，无依赖时也能运行；配置存在不等于供应商真实可用。
-- 初始化中断后在目标目录执行 `pnpm project:resume`。它能在依赖未安装时引导恢复，保留业务与密钥；依赖未变时跳过安装，仍幂等执行本地迁移。恢复命令不自动生成业务。
+- starter: read PROJECT.md/plan and run project:status/project:doctor, then extend incrementally. Preserve plans, secrets, Git and business code; merge new requirements and reset affected acceptance.
+- starter-incomplete: inspect missing parts and repair known gaps individually; never copy the entire template again.
+- existing: the initializer returns read-only inspection. Read actual package.json, entries, rules and data structures, then extend the existing architecture. Do not overwrite, force a migration or assume project:* commands are installed. For foundation adoption, prepare concrete differences and act within current authorization.
+- project:doctor is redacted, dependency-free where needed, and does not stop services or create resources. Configuration presence is not provider readiness.
+- Resume interrupted initialization with `pnpm project:resume` in the product. Preserve code/secrets; unchanged dependencies skip installation while local migration remains idempotent. Recovery does not implement business requirements.
 
-## 升级已有产品
+## Upgrade an existing product
 
-- 用户要求检查/升级底座时读 [升级指南](../../docs/UPGRADING.md)。先读产品规则、PROJECT.md、机器计划、来源版本和未提交改动，从当前 Skill 的真实路径定位原 Aster 源，不以另一产品作模板。旧产品缺少新脚本/依赖时直接运行源目录的 `scripts/project-upgrade.mjs scan --target <产品>`；不要重新初始化。
-- 默认先只读扫描并保存本次计划。按需求选择适用模块并继续合并、回归，不要求用户逐个指定文件；只要求检查/方案时交付可审阅差异。工具可对有可信基线的 update/add 文件做带备份的本地 apply；冲突、品牌/配置/依赖/迁移及无基线旧项目由 Agent 保存备份后阅读实现合并。模块分类不代表依赖完整，必须检查 shared 文件与相关流程。
-- 新产品自动保存哈希基线；旧产品不猜原始状态，不用当前代码伪造首次基线。合并后重置受影响验收，执行实际项目检查和业务回归，才用 record 按实际路径记录来源/证据。局部采用不覆盖整个来源版本，不继承上游验收；用户保留的定制在下一次上游变化时仍需审查。升级任务按已有授权推进，不在列文件清单后结束；不擅自提交、推送、部署或开通服务。
+Read [Upgrading](../../docs/en/UPGRADING.md), product rules/brief/plan, source version and dirty files. Resolve the independent source from the real installed Skill, not another generated product. If old tooling is missing, invoke the source's `scripts/project-upgrade.mjs scan --target <product>` without reinitializing.
 
-## 按需组合能力
+Save a read-only scan, choose relevant modules, then merge and regress when the user requests adoption; plan-only requests stop at reviewable differences. Tools may apply pristine update/add paths with backups. Conflicts, protected brand/config/dependency/migration paths and legacy projects require Agent review/manual merges with private backups. Module labels are not a dependency graph: inspect shared dependencies and complete flows.
 
-做任何产品前先读 [能力选择](../../docs/MODULES.md)。从用户流程选择 database/auth/emailPassword/google/mail/projects/billing 等，记录依据；普通展示站可全部关闭，不因使用 Aster 自动接入 AI 或账号。新项目可用 --profile showcase/web-app/billing-test 或完整计划；已有项目用 project:modules 先预览再在授权内增量应用，不重新初始化。公开配置与计划、页面、接口和发布检查一致；仅验收所选能力。未实现的 AI/用量需求保留待开发，不能当成已经支持的开关。保留现有真实绑定与数据，已有支付义务先检查，关闭新结账不移除门户/Webhook。
+New products get hash baselines. Never invent an original baseline for legacy projects. Reset affected acceptance, run the actual product's checks/workflows, then record only adopted paths and evidence. Partial adoption preserves the original source version; retained customizations still need conflict review next time. Do not end an authorized upgrade with a file list, or infer Git/cloud/purchase authorization from it.
 
-## 按需求开发
+## Choose capabilities from the product flow
 
-- 读取新目录的 `AGENTS.md`、`PROJECT.md`、`docs/DEVELOPMENT.md`；复杂复用/交接细节按需读 `docs/AGENT-GUIDE.md`。用目标目录作为后续命令的工作目录；当前对话不会因此自动切换项目目录或拥有新目录写权限。
-- 用户要求做产品时，初始化后继续实现，不在空骨架处停止。先说明可复用模块、首版范围与缺项，随后开发核心用户流程。以用户已授权的范围为准，不重复请求已有批准。
-- 用户要求“接通/配置并验收”外部能力时，在已有授权内继续完成配置和真实验收，不能把可执行事项改成用户操作清单后结束。先查已有账号、工具和配置；缺项只阻塞对应部分，并明确所需的最小用户动作，补齐后从原进度继续。仅方案、仅本地或暂不部署等明确限制仍有效；不能因套用了默认交接模板而忽略本次真实目标。
-- 外部接通任务读 [断点续做](../../docs/SERVICE-WORKFLOW.md)，在当前产品的 integrations 记录目标与阶段。先用 project:service status 恢复；核实当前授权和远端状态后继续 actionable 步骤。配置/验收后 record 真实结果；阻塞只记最小 userAction/resume，补齐后继续，不重复已通过且仍有效的步骤。代码、目标或凭据变化时重置受影响进度与业务验收；本地记录不执行或授权外部操作。旧产品缺工具先增量升级相关脚本，不能把新 Skill 当成已接入新代码。
-- 已选认证的产品保留其安全边界，所有私有数据保持账户隔离；保留英文默认及 `/zh`；使用现有设计系统和服务端约束。`PROJECT.md` 保存业务说明，`starter.project.json` 保存规范化选择、任务、验收证据与下一步；不要重复运行时配置。已接入流程工具的项目，每个里程碑运行 `pnpm project:check`。改变需求/实现后重置受影响用例，不能沿用过期证据；其他已有应用遵循自身实际约定。
-- 账号改密和设备管理先读 [账号安全设置](../../docs/ACCOUNT-SECURITY.md)，复用私有安全 API 与分组设置组件。按账号实际凭据展示改密，不为 Google-only 添加密码或发信要求；会话 token 不进入设备列表，使用有归属检查的 session ID。不要恢复原生会话列表/改密 HTTP 入口或让客户端关闭强制撤销。旧产品增量合并并重置受影响认证验收，不能把源码本地测试当成其云端验收。
-- 数据导出/注销读 [账号生命周期](../../docs/ACCOUNT-LIFECYCLE.md)。检查当前产品的业务归属，扩展导出白名单和删除范围；不导出认证秘密，不误删共享数据。密码账号验证当前密码，Google-only 要求近期重新登录，不新增邮件要求。有支付历史时先重新核对供应商，未结束订阅、未解决账单、开放或未知结账保持拦截；关闭结账必须有明确确认。允许注销时先原子归档最小账务关联，保留门户/Webhook 的既有功能和晚到回调处理；不能直接清记录来绕过。合并完整实现、新迁移及结账预留/租约保护，重新验收全部旧会话和旧验证/找回链接；新链接绑定账号 ID，升级前未完成的验证链接需重发。新增业务未接入前，不宣称能导出/删除其全部数据。
-- 页面规划先读 [页面蓝图](../../docs/PAGE-BLUEPRINTS.md)：从用户任务推导入口→浏览/输入→详情/结果→下一步，记录 PROJECT.md 的逐页内容、主要操作、视觉方向和来源，以及 page-composition 决策依据。官网、目录阅读、数据工具可单独选用或组合，不要求每个项目都用侧栏或相同卡片。按需查看本地 /dev/blueprints 与对应源码；真实产品替换虚构内容、临时状态并接实际数据，复制样例不等于业务完成。没有事实依据的客户、评价、统计和连接状态不生成；已有品牌与页面优先保留。
-- 产品交付前按 [公开页面文案](../../docs/FRONTEND.md#公开页面文案) 清理开发残留，检查页头、页脚、状态和主要流程；不默认加早期预览横条或沿用示例套餐。未接通能力用真实可用状态表达或关闭入口，不能去掉演示标识后冒充真实业务。保留用户明确选择的产品 Beta、试读和编辑预览；已有站点增量修改并单独验证。
-- 为 Aster 产品写界面前读 `docs/FRONTEND.md` 与现有 `src/components/ui/`。缺少 Select、Textarea 等控件时先在组件层补齐，业务页面不直接写原生控件或导入 Base UI。单行控件使用统一 size（sm/default/lg），同排一致；不靠页面 className 改高度、纵向内边距、字号或圆角。按钮式链接复用 buttonVariants。执行 lint 并在真实页面比较控件与弹层，检查键盘、禁用、深浅主题和手机；不得为通过检查整文件关闭 UI 规则。其他已有应用优先沿用自身设计系统。
-- 本底座默认未接 AI 和额度账本；私有图片按需启用；Google/邮件/支付渠道仍需产品自己的配置和真实验收。已有应用以检查到的实际能力为准。初始化不代表这些能力已上线。新项目保留示例 CRUD，必须按需求决定替换或扩展。
-- 按项目 Checks 执行基础检查，并根据计划中的步骤执行实际业务验收。保存不含私人数据的结果/截图到项目内文件，再记录相对路径。明确区分 local、mock、real；模拟供应商不能通过真实供应商用例。初始化完成、代码已实现和必需业务验收通过是不同状态；声明业务完成前运行 `pnpm project:check --ready`。它校验记录和证据路径，不能代替实际测试。
-- 生成后在产品目录实际安装、启动和检查，源码通过不能替代生成组合验收。按当前能力验证未选入口关闭和已选业务可用，不为通过模板测试而给 web-app 开支付。已有项目保留命名 production、端口和原部署入口，先核对工具目标；相关规则见能力选择与数据库指南。
-- 交付可用地址、实现范围、证据和缺项。若启动预览，默认端口 3100；已有项目或独立 worktree 沿用其回环 APP_ORIGIN 与 host/port，不误用另一目录的服务。生产 smoke 使用 3110，构建与测试串行运行。
+Read [Modules](../../docs/en/MODULES.md). Select database/auth/emailPassword/google/mail/projects/billing and other needs with reasons. A showcase may disable them all; Aster does not imply AI or accounts. New products use showcase/web-app/billing-test or a full plan; existing products preview/apply project:modules changes incrementally. Keep plan/runtime config/pages/APIs/deploy gates consistent and test only selected capabilities. Unimplemented AI/usage stay pending. Preserve actual resources/data and legacy billing duties; disabling new checkout must not remove portals/webhooks.
 
-## 上云与费用递进
+## Implement and verify
 
-- 收款需求先读 [支付主体与供应商选型](../../docs/PAYMENTS.md)。按当前产品的真实地区、个人/个体/公司、已有商户和本人结算条件选渠道；不把维护者身份固定进模板，也不推断未知资格。当前 Stripe / Creem 均 TEST ONLY；记录 payment-provider=stripe|creem，并同步各环境 BILLING_PROVIDER（初始化采用已解决的决策、默认关闭结账）。保留旧渠道账务、商品、密钥、门户和回调，记录 BILLING_LEGACY_PROVIDERS。分别按 billing-test-live / billing-creem-test-live 验收真实沙箱；代码、模拟测试、身份审核、结算资格和实际到账分别记录。其他候选须先开发适配，不只换密钥；Creem 不提供未实现的自动关闭结账操作。
-- 需求阶段先确定是否需要账号；选择邮箱认证时默认“称呼 + 邮箱 + 密码”，Google 默认 deferred，不为未选的登录方式展示按钮。称呼不是用户名登录；纯用户名登录需要另行设计标识、唯一性和找回流程，不靠取消验证来实现。用户选 Google 时才将模块记为 required，并安排配置和真实验收。
-- 时序为需求选择 → 本地实现 → staging 配置邮件/选中的 OAuth → 真实注册、收信、重置/会话或 Google 回调验收 → production 发布。发布前读 `docs/DEPLOYMENT.md` 的认证检查，机器用例按所选登录方式为 `auth-email-live`、`auth-google-live`；公开展示站均不需要；`scope=provider`、`verification=real`、证据属于当前项目。未选 Google 不阻塞邮箱版；已选未配置/未实测不能靠隐藏按钮标为完成。
-- `deploy:check` 是本地配置/记录检查；实际 `deploy` 还只读检查目标 Worker 的远端 secret 名称与所选 D1 的迁移历史/完整性，再构建发布。漏迁移会阻止发布，不自动写库。配置齐全不证明真实供应商可用。数据上云预览走 staging，邮件未就绪时暂缓注册入口；访客不应看到开发者配置错误。用户只批准方案时不执行这些云端步骤。
-- 数据库变更读 [数据库发布与恢复](../../docs/DATABASE.md)。本地用 db:migrate，远端用 project:database plan/check/apply/status 显式指定环境；Agent 先审查 SQL、旧 Worker 兼容性、目标和费用，再在授权范围执行备份、迁移及业务验收。中断先核实远端，再按相同 release-id 续做；目标/SQL 变化重新 plan。恢复命令只生成方案，覆盖恢复需核对新数据损失及具体授权。旧产品先合并脚本与部署检查，不覆盖配置/应用过的迁移，不把更新 Skill 视为已更新产品。
+- Read the target's AGENTS.md, PROJECT.md and development guide; use [Agent guide](../../docs/en/AGENT-GUIDE.md) for handoff details. Run subsequent commands in the target; changing command cwd does not change chat ownership or filesystem permissions.
+- After initialization, continue implementing the requested product instead of stopping at a skeleton. Explain reused capabilities, first-version scope and gaps, then build the core flow under existing authorization.
+- For authorized provider configuration **and** real acceptance, inspect available accounts/tools/config and execute actionable steps. Ask only for concrete missing login, verification, permission, activation or purchase approval. A missing prerequisite blocks its own part. Respect plan-only/local-only/no-deploy instructions, including staging; default brief language cannot override later user authorization.
+- Read [Service workflow](../../docs/en/SERVICE-WORKFLOW.md), use project:service status to resume product integrations, check current scope/live state, then record actual plan/record/status checkpoints. Keep precise userAction/resume blockers. Changed credentials/inputs/code reset affected progress and business acceptance. Old products may need tooling adoption first; a new Skill is not new application code.
+- Preserve selected auth boundaries, owner-scoped private data, default English and `/zh`, and existing design/server conventions. PROJECT.md holds human scope/handoff; starter.project.json holds choices/tasks/evidence/next steps, not duplicate runtime config. Use the user's language for human handoff. Run project:check at milestones and reset stale affected evidence.
+- For passwords/devices read [Account security](../../docs/en/ACCOUNT-SECURITY.md). Use private APIs, actual account credentials and grouped settings. Do not add mail/password requirements to Google-only accounts, expose session tokens, accept client ownership or revive native session/password endpoints. Preserve forced revocation; local fixtures do not establish real OAuth acceptance.
+- For export/deletion read [Account lifecycle](../../docs/en/ACCOUNT-LIFECYCLE.md). Map business ownership and export allowlists, exclude secrets/shared data, verify current password or recent original-method Google login, and bind verification links to account IDs. Freshly review all billing providers even when billing is disabled. Block unresolved subscriptions/invoices/open or unknown checkouts; expiring links needs explicit confirmation. Archive minimal reconciliation records atomically before deletion, preserve pending checkout reservations and late signed callbacks. Apply additive migrations first and retest old sessions/verification/reset links. Do not claim complete deletion/export for unmapped business data.
+- Read [Page blueprints](../../docs/en/PAGE-BLUEPRINTS.md). Derive entry → browse/input → detail/result → next action; record page content/actions, direction/provenance and page-composition rationale in PROJECT.md/decisions. Use appropriate marketing, reading, catalog or workspace compositions; no universal sidebar/card grid. Samples are fictional/in-memory and need real content/data. Do not invent customers, reviews, metrics or provider connectivity.
+- Follow [Brand workflow](../../docs/en/BRAND-WORKFLOW.md). Preserve identity; otherwise infer and implement one icon direction from name/tasks/audience/pages. Styles are optional vocabulary, not a mandatory user questionnaire. Centralize navigation/favicon/optional home-screen assets in brand.json, complete brand-identity tasks and actual small-size/mobile/theme checks, and do not call a renamed Aster icon finished. Existing products adopt only relevant changes.
+- Clean [Public copy](../../docs/en/FRONTEND.md#public-page-copy): remove unchosen early-preview banners, test placeholders and example plans; preserve intentional Beta, excerpts/private previews and honest unavailable states. Removing demo labels cannot turn fictitious behavior into real business. Check each adopted site independently.
+- Read [Frontend](../../docs/en/FRONTEND.md) before Aster UI work. Use existing src/components/ui controls; add missing controls there first. No native business controls or direct Base UI imports. Preserve 32/36/44px size variants and aligned rows; no page overrides of control height/padding/type/radius. Use buttonVariants for button-like links. Validate lint, keyboard, disabled states, popovers, themes and mobile without file-wide rule disables. Other apps retain their own design system.
+- AI/usage are not built in; private images are opt-in; Google/mail/payments still need each product's configuration and real acceptance. Inspect other apps' actual capabilities. Decide whether to replace/extend sample CRUD.
+- Run project Checks and real business acceptance from the plan. Store non-sensitive current-product evidence paths, distinguish local/mock/real, and never pass real-provider cases with mocks. Initialization, implementation and business acceptance are separate. Before declaring completion run `pnpm project:check --ready`; it validates records/paths, not behavior.
+- Actually install/start/verify generated products with their selected capabilities. Source checks are not generated-profile acceptance. Do not enable billing to make web-app tests pass. Preserve existing named production environments, ports and deployment entrypoints; verify targets first.
+- Deliver working URLs, scope, evidence and gaps. New local previews default to 3100; existing products/worktrees use their own loopback APP_ORIGIN/host/port. Never reuse another checkout's service. Production smoke uses 3110; serialize builds/tests that share outputs or ports.
 
-- 用户要接入 Cloudflare、数据上云、部署或询问费用时，先读目标项目的 `docs/COSTS.md`（旧产品缺失时读本底座源的该文档）与 `docs/DEPLOYMENT.md`。**默认免费优先，初期新增云服务费用目标 USD 0/月**；不能因底座有 CF 邮件适配就默认推荐 Workers Paid。用户已有明确预算或套餐偏好时沿用，不重复询问。
-- 按本地 → 免费云数据验证（Workers + D1）→ 登录与事务邮件真实验收 → 按实际需求升级递进。数据上云与邮件选型分开。CF 向任意收件人发信需 Paid；同时支持 Brevo / Resend 的 HTTPS 适配。已有旧产品需比较实现差异，未配置邮件时不能宣称注册闭环可用。免费 Routing/已验证目的地址不是面向普通用户的发信替代。
-- 邮件先沿用用户明确指定或项目已接通的服务；无既有选择时，目标账户已有 Workers Paid 且 CF 发信资格/域名/共享额度适用，默认优先 CF。否则结合偏好、已有环境、日/月限额、激活、品牌和投递实测选择 Brevo 或 Resend，不固定偏向其中一家。账户未知时标未知，不假定付费、不自动升级。按 [邮件接入指南](../../docs/MAIL.md) 检查配置及已有项目增量合并范围，记录 `mail-provider` 决策依据；运行时明确选一家，不做套餐自动探测或失败后跨服务切换。
-- 邮件配置与验收默认由 Agent 执行：在获准的目标账户/环境内设置服务与发信域名、核验 DNS、保存所选 secret、用受控测试邮箱实收并完成注册/验证/找回/会话回归，记录真实证据。按 [Agent 执行与人工接力](../../docs/MAIL.md#agent-执行与人工接力) 区分执行权限与平台能力；账号登录/验证码、平台激活审核、缺少工具权限或购买授权需要用户时，只请求具体一步，不把整个验收交还用户。用户明确只要步骤或禁止部署时遵守限制，说明哪些实测因此未完成，不伪称已接通。
-- 检查账户当前套餐、其他产品共用额度、免费档 CPU/存储等限制及超限行为；权限不足就标未知。密码哈希、SSR 等可能超过 Workers Free CPU 限制，需在目标云环境测量。不能把本地测试或免费请求数当作完整 SaaS 免费可运行的证明；保持认证安全强度。
-- 在 `PROJECT.md` 记录分阶段方案与每项费用，在 `starter.project.json` 的 `decisions` 用 `id=cloud-cost-policy` 记录成本偏好及 user/context/default 依据。新项目自动带默认偏好；已有记录继续使用，旧计划缺项时增量补充，不重建项目。升级建议必须包含实际瓶颈、免费替代、固定费/按量项、预算与官方链接/核验日期。
-- 云服务属于按量计费、要求付费计划或绑卡时明确说明，即使有免费额度也不能称零成本保证。付费预算或计划 JSON 不构成开通、充值或启用计费的授权；按当前用户已授权范围执行。用户说“先出方案，确认后执行”时只准备可审阅方案；缺少某项提供商配置不阻塞已获授权且独立的工作。不要默认添加 R2、AI、队列或发信绑定。
+## Cloud and progressive cost
 
-## 操作边界
+- Read [Payments](../../docs/en/PAYMENTS.md) before collection work. Evaluate the actual product/operator region, individual/sole-proprietor/company status, existing approval and settlement methods; never fix the maintainer's identity into the template or infer unknown eligibility. Stripe/Creem remain TEST ONLY. Record payment-provider=stripe|creem, align BILLING_PROVIDER and retain legacy records/products/secrets/portals/webhooks via BILLING_LEGACY_PROVIDERS. Validate each real sandbox separately with billing-test-live / billing-creem-test-live. Code, mocks, identity review, settlement eligibility and received payouts are separate evidence. Other providers need adapters, not just different keys. Do not offer unsupported Creem checkout-expiry automation.
+- Select login methods during requirements: default display name/email/password when email auth is needed; Google deferred unless requested. Display name is not username login. A username flow needs separate identity/uniqueness/recovery design, not weakened verification.
+- Sequence: requirements → local implementation → staging mail/selected OAuth configuration → real delivery/registration/reset/session or Google callback acceptance → production. Read [Deployment](../../docs/en/DEPLOYMENT.md); require current-product auth-email-live/auth-google-live provider/real evidence only for selected methods. Showcase needs neither. Hiding an unconfigured selected provider is not completion.
+- deploy:check is local. Actual deploy checks target remote secret **names** and selected D1 migration history/integrity before build/publish; it does not migrate or prove provider behavior. Data-only staging may keep registration closed until mail is ready. Visitors must not see setup diagnostics. Plan-only permission authorizes none of these cloud mutations.
+- Read [Database](../../docs/en/DATABASE.md). db:migrate is local; project:database plan/check/apply/status requires an explicit remote environment. Review SQL/old-Worker compatibility/target/cost/recovery before authorized backup/migration/business acceptance. Resume from real remote history. Changed target/SQL needs a new plan; never edit applied migrations or upload local test DBs. Restore planning is not overwrite authorization; review lost writes and the exact restore scope first. Receipts/local locks are not provider evidence or global coordination.
+- Read [Costs](../../docs/en/COSTS.md). Default to free-first and zero **new** cloud cost initially, progressing local → free cloud data → independently selected mail/auth → justified upgrades. Keep known working providers/bindings; do not mistake CF arbitrary-recipient sending's paid eligibility for a Workers/D1 prerequisite.
+- Preserve explicit/working mail choices. Without one, prefer CF only for a verified existing suitable Workers Paid account with sending/domain/shared-quota eligibility; otherwise choose Brevo/Resend from preference, existing environment, daily/monthly limits, activation and live delivery. Unknown plans stay unknown; no automatic upgrades, runtime plan detection or cross-provider failover. Record mail-provider provenance and follow [Mail](../../docs/en/MAIL.md). Only the chosen remote key/binding is required; development uses the local inbox.
+- Verify account-wide shared requests/CPU/D1 rows/storage/mail/model limits. Measure SSR/password hashing on the target cloud; source tests/free request counts do not prove complete SaaS suitability. Preserve password security.
+- Record staged costs/upgrades with dated official sources, bottlenecks, alternatives, fixed/metered items and budget in PROJECT.md and cloud-cost-policy decisions. Preserve user/context/default provenance and old plans; add missing choices incrementally rather than rebuilding.
+- Free allowances do not guarantee no charges or no card. Plans/budgets/JSON never authorize upgrades, top-ups or billing. Act within current user scope; plan-first remains plan-only. Do not add unused R2/AI/queue/mail bindings.
 
-脚本只创建独立本地文件、安装依赖和初始化本地 D1，不创建云资源、发真实邮件或调用模型。需要部署、付费调用或 Git 操作时，按用户已授权范围和执行权限处理；不能将一次 Skill 调用解释成对所有外部操作的授权。保留 LICENSE、第三方声明和底座来源版本，不输出密钥或验证链接。
+## Themes, motion and assets
 
-## 视觉主题与图片能力
+Read [Themes](../../docs/en/THEMES.md) and [Page blueprints](../../docs/en/PAGE-BLUEPRINTS.md). Sage is the green tool theme; Catalog is neutral/image-led. Preserve references/brands; themes do not lock product type or enable auth/orders/payments. Record visual-theme=sage|catalog with provenance; initialization defaults Sage, existing products update appearance.json/brief/decisions and affected acceptance. A local _style preview does not modify files.
 
-- UI 规划先读 `docs/THEMES.md`、`docs/PAGE-BLUEPRINTS.md`。当前绿色工具风格叫 Sage；Catalog 为中性、图像优先的商品目录风格，均支持深浅色。结合用户参考和上下文选用，保留已有品牌；主题不是产品类型锁定，也不自动启用认证、订单或支付。
-- 官网动效按 [页面动效](../../docs/FRONTEND.md#页面动效)，复用 RevealGroup 做首屏分组与首次滚动出现；沿用产品品牌与偏好，工具表单不默认等待入场。记录 PROJECT.md 的动效范围；验收真实入场、手机、键盘、减少动态效果和无脚本降级，不能只截静态图。已有产品需合并组件、样式与页面后独立验收，更新 Skill 不等于更新线上站点。
-- 字体与排版按 [前端约定](../../docs/FRONTEND.md#字体与阅读清晰度)：默认沿用实际可用的系统字体；品牌字体需真实加载和检查 Rendered Fonts，不只声明名称。区分官网阅读字号与紧凑工具控件，保留中文正常字距及既有品牌；在当前产品实际检查中英文、手机、浅深主题，不把更新模板当成已修复已有站点。
-- 新产品在 plan.decisions 记录 `visual-theme`（resolved，value=sage|catalog，带 basis/reason），初始化器据此写 appearance.json；未指定默认 Sage。已有产品增量修改 appearance.json 并同步 PROJECT.md/决策和受影响验收。本地 `_style` 只供比较，不代表文件已修改。
-- 需要头像/项目封面先读 `docs/FILES.md`，按流程选择 files（依赖 auth/database）；新产品默认关闭，源预览开启。完整执行本地上传、刷新、引用/替换、跨用户隔离、删除和注销清理；模糊失败不能丢弃 pending。新增其他图片引用必须同步服务端 owner 检查、引用保护和删除映射。
-- 云端需要独立 staging/production 私有 ASSETS_BUCKET、已应用增量迁移和当前 files-live 真实证据。按现有授权配置并验收；不得把本地模拟或占位 binding 当作接通，不新增购买或公开存储。导出 JSON 不含图片原文件，注销失败可能已有部分图片删除，交接需准确说明。
+Use [Page motion](../../docs/en/FRONTEND.md#page-motion) and RevealGroup for finite marketing entrances/one-time reveals; dense tools stay immediate. Record scope, verify actual time/order, mobile, keyboard, reduced motion and no-script fallbacks, and leave no permanent text transforms. Static screenshots alone do not validate motion. Existing products need component/style/page adoption and independent acceptance.
 
-## 内容管理与公开素材
+Follow [Typography](../../docs/en/FRONTEND.md#typography-and-reading-clarity): real system fonts by default; brand fonts require actual licensed loading and Rendered Fonts inspection. Separate public reading typography from compact controls, preserve normal CJK tracking and brands, and inspect both locales/themes/mobile in the current product. A template update does not fix deployed sites.
 
-需要文章、帮助或公告时读 `docs/CONTENT.md`，以 content 模块按需接入；新产品默认关闭，已有产品增量保留。文字内容不强制 R2，封面另选 files，并用独立网站素材接口，禁止把私人 file_asset 转为公开封面。先记录业务流程与视觉方向，再执行本地创建、预览、发布、匿名读取、修改快照、撤下和权限/手机验收。共享站点内容不纳入个人导出，贡献者注销前明确确认保留，删除后置空贡献者关联，不误删公共素材。保留 revision 冲突及 live/draft 引用保护，目标环境发布前审查新迁移并完成当前产品 content-live 真实验收；本地模拟不代替云端接通，不新增购买或部署授权。
+Read [Files](../../docs/en/FILES.md) for avatars/covers. Select files with auth/database, run upload/refresh/reference/replacement/cross-owner/deletion/account-cleanup flows and retain pending on ambiguous failure. New reference types must extend ownership/reference/deletion maps. Cloud needs separate private staging/production buckets, additive migration and current files-live evidence under existing authorization. No public storage or purchases are implied. JSON export excludes bytes; failed deletion may already have removed some objects.
 
-## 用户运营与访问控制
+## Content and administration
 
-需要用户管理时读 `docs/ADMIN.md`，沿用 admin_user 和当前产品授权流程；新产品不自动授予首个用户，现有角色不得覆盖。管理员须已验证且未停用。增量合并迁移/自定义触发器、会话及私人写入检查、版本化状态事务、最小记录、CLI 与注销的最后管理员保护，并保留认证日志级别和脱敏事件。停用不删数据、不取消账务、不阻断签名回调；恢复要求重新登录。执行当前产品真实页面/权限/会话/旧重置链接/并发/注销回归，记录实际证据；本地测试不代表云端或真实提供商接通，不新增部署、购买或 Git 授权。
+For articles/help/announcements read [Content](../../docs/en/CONTENT.md). content defaults off; text requires no R2, covers select files and dedicated site-asset APIs, never private file_asset IDs. Plan visual/business flow, then test draft/preview/publish/anonymous reads/snapshot edits/withdrawal/permissions/mobile. Site content survives contributor deletion only with explicit retention confirmation and nullable attribution. Keep revision/live/draft reference guards. Apply migrations and validate current content-live target evidence before release; local simulation is not cloud acceptance or new external authorization.
+
+For user operations read [Admin](../../docs/en/ADMIN.md). Reuse verified/enabled admin_user and real product authorization; never auto-promote first users or overwrite roles. Incrementally merge migrations/custom triggers, session/private-write guards, versioned atomic state/audit, CLI and last-admin deletion protections. Preserve sanitized auth severity. Suspension preserves data/billing/signed callbacks; restoration requires fresh login. Validate actual product permissions, sessions, old reset links, races, deletion and records. Local tests do not authorize or establish deployment/purchases/Git/provider acceptance.
+
+## Execution boundary
+
+The initializer creates local files, installs dependencies and migrates local D1. It does not create cloud resources, send real mail or call models. Follow actual user authorization for deployment, paid usage and Git; invoking a Skill is not blanket permission. Preserve LICENSE, third-party notices and starter provenance. Never output secrets or verification links.
