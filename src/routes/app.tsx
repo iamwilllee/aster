@@ -22,6 +22,7 @@ import { getWorkspace } from '@/server/functions'
 import { authClient } from '@/modules/auth/auth-client'
 import { Logo, Preferences, ErrorNotice } from '@/components/common'
 import { Button } from '@/components/ui/button'
+import { SidebarItem, SidebarSection } from '@/components/ui/sidebar'
 import { useI18n } from '@/components/providers'
 
 export const Route = createFileRoute('/app')({
@@ -111,33 +112,29 @@ function AppShell() {
             </div>
           </div>
         </div>
-        <p className="px-6 pb-3 pt-8 text-[9px] font-semibold tracking-[0.18em] text-muted-foreground">
-          WORKSPACE
-        </p>
-        <nav className="space-y-1 px-3">
-          {navigation.map(({ to, icon: Icon, label, exact }) => (
-            <Link
-              key={to}
-              to={to}
-              activeOptions={{ exact }}
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] text-muted-foreground transition-colors hover:bg-muted"
-              activeProps={{ className: 'bg-accent font-medium text-primary' }}
-            >
-              <Icon size={17} />
-              {label}
-            </Link>
-          ))}
-          {viewer.admin && (
-            <Link
-              to="/app/admin"
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] text-muted-foreground"
-              activeProps={{ className: 'bg-accent text-primary' }}
-            >
-              <Shield size={17} />
-              {t('admin')}
-            </Link>
-          )}
+        <nav>
+          <SidebarSection label="WORKSPACE">
+            {navigation.map(({ to, icon: Icon, label, exact }) => (
+              <SidebarItem
+                key={to}
+                icon={<Icon size={17} />}
+                onClick={() => setOpen(false)}
+                render={
+                  <Link to={to} activeOptions={{ exact }} activeProps={{ 'data-active': 'true' }} />
+                }
+              >
+                {label}
+              </SidebarItem>
+            ))}
+            {viewer.admin && (
+              <SidebarItem
+                icon={<Shield size={17} />}
+                render={<Link to="/app/admin" activeProps={{ 'data-active': 'true' }} />}
+              >
+                {t('admin')}
+              </SidebarItem>
+            )}
+          </SidebarSection>
         </nav>
         <div className="mt-auto px-4 pb-5">
           {viewer.local && features.mail && (

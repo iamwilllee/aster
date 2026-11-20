@@ -1,12 +1,14 @@
 # 前端约定
 
+[English](en/FRONTEND.md)
+
 Aster 使用 React、TanStack Router / Query、Tailwind CSS、shadcn/ui base-nova（Base UI）与 Lucide。复用现有组件和主题，不为同一种能力同时引入多套方案。
 
 ## 组件与品牌
 
 - `src/components/ui/` 保存可维护的基础组件源码；通用页面组件位于 `src/components/common.tsx`。
-- `src/styles.css` 管理颜色、圆角、字体和深浅主题；品牌名称与描述位于 `src/config/site.ts`。
-- Logo、favicon 与使用说明见 [品牌文档](BRAND.md)。业务图标统一使用 Lucide，品牌图形独立管理。
+- 颜色、圆角、字体、控件尺寸和深浅主题来自 Flatpack 样式层 `src/styles/flatpack.css`（用 `pnpm flatpack:sync` 从 Flatpack 仓库同步，不在这里手改）；`src/styles.css` 只把 Tailwind 颜色名映射到 Flatpack token，并保存 Aster 的入场动效；品牌名称与描述位于 `src/config/site.ts`。
+- Logo、favicon 与使用说明见 [品牌文档](BRAND.md)，新产品按 [图标设计流程](BRAND-WORKFLOW.md) 自主设计、接入并验收；资产路径集中在 `src/config/brand.json`。业务图标统一使用 Lucide，品牌图形独立管理。
 - 常规布局使用 CSS Grid / Flex；基础入场动效复用 RevealGroup 与 CSS，可拖动面板、拖拽和复杂状态/动画库按实际业务需要添加。
 
 ## 组件样板
@@ -27,7 +29,7 @@ Button、Input、Select、Textarea、Checkbox、Switch 和 TabsTrigger 在水合
 
 底座源目录用根目录 PROJECT.md 区分生成产品，维护底座本身的界面时将设计记录放在私有 `.local/PROJECT.md`，保留该识别保护。产品开发先在 `PROJECT.md` 的“界面与内容”写明用户与主要操作、视觉参考或推导依据、信息密度、页面组合及品牌方向。用户已有品牌/界面时优先延续；没有参考时从场景推导，不例行追加一轮设计问卷。
 
-高频操作工具优先清晰导航、可扫描列表和明确操作；内容型产品优先阅读顺序、字体层级和留白。根据内容选择结构，不让每页都变成标题加卡片。当前绿色、侧栏和示例业务不是强制品牌。品牌色和字体通过 `src/styles.css` 管理，深浅主题成对调整，页面不写零散品牌色。视觉示例不宣称不存在的功能、客户或指标。
+高频操作工具优先清晰导航、可扫描列表和明确操作；内容型产品优先阅读顺序、字体层级和留白。根据内容选择结构，不让每页都变成标题加卡片。当前绿色、侧栏和示例业务不是强制品牌。品牌色和字体通过 Flatpack 主题管理，深浅主题成对调整，页面不写零散品牌色。视觉示例不宣称不存在的功能、客户或指标。
 
 ## 产品视觉主题
 
@@ -35,14 +37,14 @@ Button、Input、Select、Textarea、Checkbox、Switch 和 TabsTrigger 在水合
 
 ## 字体与阅读清晰度
 
-字体在 `src/styles.css` 的 `--type-family` 集中设置。Sage 默认先用 `system-ui`，让 macOS、Windows、Android 等使用各自可用的 UI 字体；Catalog 有意优先 Arial，再回退到系统可用字体。中文由相应系统字体承接。默认没有远程字体请求，也不承诺不同操作系统像素完全一致。
+字体在 Flatpack 主题的 `--fp-sans` 集中设置。Sage 默认先用 `system-ui`，让 macOS、Windows、Android 等使用各自可用的 UI 字体；Catalog 有意优先 Arial，再回退到系统可用字体。中文由相应系统字体承接。默认没有远程字体请求，也不承诺不同操作系统像素完全一致。
 
 品牌明确选择 Inter 等字体时，需要实际提供有许可的字体文件或明确的加载源，以 `@font-face` 声明正确的字重、样式和 `font-display`，并验证请求成功、真实使用和回退表现。只写 `font-family: Inter` 不代表已加载；也不能凭 `getComputedStyle().fontFamily` 或单独一次 `document.fonts.check()` 判断字体真实命中。可用浏览器的 Rendered Fonts 或 `CSS.getPlatformFontsForNode` 检查，确认英文没有意外落到中文字体；纯中文正常使用中文系统字体。
 
 | 场景               | 默认建议                     | 边界                                                     |
 | ------------------ | ---------------------------- | -------------------------------------------------------- |
 | 官网首屏、阅读说明 | 正文 16–18px，行高约 1.6–1.8 | 不把承载主要信息的段落缩为 12–14px                       |
-| 紧凑工作台         | 正文 14–16px                 | 保留控件 32/36/44px 及既有字号契约                       |
+| 紧凑工作台         | 正文 14–16px                 | 保留控件 32/40/48px 及既有字号契约                       |
 | 元信息、辅助标签   | 12–14px，确保当前主题下可读  | 更小的装饰性编号不能承载关键操作或说明                   |
 | 无衬线标题         | 按层级使用 600/700           | 英文大标题适度收紧；示例首屏为 -0.03em，中文保持正常字距 |
 
@@ -120,13 +122,15 @@ FAQ 复用 `patterns/content-patterns.tsx` 的 FaqList；底层 `ui/disclosure.t
 
 业务页面从 `@/components/ui/` 导入 Button、Input、Select 与 Textarea。Select 使用 Base UI 的可访问弹层，统一触发器、选项、焦点与主题；不能用页面里的原生 `<select>` 代替。组件底层最终渲染原生 DOM 是正常行为，限制针对业务层绕过封装。
 
+组件源码同样来自 Flatpack：`src/components/flatpack/` 由 `pnpm flatpack:sync` 原样复制，不在产品里手改，`pnpm flatpack:sync --check` 会发现漂移；`src/components/ui/` 是 Aster 的封装，重新导出这些组件，只增加 Aster 自己的行为（水合前禁用、本地化关闭文案、Select 组合式写法、Tabs 面板按需挂载）。通用组件的新能力先改 Flatpack 再同步，Aster 特有行为才写在 `ui/`。Alert（错误提示）、Empty（空状态）、Sidebar（工作区导航）、Tooltip 与 Toast 也来自 Flatpack：Toast 通过 `ToastProvider` 与 `useToast()` 在请求内使用，模块加载时不创建全局管理器。
+
 | 档位      | 单行高度 | 用途               |
 | --------- | -------- | ------------------ |
 | `sm`      | 32px     | 紧凑工具栏         |
-| `default` | 36px     | 默认表单与筛选     |
-| `lg`      | 44px     | 突出操作与触摸场景 |
+| `default` | 40px     | 默认表单与筛选     |
+| `lg`      | 48px     | 突出操作与触摸场景 |
 
-Button、Input、SelectTrigger 使用相同的 `size` 属性；图标按钮对应 `icon-sm`、`icon`、`icon-lg`。尺寸源是 `src/styles.css` 的 `--control-sm/md/lg` 与 `src/components/ui/control.ts`，同一行的单行控件选同一档。字段容器使用 `grid gap-2`，避免 Base UI 的隐藏表单输入被 `space-y-*` 计入尾部间距；Input/Textarea 使用块级显示，避免行内基线空隙。控件文字在桌面为 14px、手机为 16px；Textarea 为多行输入，默认三行、最小 96px，不套用单行高度。
+Button、Input、SelectTrigger 使用相同的 `size` 属性；图标按钮对应 `icon-sm`、`icon`、`icon-lg`。尺寸源是 Flatpack 的 `--fp-control-sm/md/lg` 与 `src/components/ui/control.ts`，同一行的单行控件选同一档。字段容器使用 `grid gap-2`，避免 Base UI 的隐藏表单输入被 `space-y-*` 计入尾部间距；Input/Textarea 使用块级显示，避免行内基线空隙。控件文字在桌面为 14px、手机为 16px；Textarea 为多行输入，默认三行、最小 96px，不套用单行高度。
 
 ```tsx
 <Input size="default" aria-label="Search" className="w-full" />
@@ -148,7 +152,7 @@ Select 在 Root 的 `items` 中提供标签映射，使受控值、初次渲染�
 </Select>
 ```
 
-页面的 className 负责宽度、定位、外部间距等布局；控件高度、纵向内边距、字号、圆角由组件决定。改全站密度时调整 tokens，新增视觉用途时在 UI 层增加 variant。按钮式 Link 复用 `buttonVariants({ variant: 'outline', size: 'default' })`，保留真正的链接语义；普通文本链接与导航按各自语义设计。Input 的原生字符宽度参数改用 `htmlSize`。
+页面的 className 负责宽度、定位、外部间距等布局；控件高度、纵向内边距、字号、圆角由组件决定。改全站密度时调整 tokens，新增视觉用途时在 UI 层增加 variant。按钮式 Link 展开 `buttonProps({ variant: 'outline', size: 'default' })`，保留真正的链接语义；普通文本链接与导航按各自语义设计。Input 的原生字符宽度参数改用 `htmlSize`。
 
 `pnpm lint`（已包含在 `pnpm check`）拒绝业务 TSX 的原生 button/input/select/textarea、直接 Base UI 导入，以及共享控件的高度、字号、圆角和纵向内边距覆盖。规则支持导入别名、响应式 class、cn/clsx 与有限条件表达式；无法判断的动态控件 className/style 要移到 UI 层维护。全屏关闭遮罩等特殊交互可用带原因的单行例外，不能整文件豁免。静态规则不能代替浏览器布局、键盘和焦点验收，也不能保证任意全局 CSS 不改变组件。
 

@@ -1,5 +1,7 @@
 # 开发手册
 
+[English](en/DEVELOPMENT.md)
+
 第一次把底座用于新产品，请先读 [Agent 使用指南](AGENT-GUIDE.md)，通过 `$aster-new` 或 `pnpm aster:new` 初始化新目录，自动生成 [产品需求与交接模板](templates/PROJECT-BRIEF.md)。本手册说明开发实现与运行约定。
 
 ## 本地工作流
@@ -12,16 +14,16 @@
 
 ## 目录与数据
 
-| 目录                               | 用途                                                 |
-| ---------------------------------- | ---------------------------------------------------- |
-| `src/routes`                       | TanStack 文件路由、公共页面、受保护工作台和 API 路由 |
-| `src/modules/auth`                 | 请求内构建的 Better Auth、邮箱密码与服务端用户授权   |
-| `src/modules/billing`              | 测试订阅、门户、事件验签、当前状态同步、套餐判断     |
-| `src/modules/mail`                 | 本地收件箱和 Cloudflare 发信适配                     |
-| `src/modules/projects`             | 项目输入规则，业务处理在 server API 中               |
-| `src/server`                       | JSON/Origin/请求体边界、API、server functions        |
-| `src/db`、`migrations`             | Drizzle SQLite schema 与迁移                         |
-| `src/components`、`src/styles.css` | 可编辑 UI 源码、共享组件和主题                       |
+| 目录                               | 用途                                                                                     |
+| ---------------------------------- | ---------------------------------------------------------------------------------------- |
+| `src/routes`                       | TanStack 文件路由、公共页面、受保护工作台和 API 路由                                     |
+| `src/modules/auth`                 | 请求内构建的 Better Auth、邮箱密码与服务端用户授权                                       |
+| `src/modules/billing`              | 测试订阅、门户、事件验签、当前状态同步、套餐判断                                         |
+| `src/modules/mail`                 | 本地收件箱和 Cloudflare 发信适配                                                         |
+| `src/modules/projects`             | 项目输入规则，业务处理在 server API 中                                                   |
+| `src/server`                       | JSON/Origin/请求体边界、API、server functions                                            |
+| `src/db`、`migrations`             | Drizzle SQLite schema 与迁移                                                             |
+| `src/components`、`src/styles.css` | 可编辑 UI 源码、共享组件和主题（`src/styles/flatpack.css` 由 `pnpm flatpack:sync` 同步） |
 
 修改 schema 后执行 `pnpm db:generate`，检查新 SQL，再执行 `pnpm db:migrate`（本地）。迁移不会在普通请求内执行。已经应用过的迁移保持不变，使用新迁移变更数据。生产迁移见部署手册。
 

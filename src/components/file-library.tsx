@@ -7,7 +7,7 @@ import { type FileAsset, fileContentPath, fileLimits } from '@/modules/files/pol
 import { useI18n } from '@/components/providers'
 import { ErrorNotice, Loading } from '@/components/common'
 import { EmptyState } from '@/components/patterns/page-patterns'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button, buttonProps } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
@@ -168,7 +168,7 @@ export function FileLibrary({
                         <a
                           href={fileContentPath(file.id)}
                           download={file.name}
-                          className={buttonVariants({ variant: 'outline' })}
+                          {...buttonProps({ variant: 'outline' })}
                         >
                           {t('files_download')}
                         </a>

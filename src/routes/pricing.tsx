@@ -2,7 +2,7 @@ import { features } from '@/config/features'
 import { notFound } from '@tanstack/react-router'
 import { createFileRoute, Link, getRouteApi } from '@tanstack/react-router'
 import { ArrowUpRight, Check } from 'lucide-react'
-import { buttonVariants } from '@/components/ui/button'
+import { buttonProps } from '@/components/ui/button'
 import { Logo, Preferences } from '@/components/common'
 import { useI18n } from '@/components/providers'
 
@@ -67,7 +67,8 @@ function Pricing() {
                 to={
                   plan.name === 'Free' ? (registrationReady ? '/signup' : '/login') : '/app/billing'
                 }
-                className={`${buttonVariants({ variant: plan.name === 'Pro' ? 'default' : 'outline' })} w-full`}
+                {...buttonProps({ variant: plan.name === 'Pro' ? 'default' : 'outline' })}
+                className="w-full"
               >
                 {plan.name === 'Free'
                   ? registrationReady

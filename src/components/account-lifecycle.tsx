@@ -6,7 +6,7 @@ import { features } from '@/config/features'
 import { useI18n } from '@/components/providers'
 import { ErrorNotice } from '@/components/common'
 import { SettingsSection } from '@/components/patterns/page-patterns'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button, buttonProps } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -234,7 +234,7 @@ export function AccountLifecycleSettings({ userId }: { userId: string }) {
                       </Button>
                     )}
                     {features.billing && (
-                      <Link to="/app/billing" className={buttonVariants({ variant: 'outline' })}>
+                      <Link to="/app/billing" {...buttonProps({ variant: 'outline' })}>
                         {t('review_billing_before_deletion')}
                       </Link>
                     )}

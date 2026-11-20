@@ -5,7 +5,7 @@ import { Monitor, Smartphone } from 'lucide-react'
 import { useI18n } from '@/components/providers'
 import { ErrorNotice } from '@/components/common'
 import { SettingsSection } from '@/components/patterns/page-patterns'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button, buttonProps } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
@@ -185,7 +185,7 @@ export function AccountSecuritySettings({
                 {passwordPending ? t('saving') : t('change_password')}
               </Button>
               {mailReady && (
-                <Link to="/forgot-password" className={buttonVariants({ variant: 'link' })}>
+                <Link to="/forgot-password" {...buttonProps({ variant: 'link' })}>
                   {t('forgot_password')}
                 </Link>
               )}

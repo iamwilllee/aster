@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+
+- 2026-11-22: Adopt Flatpack's Alert (error notices), Empty (empty states, with a heading title) and Sidebar (workspace navigation, with active links through `render`). Tabs triggers lay out icon and text in a row. Pagination and Breadcrumb are not adopted: Aster's pagination shows a summary with previous/next, which Flatpack's numbered pager does not replace.
+
+- 2026-11-21: Adopt Flatpack component source. `src/components/flatpack/` is copied unmodified by `pnpm flatpack:sync` (with per-file hashes and `--check`); Aster's Button, Badge, Card, Table, Skeleton, Input, Textarea, Progress, Tabs, Checkbox, Switch, Dialog, Select and DropdownMenu now wrap it and add only hydration guards, localized close text and Aster's compound Select. Tooltip and Toast follow in the same pass: Flatpack gained a compound Tooltip and a request-local `ToastProvider`/`useToast()`, so nothing in `src/components/ui` is implemented locally any more except Label, Disclosure and Reveal.
+
+- 2026-11-20: Make Flatpack the visual base. Sage and Catalog are now Flatpack themes (`data-fp-theme`) styled by the synced `src/styles/flatpack.css`; Aster's UI wrappers render Flatpack `data-slot` markup and keep their APIs. Control sizes change from 32/36/44px to 32/40/48px, `buttonVariants` becomes `buttonProps` (spread on links), and `pnpm flatpack:sync` records the Flatpack source. Rounded utilities now follow the surface radius; links no longer get a default underline.
+
+- 2026-10-29: Add private local Codex development-task Token reports, deferred final-reply settlement and bilingual guidance. Keep unavailable/partial coverage explicit and product AI/billing modules unchanged.
+
+- 2026-10-27: Maintain the Skill/execution reference in English and add complete English counterparts for 24 public documentation topics. Add bilingual catalog/link/anchor/translation-drift checks and same-language static website documentation at /docs and /zh/docs, with safe Markdown rendering and equivalent-page locale navigation.
+
+- 2026-10-27: Add and deploy the independent bilingual Aster website, with release-pinned documentation, quick-start/copy interactions, accessible theme/FAQ behavior and assets-only Cloudflare hosting. Keep product template configuration and services separate.
+
+- 2026-10-27 (unreleased): Add context-driven product icon design, optional style references, centralized brand assets and explicit new-product branding checkpoints; preserve existing identities and require rendered acceptance separately from file checks.
+
 ## 0.2.0-beta.1 — 2026-10-26（公开预览）
 
 - Scope the profile-save browser assertion to its settings region and reproduce concurrent security loading, keeping CI independent of unrelated live status messages.

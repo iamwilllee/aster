@@ -14,7 +14,7 @@ import { useI18n } from '@/components/providers'
 import { ContentReading } from '@/components/content-reading'
 import { Pagination } from '@/components/patterns/page-patterns'
 import { PageHeading, ErrorNotice, Loading } from '@/components/common'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button, buttonProps } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
@@ -136,7 +136,7 @@ function ContentAdmin() {
         title={t('content_manage')}
         description={t('content_manage_intro')}
         action={
-          <Link to="/content" className={buttonVariants({ variant: 'outline' })}>
+          <Link to="/content" {...buttonProps({ variant: 'outline' })}>
             {t('content_view_public')}
           </Link>
         }
@@ -401,7 +401,7 @@ function ContentAdmin() {
                               to="/content/$slug"
                               params={{ slug: record.live.slug }}
                               search={{ _locale: record.live.locale }}
-                              className={buttonVariants({ variant: 'outline' })}
+                              {...buttonProps({ variant: 'outline' })}
                             >
                               {t('content_view_public')}
                             </Link>

@@ -1,23 +1,10 @@
 import type { ComponentProps } from 'react'
-import { cn } from 'cn'
-import { controlVariants } from './control'
+import { Textarea as FlatTextarea } from '@/components/flatpack/textarea'
 import { useHydrated } from '@/lib/use-hydrated'
 
-function Textarea({ className, rows = 3, ...props }: ComponentProps<'textarea'>) {
+function Textarea({ rows = 3, ...props }: ComponentProps<typeof FlatTextarea>) {
   const hydrated = useHydrated()
-  return (
-    <textarea
-      data-slot="textarea"
-      rows={rows}
-      className={cn(
-        controlVariants({ size: null }),
-        'block min-h-24 resize-y py-2 [--control-radius:var(--radius-lg)]',
-        className,
-      )}
-      {...props}
-      disabled={!hydrated || props.disabled}
-    />
-  )
+  return <FlatTextarea rows={rows} {...props} disabled={!hydrated || props.disabled} />
 }
 
 export { Textarea }

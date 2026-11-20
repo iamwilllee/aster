@@ -22,7 +22,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node scripts/project-database.mjs local",
     "setup": "node scripts/setup.mjs",
-    "check": "pnpm project:check --if-present && pnpm locale:check && pnpm build && pnpm lint && pnpm typecheck && pnpm test && pnpm test:starter",
+    "check": "pnpm project:check --if-present && pnpm locale:check && pnpm docs:check && pnpm brand:check && pnpm build && pnpm lint && pnpm typecheck && pnpm test && pnpm test:starter",
     "admin:grant": "node scripts/admin.mjs grant",
     "admin:revoke": "node scripts/admin.mjs revoke",
     "deploy": "node scripts/deploy.mjs",
@@ -40,7 +40,11 @@
     "aster:new": "node skills/aster-new/scripts/create-project.mjs",
     "project:service": "node scripts/project-service.mjs",
     "project:modules": "node scripts/project-modules.mjs",
-    "project:database": "node scripts/project-database.mjs"
+    "project:database": "node scripts/project-database.mjs",
+    "brand:check": "node scripts/check-brand.mjs",
+    "docs:check": "node scripts/check-docs.mjs",
+    "project:usage": "node scripts/agent-usage.mjs",
+    "flatpack:sync": "node scripts/flatpack-sync.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.9.0",

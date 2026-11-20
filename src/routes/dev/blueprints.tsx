@@ -13,7 +13,7 @@ import {
   SelectItem,
 } from '@/components/ui/select'
 import { getRouteApi } from '@tanstack/react-router'
-import { buttonVariants } from '@/components/ui/button'
+import { buttonProps } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ProductBlueprint } from '@/components/dev/blueprints/product'
 import { DirectoryBlueprint } from '@/components/dev/blueprints/directory'
@@ -50,7 +50,7 @@ function Blueprints() {
         title={t('bp_title')}
         description={t('bp_intro')}
         action={
-          <Link to="/dev/ui" className={buttonVariants({ variant: 'outline' })}>
+          <Link to="/dev/ui" {...buttonProps({ variant: 'outline' })}>
             {t('ui_reference_title')}
           </Link>
         }

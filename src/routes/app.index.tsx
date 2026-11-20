@@ -14,7 +14,7 @@ import {
 import { PageHeading } from '@/components/common'
 import { useI18n } from '@/components/providers'
 import { Badge } from '@/components/ui/badge'
-import { buttonVariants } from '@/components/ui/button'
+import { buttonProps } from '@/components/ui/button'
 import { site } from '@/config/site'
 
 export const Route = createFileRoute('/app/')({ component: Overview })
@@ -58,7 +58,7 @@ function Overview() {
         description={t('a_fresh_start_turn_your_next_idea_into_something_real')}
         action={
           features.projects ? (
-            <Link to="/app/projects" className={buttonVariants({})}>
+            <Link to="/app/projects" {...buttonProps({})}>
               {t('create_a_project')}
               <ArrowUpRight size={15} />
             </Link>

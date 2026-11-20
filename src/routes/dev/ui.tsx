@@ -4,7 +4,7 @@ import { ArrowUpRight, LoaderCircle, Plus } from 'lucide-react'
 import { getAuthInfo } from '@/server/functions'
 import { Logo, Preferences, PageHeading, ErrorNotice } from '@/components/common'
 import { useI18n } from '@/components/providers'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button, buttonProps } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
@@ -66,7 +66,7 @@ function UiReference() {
           <Link
             to="/dev/blueprints"
             search={{ kind: 'product' }}
-            className={buttonVariants({ variant: 'outline' })}
+            {...buttonProps({ variant: 'outline' })}
           >
             {t('bp_title')}
             <ArrowUpRight />

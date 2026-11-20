@@ -11,3 +11,5 @@ qa
 .local
 starter.project.json
 .aster
+src/styles/flatpack.css
+src/components/flatpack

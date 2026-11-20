@@ -1,4 +1,3 @@
-import { Toast } from '@base-ui/react/toast'
-
-// Request-local React context; do not create a global toast manager during SSR.
-export const useToast = Toast.useToastManager
+// Request-local toast manager from the nearest ToastProvider; no global manager is created
+// during SSR.
+export { useToast } from '@/components/flatpack/toast'

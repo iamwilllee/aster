@@ -1,6 +1,8 @@
 # Sage 与 Catalog 视觉主题
 
-Aster 共用 shadcn/ui base-nova（Base UI）组件，提供两套产品视觉主题。base-nova 是组件风格；Sage / Catalog 是本项目的主题名。两者都支持英文/中文、浅色/深色和手机布局，不增加组件框架或云服务。
+[English](en/THEMES.md)
+
+Aster 的组件封装 Base UI，并使用 Flatpack 的 `data-slot` 样式层（`src/styles/flatpack.css`），提供两套产品视觉主题。Sage / Catalog 是 Flatpack 的主题，由 `data-fp-theme` 切换；主题定义在 Flatpack 仓库，用 `pnpm flatpack:sync` 同步到产品。两者都支持英文/中文、浅色/深色和手机布局，不增加组件框架或云服务。
 
 | 主题           | 视觉方向                                                         | 常见用途                           |
 | -------------- | ---------------------------------------------------------------- | ---------------------------------- |
@@ -49,4 +51,4 @@ Agent 先读已有项目与品牌，记录 PROJECT.md 的视觉方向、主要�
 
 预览只使用 URL 参数，不修改项目文件；导航保留当前预览。`_style` 仅在匹配的本地开发来源生效，预发布/生产忽略它并使用 appearance.json；本地蓝图页在远端返回 404。正式主题在服务端渲染时写入 html 的 `data-visual-theme`，避免先显示另一套视觉再切换。用户的浅/深色偏好仍由已有切换器与 localStorage 保存，和产品主题分开。
 
-颜色、字体和圆角集中在 `src/styles.css`，共享控件通过 `--control-radius` 适配。单行控件仍保持 32/36/44px，不在页面覆写尺寸。多行输入保持适合文本编辑的圆角。布局来自页面组合，不能只改颜色就声称完成产品设计。更改后检查桌面/手机、浅深色、中英、键盘与真实交互；规则见 [前端约定](FRONTEND.md) 和 [页面蓝图](PAGE-BLUEPRINTS.md)。
+颜色、字体和圆角集中在 Flatpack 样式层，共享控件通过 `--fp-radius-control` 与 `--fp-radius-surface` 适配；`src/styles.css` 只做 Tailwind 颜色名映射。单行控件统一为 32/40/48px，不在页面覆写尺寸。多行输入保持适合文本编辑的圆角。布局来自页面组合，不能只改颜色就声称完成产品设计。更改后检查桌面/手机、浅深色、中英、键盘与真实交互；规则见 [前端约定](FRONTEND.md) 和 [页面蓝图](PAGE-BLUEPRINTS.md)。

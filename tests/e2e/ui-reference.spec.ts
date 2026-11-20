@@ -40,8 +40,8 @@ test('local component reference preserves size, disabled, dialog, theme and mobi
   await expect(page.getByRole('heading', { name: '组件样板', exact: true })).toBeVisible()
   for (const [size, height] of [
     ['sm', 32],
-    ['default', 36],
-    ['lg', 44],
+    ['default', 40],
+    ['lg', 48],
   ] as const) {
     const controls = page
       .locator(`[data-ui-row="${size}"]`)

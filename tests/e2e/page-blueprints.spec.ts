@@ -191,7 +191,7 @@ test('Catalog and Sage preview themes persist through navigation, preserve contr
       el.evaluate((node) => Math.round(node.getBoundingClientRect().height)),
     ),
   )
-  expect(sizes).toEqual([36, 36])
+  expect(sizes).toEqual([40, 40])
   await page
     .getByRole('textbox', { name: 'Search sample products', exact: true })
     .fill('no matching object')

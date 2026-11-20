@@ -1,16 +1,11 @@
-import * as React from 'react'
+import type { ComponentProps } from 'react'
 import { cn } from 'cn'
+import { Label as FlatLabel } from '@/components/flatpack/input'
 
-function Label({ className, ...props }: React.ComponentProps<'label'>) {
+// Flatpack labels sit above a control with a bottom margin; Aster forms lay out with gap.
+function Label({ className, ...props }: ComponentProps<typeof FlatLabel>) {
   return (
-    <label
-      data-slot="label"
-      className={cn(
-        'flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50',
-        className,
-      )}
-      {...props}
-    />
+    <FlatLabel className={cn('mb-0 flex items-center gap-2 select-none', className)} {...props} />
   )
 }
 

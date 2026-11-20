@@ -12,6 +12,8 @@ export default tseslint.config(
       '.tanstack/**',
       'worker-configuration.d.ts',
       'src/routeTree.gen.ts',
+      // Flatpack sources, copied unmodified by scripts/flatpack-sync.mjs.
+      'src/components/flatpack/**',
       'playwright-report/**',
       'test-results/**',
       'qa/**',
@@ -65,7 +67,7 @@ export default tseslint.config(
         'warn',
         {
           allowConstantExport: true,
-          allowExportNames: ['buttonVariants', 'badgeVariants', 'useI18n'],
+          allowExportNames: ['buttonProps', 'useI18n'],
         },
       ],
     },

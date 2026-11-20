@@ -1,0 +1,330 @@
+{
+  "schemaVersion": 1,
+  "topics": [
+    {
+      "slug": "agent-guide",
+      "file": "AGENT-GUIDE.md",
+      "group": "start",
+      "title": {
+        "en": "Agent guide",
+        "zh": "Agent 使用指南"
+      },
+      "translation": {
+        "sourceSha256": "a4776b7a7eed11319740a8d58b2ce194351a5f1dea1ebf7530969ebfcda045a9",
+        "englishSha256": "ce1bd8ba2f88a8173c4542416692ac6bfce742d0167364b298049c4688650e6f"
+      }
+    },
+    {
+      "slug": "modules",
+      "file": "MODULES.md",
+      "group": "start",
+      "title": {
+        "en": "Capabilities",
+        "zh": "能力选择"
+      },
+      "translation": {
+        "sourceSha256": "33c07bd5ffa9166132bb814c925a92f9e5698b613b3554e160145dcce310cd9e",
+        "englishSha256": "3c56ec34c3f881c5faf46dc884b5d768ed14b45ef6617796a23637c8a1ef3703"
+      }
+    },
+    {
+      "slug": "development",
+      "file": "DEVELOPMENT.md",
+      "group": "start",
+      "title": {
+        "en": "Development",
+        "zh": "开发手册"
+      },
+      "translation": {
+        "sourceSha256": "71aa0b22bc7b7ad6ef162d36936eaf2c426e057899f4ed4fb16bf2e95108f9f7",
+        "englishSha256": "9d1e32619b54876802f427452e40f65784227db14800dbd71bb42caa40c94ee2"
+      }
+    },
+    {
+      "slug": "project-brief",
+      "file": "templates/PROJECT-BRIEF.md",
+      "group": "start",
+      "title": {
+        "en": "Project brief",
+        "zh": "需求与交接模板"
+      },
+      "translation": {
+        "sourceSha256": "a3a7b39e15e8b863b790240049256610df122ff7ad158711c22267370b3c6f98",
+        "englishSha256": "503f992f9bf97ede6fe1d13b8fcba70bda16b667f345998ff477105168b6d4a9"
+      }
+    },
+    {
+      "slug": "frontend",
+      "file": "FRONTEND.md",
+      "group": "design",
+      "title": {
+        "en": "Frontend",
+        "zh": "前端约定"
+      },
+      "translation": {
+        "sourceSha256": "7c9c00d665db9786c3b9bf9396a48ae82813253047731803cbf7d1bd689481e5",
+        "englishSha256": "760a651565685980a43ab1f579567f741018edf7d91a04d083c3bc74aea7007c"
+      }
+    },
+    {
+      "slug": "page-blueprints",
+      "file": "PAGE-BLUEPRINTS.md",
+      "group": "design",
+      "title": {
+        "en": "Page blueprints",
+        "zh": "页面蓝图"
+      },
+      "translation": {
+        "sourceSha256": "3e1d925985d57e3e4f4b03658bbcfca36096b6e3fe8b7915e1736adef16dcabe",
+        "englishSha256": "752784ffa4909b92a6baf8af85ab7e302705bff2150f617cc3e2158b528b497a"
+      }
+    },
+    {
+      "slug": "themes",
+      "file": "THEMES.md",
+      "group": "design",
+      "title": {
+        "en": "Themes",
+        "zh": "视觉主题"
+      },
+      "translation": {
+        "sourceSha256": "a8ca589def6aabfa9194a0b0d49368ea33e344ef25f09655e56dede57e43e61e",
+        "englishSha256": "2bb533c04bf72949ecf25cfb44751237c7484ad98612aa9d8194c86d7f73dc78"
+      }
+    },
+    {
+      "slug": "brand",
+      "file": "BRAND.md",
+      "group": "design",
+      "title": {
+        "en": "Aster brand",
+        "zh": "Aster 品牌"
+      },
+      "translation": {
+        "sourceSha256": "ab6f9b1e729691813c541e40e9b17ca04463a82746468f79ec6e91b162685666",
+        "englishSha256": "7e66fc6f87cbfab7865cfc62490dca97f23c9ab3e31375b88d72501636e53533"
+      }
+    },
+    {
+      "slug": "brand-workflow",
+      "file": "BRAND-WORKFLOW.md",
+      "group": "design",
+      "title": {
+        "en": "Product icon workflow",
+        "zh": "产品图标流程"
+      },
+      "translation": {
+        "sourceSha256": "3a33c4542a89afd67fc563e34be0bcac63b215c1cc11b08749e93657fce704b4",
+        "englishSha256": "0a25f764707bb00d5b895b5998f7be76e789c5af00f56dbce6c8effc4b1b79df"
+      }
+    },
+    {
+      "slug": "account-security",
+      "file": "ACCOUNT-SECURITY.md",
+      "group": "product",
+      "title": {
+        "en": "Account security",
+        "zh": "账号安全"
+      },
+      "translation": {
+        "sourceSha256": "5b82d9a7830635ad42eee0ed1c31bf8f3ff043cedf4cd5f87d5287630a190e05",
+        "englishSha256": "5e688a9ffbcaa836bf8cd9f60e0f0d95580f61bb25ad370c0c5076373603e57a"
+      }
+    },
+    {
+      "slug": "account-lifecycle",
+      "file": "ACCOUNT-LIFECYCLE.md",
+      "group": "product",
+      "title": {
+        "en": "Account lifecycle",
+        "zh": "账号生命周期"
+      },
+      "translation": {
+        "sourceSha256": "f9c7aa928a113bd3b64c510ca487521ef00ef29c84e65439b3d0c199f4d27110",
+        "englishSha256": "ed3a03134987d07dc30f5622eeda090e6f6523d865ba0d52a887fb3d25ea5e2b"
+      }
+    },
+    {
+      "slug": "admin",
+      "file": "ADMIN.md",
+      "group": "product",
+      "title": {
+        "en": "Administration",
+        "zh": "运营后台"
+      },
+      "translation": {
+        "sourceSha256": "6f222550a0a5b73829bcbbeb119eb8b0265f7c432d0e3bb75db967cb68676229",
+        "englishSha256": "998187b476d57e2040561321cb5194ced52a3bd6dbe2299c327cbdd7c5451be2"
+      }
+    },
+    {
+      "slug": "files",
+      "file": "FILES.md",
+      "group": "product",
+      "title": {
+        "en": "Private images",
+        "zh": "私有图片"
+      },
+      "translation": {
+        "sourceSha256": "c42be5214ecc243a8377c69a29a3490fa4c228945d9f13f26bcceafc43246948",
+        "englishSha256": "b2117f4dd81b60baa6df7f924f78bf35d599ab69acb0425b3afe7b2197c4125d"
+      }
+    },
+    {
+      "slug": "content",
+      "file": "CONTENT.md",
+      "group": "product",
+      "title": {
+        "en": "Editorial content",
+        "zh": "内容管理"
+      },
+      "translation": {
+        "sourceSha256": "8bd6751bcbe99b1cdcb167cafc6b2ff32124e003fc9d200a005dc5eebd85bdce",
+        "englishSha256": "27ac68fee33a81d2a152fd9d1068823971560462fd8a20e3ab4602c1f1fb85cc"
+      }
+    },
+    {
+      "slug": "cloudflare",
+      "file": "CLOUDFLARE.md",
+      "group": "cloud",
+      "title": {
+        "en": "Cloudflare architecture",
+        "zh": "Cloudflare 架构"
+      },
+      "translation": {
+        "sourceSha256": "4cc1aeb4ce9c4d43f3a5bcfcd6525f7acb06463cf182cb477bda6eff1f4d1271",
+        "englishSha256": "992cc2344ce90e765d62c8f980741184ec4d53b6665c728b594275df21eb9cca"
+      }
+    },
+    {
+      "slug": "costs",
+      "file": "COSTS.md",
+      "group": "cloud",
+      "title": {
+        "en": "Costs and progression",
+        "zh": "成本与递进"
+      },
+      "translation": {
+        "sourceSha256": "496e521eddadb3b2aaf37657c09079c5959e4e99597570729442abe116e8b309",
+        "englishSha256": "66603bfb57392518cf3f63c00b0cbff263a0c52a41c20d7f2828bc352a7f78b0"
+      }
+    },
+    {
+      "slug": "mail",
+      "file": "MAIL.md",
+      "group": "cloud",
+      "title": {
+        "en": "Transactional mail",
+        "zh": "邮件接入"
+      },
+      "translation": {
+        "sourceSha256": "a9cb825f2851e0edaddb316743e04f65069b1a14a351944344015010b5e1b648",
+        "englishSha256": "bc0a659bfb0d4c53628522994ab5a2df36bbaf0631e488eabed9f4019eed4d68"
+      }
+    },
+    {
+      "slug": "service-workflow",
+      "file": "SERVICE-WORKFLOW.md",
+      "group": "cloud",
+      "title": {
+        "en": "Provider checkpoints",
+        "zh": "外部配置续做"
+      },
+      "translation": {
+        "sourceSha256": "f24aecbe451c914c699479f5a56a330f2c2af56e028780841ae8c688a9c926e6",
+        "englishSha256": "468a4d65a976ff5fc0dd85ec874f353ba63c00fd4dad318e09a97e712c51f48f"
+      }
+    },
+    {
+      "slug": "database",
+      "file": "DATABASE.md",
+      "group": "cloud",
+      "title": {
+        "en": "Database releases",
+        "zh": "数据库发布"
+      },
+      "translation": {
+        "sourceSha256": "dfadcc1e2f25d380db8c3c742a330a2068bac1323ba2eed1d419d10a585993d6",
+        "englishSha256": "60b5c96bf0189bf45bea3e115867408f4597803cb0072fc25d2dcca8306edd2e"
+      }
+    },
+    {
+      "slug": "deployment",
+      "file": "DEPLOYMENT.md",
+      "group": "cloud",
+      "title": {
+        "en": "Deployment",
+        "zh": "部署指南"
+      },
+      "translation": {
+        "sourceSha256": "e59b20952c711935b19d73f7140e4cc73037b9a174eef2f4957a4aaa6da29b34",
+        "englishSha256": "09268dcd10bbbe95bfb2c3ee4d2d4484f755a088981f1135126887295b1440f3"
+      }
+    },
+    {
+      "slug": "payments",
+      "file": "PAYMENTS.md",
+      "group": "cloud",
+      "title": {
+        "en": "Payment eligibility",
+        "zh": "支付选型"
+      },
+      "translation": {
+        "sourceSha256": "009b4d0ca9ea258da7094b85d272c0d5d25339484eed110bc98d58f95ba50797",
+        "englishSha256": "0ede42bda3823de40de67d62b06c804d97a5534a456e06dc695919a7cd148230"
+      }
+    },
+    {
+      "slug": "upgrading",
+      "file": "UPGRADING.md",
+      "group": "maintenance",
+      "title": {
+        "en": "Upgrading products",
+        "zh": "产品升级"
+      },
+      "translation": {
+        "sourceSha256": "ed384ebf7d3f6dc1a59088215c2d97ede316bfe5ea424351cb93f637f5ed3609",
+        "englishSha256": "9cefd10d059dad5fb8d80b33f85cd33d0e5d81f07471e19e717f74aa7ded7941"
+      }
+    },
+    {
+      "slug": "releasing",
+      "file": "RELEASING.md",
+      "group": "maintenance",
+      "title": {
+        "en": "Release maintenance",
+        "zh": "发版维护"
+      },
+      "translation": {
+        "sourceSha256": "2e440bcb78532a103e0a19c924b1cf00eb816a351cb4c285623da0e333d305bb",
+        "englishSha256": "33f4ad2d5fc87c1a377abd928d512b0232009d3c7616ec92ee2d7217ea24f46d"
+      }
+    },
+    {
+      "slug": "release-0-2",
+      "file": "releases/0.2.0-beta.1.md",
+      "group": "maintenance",
+      "title": {
+        "en": "v0.2.0-beta.1",
+        "zh": "v0.2.0-beta.1 版本说明"
+      },
+      "translation": {
+        "sourceSha256": "0c9dbc419311a8aa4a2269788ee06fddc2a5250c2c6b56d7fd8079c6029fea0b",
+        "englishSha256": "bec8955f46f8a4717db5a737b5a2c0eee034334e971236fae87aa57301556544"
+      }
+    },
+    {
+      "slug": "agent-usage",
+      "file": "AGENT-USAGE.md",
+      "group": "maintenance",
+      "title": {
+        "en": "Development task usage",
+        "zh": "开发任务用量"
+      },
+      "translation": {
+        "sourceSha256": "0670814965f53f218ceb608a2800efc863c14e3f08633d7938ca1f8c497f88ad",
+        "englishSha256": "978c03931744539c3eaab91643279501bff23eae26622913002e3e90a1524410"
+      }
+    }
+  ]
+}

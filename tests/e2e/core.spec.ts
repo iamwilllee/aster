@@ -146,7 +146,7 @@ test('browser workflow: sign in, create, edit, reload, filter, settings, delete,
   const search = page.getByLabel('搜索项目', { exact: true })
   const filter = page.getByRole('combobox', { name: '筛选项目状态', exact: true })
   for (const control of [search, filter, page.getByRole('button', { name: '新建项目' })])
-    expect(await control.evaluate((node) => node.getBoundingClientRect().height)).toBe(36)
+    expect(await control.evaluate((node) => node.getBoundingClientRect().height)).toBe(40)
   await expect(page.locator('select:visible')).toHaveCount(0)
   await page.getByRole('button', { name: '新建项目' }).click()
   await page.getByLabel('项目名称', { exact: true }).fill('浏览器保存测试')
@@ -164,12 +164,12 @@ test('browser workflow: sign in, create, edit, reload, filter, settings, delete,
   await expect(page.getByRole('heading', { name: '已编辑的想法' })).toBeVisible()
   await page.getByRole('button', { name: '编辑 已编辑的想法' }).click()
   await expect(editorStatus).toHaveText('开发中')
-  expect(await editorStatus.evaluate((node) => node.getBoundingClientRect().height)).toBe(36)
+  expect(await editorStatus.evaluate((node) => node.getBoundingClientRect().height)).toBe(40)
   expect(
     await page
       .getByLabel('项目名称', { exact: true })
       .evaluate((node) => node.getBoundingClientRect().height),
-  ).toBe(36)
+  ).toBe(40)
   await page.getByRole('button', { name: '取消', exact: true }).click()
   // A custom popup must preserve keyboard dismissal and URL/refresh behavior.
   await filter.focus()

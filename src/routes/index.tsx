@@ -16,7 +16,7 @@ import { useI18n } from '@/components/providers'
 import { site } from '@/config/site'
 import { RevealGroup } from '@/components/ui/reveal'
 import { Badge } from '@/components/ui/badge'
-import { buttonVariants } from '@/components/ui/button'
+import { buttonProps } from '@/components/ui/button'
 
 export const Route = createFileRoute('/')({ component: Home })
 function Home() {
@@ -45,7 +45,7 @@ function Home() {
           )}
           <Preferences />
           {features.auth && (
-            <Link to="/login" className={buttonVariants({ variant: 'outline' })}>
+            <Link to="/login" {...buttonProps({ variant: 'outline' })}>
               {t('open_workspace')} <span aria-hidden>↗</span>
             </Link>
           )}
@@ -81,12 +81,12 @@ function Home() {
               <div data-reveal="enter" data-reveal-step="3" className="mt-8 flex flex-wrap gap-3">
                 <Link
                   to={registrationReady ? '/signup' : '/login'}
-                  className={buttonVariants({ size: 'lg' })}
+                  {...buttonProps({ size: 'lg' })}
                 >
                   {registrationReady ? t('create_your_workspace') : t('go_to_sign_in')}
                   <ArrowUpRight size={17} />
                 </Link>
-                <Link to="/app" className={buttonVariants({ variant: 'outline', size: 'lg' })}>
+                <Link to="/app" {...buttonProps({ variant: 'outline', size: 'lg' })}>
                   {t('explore_workspace')}
                   <ArrowRight size={16} />
                 </Link>

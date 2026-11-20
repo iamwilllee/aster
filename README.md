@@ -8,6 +8,8 @@
 
 源码仓库为 [iamwilllee/aster](https://github.com/iamwilllee/aster)。当前版本 **v0.2.0-beta.1，无支付公开预览版**。发布状态与下载见 [GitHub Releases](https://github.com/iamwilllee/aster/releases)，支持范围与采用方式见 [版本说明](docs/releases/0.2.0-beta.1.md)。本地与隔离 Worker 验收不等于每个产品的真实邮件、Google、R2 或云端部署已接通。
 
+官网：[aster.iamwilllee.com](https://aster.iamwilllee.com/) · [中文](https://aster.iamwilllee.com/zh)。官网为独立静态展示站，提供产品介绍、快速开始与已发布版本的文档入口；维护和部署见 [website/README.md](website/README.md)。
+
 ![Aster Logo](public/brand/aster-logo.svg)
 
 本地 `/dev/blueprints` 提供官网、目录阅读、商品目录、数据工作台四类可交互页面蓝图，中英文及深浅主题可用；仅演示、不保存到服务端，生产入口关闭。Agent 选用方式见 [页面规划与组合](docs/PAGE-BLUEPRINTS.md)。
@@ -15,6 +17,8 @@
 当前绿色主题命名为 **Sage**；新增 **Catalog** 中性商品目录主题。配置、Agent 选择及本地预览见 [主题指南](docs/THEMES.md)。私有图片库及头像/封面接入见 [图片指南](docs/FILES.md)。
 
 内容管理支持文章、帮助和公告的草稿、预览、发布/撤下，以及独立的网站封面素材。后台与发布边界见 [内容管理](docs/CONTENT.md)。模块按需开启，新产品默认关闭。
+
+文档：[English](docs/en/README.md) · [中文](docs/README.md)。Skill 指令使用英文，交流和业务交接跟随用户语言。
 
 ## 开始使用
 
@@ -53,7 +57,7 @@ pnpm dev
 
 前端：React、TanStack Router / Query、Tailwind CSS、shadcn/ui base-nova、Base UI、Lucide。服务端：Workers、Better Auth、Drizzle、D1。没有同时引入另一套 UI、表单或全局状态框架；拖拽/动画按真实需求再引入。
 
-基础控件包含 Button、Input、Select、Textarea；单行尺寸统一为 32/36/44px，默认 36px。业务页面的原生控件、直接 Base UI 导入与共享控件尺寸覆盖由 ESLint 检查；新增控件先在 UI 层封装。具体 API、布局边界与验收要求见 [前端约定](docs/FRONTEND.md)。
+基础控件包含 Button、Input、Select、Textarea；单行尺寸统一为 32/40/48px，默认 40px。业务页面的原生控件、直接 Base UI 导入与共享控件尺寸覆盖由 ESLint 检查；新增控件先在 UI 层封装。具体 API、布局边界与验收要求见 [前端约定](docs/FRONTEND.md)。
 
 组件样板：[本地英文](http://127.0.0.1:3100/dev/ui) · [本地中文](http://127.0.0.1:3100/zh/dev/ui)。包含基础组件、列表/详情/设置组合及两种视觉排版方向，仅匹配的本机开发来源开放；演示不保存业务数据，生产路径返回 404。
 
@@ -125,7 +129,7 @@ pnpm aster:new ../snippet-shelf --name "Snippet Shelf" --brief "私人代码片�
 详见 [Agent 使用指南](docs/AGENT-GUIDE.md)；[产品需求模板](docs/templates/PROJECT-BRIEF.md) 由命令自动生成到新项目的 `PROJECT.md`。Skill 安装为指向此底座的链接；保留底座目录。当前未发布 npm 包，其他 Agent 可克隆本仓库后直接使用 CLI 或读取仓库中的 [Skill](skills/aster-new/SKILL.md)。
 
 - `src/config/site.ts`：品牌名、描述与服务端项目上限。页面示例文案和套餐说明也需相应调整。
-- `src/styles.css`、`public/favicon.svg`：主题与图标。
+- `src/styles/flatpack.css`（由 Flatpack 同步，勿手改）、`src/styles.css`、`public/favicon.svg`：主题与图标。
 - `src/modules/`：认证、邮件、支付及项目校验；按业务增加模块。
 - `src/db/schema.ts` + `migrations/`：数据模型和可追溯 SQL。
 - `AGENTS.md`：供 AI 协作时遵守的目录与边界。

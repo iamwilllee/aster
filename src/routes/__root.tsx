@@ -12,6 +12,7 @@ import { Providers, useI18n } from '@/components/providers'
 import { appearance } from '@/config/appearance'
 import type { VisualTheme } from '@/config/appearance-policy.mjs'
 import { site } from '@/config/site'
+import { brand } from '@/config/brand'
 import { translate, localizePath, type Locale } from '@/i18n/core'
 import { getPublicConfig } from '@/server/functions'
 import { Button } from '@/components/ui/button'
@@ -44,7 +45,8 @@ export const Route = createRootRoute({
       ],
       links: [
         { rel: 'stylesheet', href: css },
-        { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' },
+        { rel: 'icon', ...brand.favicon },
+        ...(brand.appleTouchIcon ? [{ rel: 'apple-touch-icon', href: brand.appleTouchIcon }] : []),
         ...(publicPage && origin
           ? [
               { rel: 'canonical', href: origin + localizePath(path, locale) },
@@ -99,6 +101,7 @@ function Document({
   return (
     <html
       data-visual-theme={theme}
+      data-fp-theme={theme}
       lang={locale === 'zh' ? 'zh-CN' : 'en'}
       suppressHydrationWarning
     >
@@ -106,7 +109,7 @@ function Document({
         <HeadContent />
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{if(localStorage.getItem('starter-theme')==='dark'||(!localStorage.getItem('starter-theme')&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.classList.add('dark')}catch{}`,
+            __html: `try{if(localStorage.getItem('starter-theme')==='dark'||(!localStorage.getItem('starter-theme')&&matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark');document.documentElement.setAttribute('data-theme','dark')}}catch{}`,
           }}
         />
       </head>

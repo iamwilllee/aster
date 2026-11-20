@@ -1,0 +1,26 @@
+{
+  "commit": "7743c72eb443fddeb01bba910909dad0195ada3c",
+  "uncommittedChanges": false,
+  "files": {
+    "src/styles/flatpack.css": "def140fdf124f7623ad68d96186e87296c02068ecb13a41193741cdb24cc5ba4",
+    "src/components/flatpack/button.tsx": "24f3e9e9c315bcbdcaa6890731ef42da6f2fd2bc1de41c4dcb361fb50a3be06d",
+    "src/components/flatpack/badge.tsx": "1bde6f5fdeff6937a0781c9f4ec332bd4311e04f310612406b3077a73c9cad79",
+    "src/components/flatpack/card.tsx": "7d1e5e788aaa3fb3b7be3f7806868e0ae7fb53eccbe80f2976a9b2ec9deddc30",
+    "src/components/flatpack/table.tsx": "3230fd0c44d1e348fb977fe70c77e7c38ff16856a0f33bbf4337e69452be380e",
+    "src/components/flatpack/skeleton.tsx": "47f9098dc32d435ba07fff2cf873bdbbe569f803012ad02e6a826d1c41474078",
+    "src/components/flatpack/input.tsx": "200b8b9db905f7f40ccde0bd999aae87fa48440c21ed2c4f65de01b383522f63",
+    "src/components/flatpack/textarea.tsx": "064c93c3acd9ae7a167446bdb233bd8bdfb2d2e26c015673df05be1dfcbb45af",
+    "src/components/flatpack/progress.tsx": "f5ca2bd3033e523ad53bacad459280c58f8af42724fd6956a6c3b6bb4c436935",
+    "src/components/flatpack/tabs.tsx": "3853a7bd9d6cf0cf11682e0b9173ee26d73b5d8a49c2269408d15585cab4b385",
+    "src/components/flatpack/checkbox.tsx": "9b380d964a2631ac8b1e22f086b2dfdcde488d9cb291a41a1cd8a75095051dba",
+    "src/components/flatpack/switch.tsx": "91e03ed7f260ba32821c1d2a1b3fb278b7e8711ffeef2ce9c11f15df9f75d485",
+    "src/components/flatpack/dialog.tsx": "f47eca333f354b058e110a5707749db956099766824310b1d507d86d4661e793",
+    "src/components/flatpack/select.tsx": "07047f1fc2d2c64d536145b58c9a371a22a9437bc607f4f786992edfd1eb7fec",
+    "src/components/flatpack/dropdown-menu.tsx": "40be80f80a09cb42754afac5afd6478d9c4ac8ed47236e8d9979e21292445ecd",
+    "src/components/flatpack/tooltip.tsx": "e1ed2c5a2f801c67e694935086171f73c091b01fa0dd3ce725bf82e6cc954012",
+    "src/components/flatpack/toast.tsx": "87da11aedfb01cb62b0ed2b066b36485080702caf8db7deaf5277caa35ae1767",
+    "src/components/flatpack/alert.tsx": "868c2dea66942c26c8c18069349103db47915330bc4f14066dd30d706049701d",
+    "src/components/flatpack/empty.tsx": "fae360130afa33054bf8f9fb523d3196592564cad235b5c6d7ac8ef2ba05b5ce",
+    "src/components/flatpack/sidebar.tsx": "80e2e1f0f3b60d2cc4501f8b2bb322ac828fcf317a18feb9b956dcd2ffafc8b7"
+  }
+}

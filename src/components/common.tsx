@@ -1,9 +1,11 @@
 import { Link } from '@tanstack/react-router'
-import { Moon, Sun, Languages, LoaderCircle, AlertCircle } from 'lucide-react'
+import { Moon, Sun, Languages, LoaderCircle } from 'lucide-react'
+import { Alert } from './ui/alert'
 import { Button } from './ui/button'
 import { useI18n } from './providers'
 import type { ReactNode } from 'react'
 import { site } from '@/config/site'
+import { brand } from '@/config/brand'
 
 export function Logo({ compact = false }: { compact?: boolean }) {
   const { t } = useI18n()
@@ -13,7 +15,22 @@ export function Logo({ compact = false }: { compact?: boolean }) {
       className="flex items-center gap-2.5 font-semibold tracking-tight"
       aria-label={t('home_label', { name: site.name })}
     >
-      <img src="/brand/aster-icon.svg" alt="" width={32} height={32} className="size-8 shrink-0" />
+      <img
+        src={brand.icon}
+        alt=""
+        width={32}
+        height={32}
+        className={`size-8 shrink-0${brand.iconDark ? ' dark:hidden' : ''}`}
+      />
+      {brand.iconDark && (
+        <img
+          src={brand.iconDark}
+          alt=""
+          width={32}
+          height={32}
+          className="hidden size-8 shrink-0 dark:block"
+        />
+      )}
       {!compact && (
         <span className="text-xl">
           {site.name}
@@ -42,6 +59,7 @@ export function Preferences() {
         aria-label={t('toggle_theme')}
         onClick={() => {
           const dark = document.documentElement.classList.toggle('dark')
+          document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light')
           try {
             localStorage.setItem('starter-theme', dark ? 'dark' : 'light')
           } catch {
@@ -80,15 +98,7 @@ export function PageHeading({
   )
 }
 export function ErrorNotice({ children }: { children: ReactNode }) {
-  return (
-    <div
-      role="alert"
-      className="flex items-start gap-2 rounded-lg border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive"
-    >
-      <AlertCircle className="mt-0.5 size-4 shrink-0" />
-      <div>{children}</div>
-    </div>
-  )
+  return <Alert variant="error">{children}</Alert>
 }
 export function Loading() {
   const { t } = useI18n()

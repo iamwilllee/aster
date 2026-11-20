@@ -1,25 +1,13 @@
-import * as React from 'react'
-import { Input as InputPrimitive } from '@base-ui/react/input'
+import { Input as FlatInput, type InputProps } from '@/components/flatpack/input'
 import { cn } from 'cn'
-import { controlVariants, type ControlSize } from './control'
 import { useHydrated } from '@/lib/use-hydrated'
 
-type InputProps = Omit<React.ComponentProps<'input'>, 'size'> & {
-  size?: ControlSize
-  htmlSize?: number
-}
-
-function Input({ className, type, size = 'default', htmlSize, ...props }: InputProps) {
+function Input({ className, ...props }: InputProps) {
   const hydrated = useHydrated()
   return (
-    <InputPrimitive
-      type={type}
-      size={htmlSize}
-      data-slot="input"
-      data-size={size}
+    <FlatInput
       className={cn(
-        controlVariants({ size }),
-        'block file:inline-flex file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground',
+        'file:inline-flex file:h-full file:border-0 file:bg-transparent file:text-sm file:font-medium',
         className,
       )}
       {...props}

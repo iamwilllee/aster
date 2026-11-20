@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { RotateCcw } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { useI18n } from '@/components/providers'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button, buttonProps } from '@/components/ui/button'
 import { RevealGroup } from '@/components/ui/reveal'
 
 export function MotionExamples() {
@@ -50,7 +50,7 @@ export function MotionExamples() {
       <RevealGroup className="mt-6">
         <div data-reveal="scroll" className="rounded-lg border bg-muted/40 p-5">
           <p className="mb-4 text-sm leading-7 text-muted-foreground">{t('ui_motion_scroll')}</p>
-          <Link to="/" className={buttonVariants({ variant: 'outline' })}>
+          <Link to="/" {...buttonProps({ variant: 'outline' })}>
             {t('back_home')}
           </Link>
         </div>

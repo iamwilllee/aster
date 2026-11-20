@@ -145,7 +145,9 @@ test('theme and locale entrances preserve mobile/desktop geometry in light and d
         )
         const cta = page.locator('main a').first()
         if (await cta.count())
-          expect(await cta.evaluate((element) => element.getBoundingClientRect().height)).toBe(44)
+          expect(
+            await cta.evaluate((element) => element.getBoundingClientRect().height),
+          ).toBeCloseTo(48, 1)
       }
     }
   }
