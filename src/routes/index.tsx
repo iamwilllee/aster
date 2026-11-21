@@ -11,7 +11,7 @@ import {
   Terminal,
   Box,
 } from 'lucide-react'
-import { Logo, Preferences } from '@/components/common'
+import { Logo, Main, Preferences } from '@/components/common'
 import { useI18n } from '@/components/providers'
 import { site } from '@/config/site'
 import { RevealGroup } from '@/components/ui/reveal'
@@ -51,7 +51,7 @@ function Home() {
           )}
         </div>
       </header>
-      <main>
+      <Main>
         <section className="mx-auto grid max-w-6xl items-center gap-12 px-5 pb-20 pt-14 sm:px-8 sm:pt-20 lg:grid-cols-[1.05fr_1fr]">
           <div>
             <Badge
@@ -231,7 +231,7 @@ function Home() {
             ))}
           </div>
         </section>
-      </main>
+      </Main>
       <footer className="mx-auto flex max-w-6xl flex-wrap justify-between gap-4 px-5 py-7 text-xs text-muted-foreground sm:px-8">
         <span>
           {site.name} · v{site.version}

@@ -3,7 +3,7 @@ import { notFound } from '@tanstack/react-router'
 import { createFileRoute, Link, getRouteApi } from '@tanstack/react-router'
 import { ArrowUpRight, Check } from 'lucide-react'
 import { buttonProps } from '@/components/ui/button'
-import { Logo, Preferences } from '@/components/common'
+import { Logo, Main, Preferences } from '@/components/common'
 import { useI18n } from '@/components/providers'
 
 export const Route = createFileRoute('/pricing')({
@@ -21,7 +21,7 @@ function Pricing() {
         <Logo />
         <Preferences />
       </header>
-      <main className="py-16">
+      <Main className="py-16">
         <p className="text-center text-[10px] font-semibold tracking-[0.2em] text-primary">
           START SMALL. GROW YOUR WAY.
         </p>
@@ -80,7 +80,7 @@ function Pricing() {
             </section>
           ))}
         </div>
-      </main>
+      </Main>
     </div>
   )
 }

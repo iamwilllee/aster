@@ -5,6 +5,8 @@ import { pathToFileURL } from 'node:url'
 const imageTypes = {
   '.svg': 'image/svg+xml',
   '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
   '.webp': 'image/webp',
   '.ico': 'image/x-icon',
 }
@@ -29,7 +31,13 @@ export function checkBrand(root) {
       return
     }
     const type = imageTypes[extname(value).toLowerCase()]
-    if (!type || (label === 'appleTouchIcon' && type !== 'image/png')) {
+    // Link previews are fetched by other sites' crawlers, which do not render SVG or ICO.
+    const bitmap = ['image/png', 'image/jpeg', 'image/webp']
+    if (
+      !type ||
+      (label === 'appleTouchIcon' && type !== 'image/png') ||
+      (label === 'socialImage' && !bitmap.includes(type))
+    ) {
       errors.push(`${label}: unsupported format`)
       return
     }
@@ -51,6 +59,7 @@ export function checkBrand(root) {
   if (faviconType && config.favicon?.type !== faviconType)
     errors.push('favicon: MIME type must match the file extension')
   asset('appleTouchIcon', config.appleTouchIcon, true)
+  asset('socialImage', config.socialImage ?? null, true)
   return { errors, files: [...new Set(files)] }
 }
 

@@ -3,7 +3,7 @@ import { useState, type FormEvent } from 'react'
 import { Link, useRouter } from '@tanstack/react-router'
 import { ArrowLeft, ArrowRight, CheckCircle2, Mail, ShieldCheck } from 'lucide-react'
 import { authClient } from '@/modules/auth/auth-client'
-import { Logo, Preferences, ErrorNotice } from './common'
+import { Logo, Main, Preferences, ErrorNotice } from './common'
 import { VerificationResend } from './verification-resend'
 import { localizePath } from '@/i18n/core'
 import { authError } from '@/i18n/auth-errors'
@@ -96,7 +96,7 @@ export function AuthForm({
         <Logo />
         <Preferences />
       </header>
-      <main className="mx-auto grid min-h-[calc(100vh-100px)] max-w-5xl items-center gap-12 px-6 pb-16 pt-6 lg:grid-cols-2 lg:gap-24">
+      <Main className="mx-auto grid min-h-[calc(100vh-100px)] max-w-5xl items-center gap-12 px-6 pb-16 pt-6 lg:grid-cols-2 lg:gap-24">
         <div className="hidden lg:block">
           <p className="mb-7 text-[10px] font-semibold tracking-[0.2em] text-primary">
             A GOOD PLACE TO START
@@ -328,7 +328,7 @@ export function AuthForm({
             {site.name} · TanStack Start × Cloudflare
           </p>
         </section>
-      </main>
+      </Main>
     </div>
   )
 }

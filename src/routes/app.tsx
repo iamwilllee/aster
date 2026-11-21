@@ -20,7 +20,7 @@ import {
 import { useState } from 'react'
 import { getWorkspace } from '@/server/functions'
 import { authClient } from '@/modules/auth/auth-client'
-import { Logo, Preferences, ErrorNotice } from '@/components/common'
+import { Logo, Main, Preferences, ErrorNotice } from '@/components/common'
 import { Button } from '@/components/ui/button'
 import { SidebarItem, SidebarSection } from '@/components/ui/sidebar'
 import { useI18n } from '@/components/providers'
@@ -220,14 +220,14 @@ function AppShell() {
             </Button>
           </div>
         </header>
-        <main className="mx-auto max-w-6xl p-5 pb-12 sm:p-9">
+        <Main className="mx-auto max-w-6xl p-5 pb-12 sm:p-9">
           {error && (
             <div className="mb-5">
               <ErrorNotice>{error}</ErrorNotice>
             </div>
           )}
           <Outlet />
-        </main>
+        </Main>
       </div>
     </div>
   )

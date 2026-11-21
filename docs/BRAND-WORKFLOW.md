@@ -28,7 +28,7 @@
 
 ## 接入
 
-`src/config/brand.json` 是运行时资产路径入口：`icon` 为导航图标，`iconDark` 为可选深色替代，`favicon` 为浏览器图标，`appleTouchIcon` 为可选主屏 PNG。路径从 public 根开始；未产出的可选资产保持 null。产品名和描述继续使用 `src/config/site.ts`，主题变量在 styles.css，不重复维护品牌名。
+`src/config/brand.json` 是运行时资产路径入口：`icon` 为导航图标，`iconDark` 为可选深色替代，`favicon` 为浏览器图标，`appleTouchIcon` 为可选主屏 PNG，`socialImage` 为可选的链接预览图（1200×630 的 PNG、JPEG 或 WebP；其他网站的爬虫不渲染 SVG 和 ICO，检查会拒绝它们）。没有预览图时，分享卡片只显示文字。路径从 public 根开始；未产出的可选资产保持 null。产品名和描述继续使用 `src/config/site.ts`，主题变量在 styles.css，不重复维护品牌名。
 
 默认 Aster 资源只是初始化占位，不等于生成了新产品品牌。生成器会留下 `brand-identity` 任务和必需本地验收；Agent 实现产品时继续设计、替换引用并清理不再使用的模板品牌素材，保留底座来源记录与许可。不要机械替换内部 starter 标识。只更新 Skill 不会自动替换已有站点。
 

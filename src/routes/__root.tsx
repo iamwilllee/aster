@@ -13,9 +13,11 @@ import { appearance } from '@/config/appearance'
 import type { VisualTheme } from '@/config/appearance-policy.mjs'
 import { site } from '@/config/site'
 import { brand } from '@/config/brand'
+import { socialMeta } from '@/lib/social-meta'
 import { translate, localizePath, type Locale } from '@/i18n/core'
 import { getPublicConfig } from '@/server/functions'
 import { Button } from '@/components/ui/button'
+import { Main, SkipLink } from '@/components/common'
 
 export const Route = createRootRoute({
   validateSearch: (
@@ -42,6 +44,18 @@ export const Route = createRootRoute({
           name: 'robots',
           content: loaderData?.indexable && publicPage ? 'index,follow' : 'noindex,nofollow',
         },
+        // Link previews for public pages only; a page can override these in its own head.
+        ...(publicPage && origin
+          ? socialMeta({
+              origin,
+              path: localizePath(path, locale),
+              locale,
+              siteName: site.name,
+              title: `${site.name} · ${translate(locale, 'page_title')}`,
+              description: site.description[locale],
+              image: brand.socialImage,
+            })
+          : []),
       ],
       links: [
         { rel: 'stylesheet', href: css },
@@ -68,25 +82,25 @@ export const Route = createRootRoute({
 function NotFound() {
   const { t } = useI18n()
   return (
-    <main className="grid min-h-screen place-content-center gap-4 p-8 text-center">
+    <Main className="grid min-h-screen place-content-center gap-4 p-8 text-center">
       <p className="text-sm text-muted-foreground">404 · PAGE NOT FOUND</p>
       <h1 className="text-2xl font-semibold">{t('not_found')}</h1>
       <Link to="/" className="text-primary underline">
         {t('back_home')}
       </Link>
-    </main>
+    </Main>
   )
 }
 function Failure({ reset }: { reset: () => void }) {
   const { t } = useI18n()
   return (
-    <main className="grid min-h-screen place-content-center gap-4 p-8 text-center">
+    <Main className="grid min-h-screen place-content-center gap-4 p-8 text-center">
       <h1 className="text-2xl font-semibold">{t('page_unavailable')}</h1>
       <p>{t('check_service')}</p>
       <Button onClick={reset} variant="link">
         {t('reload_page')}
       </Button>
-    </main>
+    </Main>
   )
 }
 function Document({
@@ -128,6 +142,7 @@ function Root() {
   return (
     <Document locale={locale} theme={theme}>
       <Providers locale={locale}>
+        <SkipLink />
         <Outlet />
       </Providers>
     </Document>

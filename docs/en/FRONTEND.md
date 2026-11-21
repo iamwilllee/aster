@@ -110,6 +110,8 @@ Toast/Tooltip managers are per React tree, not global mutable SSR state. Toast: 
 
 Business code imports Button/Input/Select/Textarea from @/components/ui. Select uses Base UI popovers/focus/theme; native business select is not a substitute. Primitive components normally render native DOM internally.
 
+Every page has exactly one `<main>` (the `Main` component, id `main-content`), and the first focusable element in the root layout is a skip-to-content link so keyboard users can pass the header and navigation; new pages use `Main` rather than writing their own `<main>`. Public pages carry Open Graph and Twitter card tags (`src/lib/social-meta.ts`), and a content detail page overrides the site defaults with the article's cover and summary. The preview picture comes from `socialImage` in `brand.json`; without one, only text is shown.
+
 Component source also comes from Flatpack: `src/components/flatpack/` is copied unmodified by `pnpm flatpack:sync`, is never hand-edited in a product, and `pnpm flatpack:sync --check` detects drift. `src/components/ui/` holds Aster's wrappers: they re-export those components and add only Aster behavior (inert-until-hydrated, localized close label, the compound Select form, on-demand Tabs panels). New general capability goes into Flatpack first, then syncs; only Aster-specific behavior is written in `ui/`. Alert (error notices), Empty (empty states), Sidebar (workspace navigation), Tooltip and Toast come from Flatpack too: Toast is request-local through `ToastProvider` and `useToast()`, and no global manager is created at module load.
 
 | Size    | Height | Use                     |

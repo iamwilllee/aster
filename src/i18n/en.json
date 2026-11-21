@@ -786,5 +786,6 @@
   "error_subscription_user_missing": "The subscription has no valid user link.",
   "error_subscription_user_changed": "The subscription user link changed.",
   "error_stripe_test_only": "Only Stripe test events are accepted.",
-  "error_payment_signature_missing": "The payment event signature is missing."
+  "error_payment_signature_missing": "The payment event signature is missing.",
+  "skip_to_content": "Skip to main content"
 }

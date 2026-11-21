@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, notFound, Link } from '@tanstack/react-router'
 import { features } from '@/config/features'
-import { Logo, Preferences } from '@/components/common'
+import { Logo, Main, Preferences } from '@/components/common'
 import { useI18n } from '@/components/providers'
 export const Route = createFileRoute('/content')({
   beforeLoad: () => {
@@ -22,7 +22,9 @@ function Shell() {
           <Preferences />
         </div>
       </header>
-      <Outlet />
+      <Main>
+        <Outlet />
+      </Main>
     </div>
   )
 }

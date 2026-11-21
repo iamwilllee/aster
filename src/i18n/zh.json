@@ -786,5 +786,6 @@
   "error_subscription_user_missing": "订阅缺少有效的用户关联",
   "error_subscription_user_changed": "订阅用户关联发生变化",
   "error_stripe_test_only": "当前仅接受 Stripe 测试事件",
-  "error_payment_signature_missing": "缺少支付事件签名"
+  "error_payment_signature_missing": "缺少支付事件签名",
+  "skip_to_content": "跳到主要内容"
 }

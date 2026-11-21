@@ -29,6 +29,9 @@ test.describe('default authenticated starter', () => {
       expect(html).toContain(i % 2 ? 'lang="zh-CN"' : 'lang="en"')
       expect(html).toContain(i % 2 ? '给 Agent 一个' : 'For your agent.')
       expect(html).toContain('noindex,nofollow')
+      expect(html).toContain('id="main-content"')
+      expect(html).toContain(i % 2 ? '跳到主要内容' : 'Skip to main content')
+      expect(html).toContain('property="og:title"')
       expect(html).not.toContain('fixture-only-not-a-real-google-secret')
     }
   })

@@ -28,7 +28,7 @@ Combine these or create another direction. Sage/Catalog are page themes, not ico
 
 ## Integration
 
-`src/config/brand.json` centralizes `icon` (navigation), optional `iconDark`, `favicon` and optional `appleTouchIcon`. Paths begin at the public root. Keep unproduced optional assets null. Name/description remain in `src/config/site.ts`, theme variables in styles.css; do not duplicate brand names.
+`src/config/brand.json` centralizes `icon` (navigation), optional `iconDark`, `favicon` optional `appleTouchIcon` and optional `socialImage`, the link-preview picture (1200×630 PNG, JPEG or WebP; other sites' crawlers do not render SVG or ICO, so the check rejects them). Without one, shared links show a text-only card. Paths begin at the public root. Keep unproduced optional assets null. Name/description remain in `src/config/site.ts`, theme variables in styles.css; do not duplicate brand names.
 
 Default Aster assets are initializer placeholders, not completed product branding. The generator leaves a `brand-identity` task and required local acceptance. Continue design, update references and remove unused template brand assets while preserving starter source/license records. Do not mechanically replace internal starter identifiers. A Skill update does not update existing sites.
 

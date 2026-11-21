@@ -3,10 +3,26 @@ import { Moon, Sun, Languages, LoaderCircle } from 'lucide-react'
 import { Alert } from './ui/alert'
 import { Button } from './ui/button'
 import { useI18n } from './providers'
-import type { ReactNode } from 'react'
+import type { ComponentProps, ReactNode } from 'react'
 import { site } from '@/config/site'
 import { brand } from '@/config/brand'
 
+/** The page's main landmark and the target of the skip link. One per page. */
+export function Main(props: ComponentProps<'main'>) {
+  return <main id="main-content" tabIndex={-1} {...props} />
+}
+/** The first focusable element: lets keyboard users jump past the header and navigation. */
+export function SkipLink() {
+  const { t } = useI18n()
+  return (
+    <a
+      href="#main-content"
+      className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-100 focus:rounded-full focus:border focus:bg-background focus:px-4 focus:py-2 focus:text-sm focus:text-foreground focus:shadow-lg"
+    >
+      {t('skip_to_content')}
+    </a>
+  )
+}
 export function Logo({ compact = false }: { compact?: boolean }) {
   const { t } = useI18n()
   return (

@@ -59,3 +59,19 @@ test('brand checks reject remote paths, traversal and symlinks outside public', 
   f.config.icon = '/linked.svg'
   assert.ok(f.check().errors.some((item) => item.startsWith('icon:')))
 })
+
+test('the link-preview image is optional and must be a bitmap crawlers can render', (t) => {
+  const f = fixture(t)
+  // Products made before the field existed have no socialImage at all.
+  assert.equal(f.check().errors.length, 0)
+  f.config.socialImage = null
+  assert.equal(f.check().errors.length, 0)
+  writeFileSync(join(f.root, 'public/share.png'), 'png')
+  f.config.socialImage = '/share.png'
+  assert.deepEqual(f.check().files.sort(), ['/icon.svg', '/share.png'])
+  // Other sites' crawlers do not render SVG or ICO previews.
+  f.config.socialImage = '/icon.svg'
+  assert.ok(f.check().errors.some((item) => item.startsWith('socialImage:')))
+  f.config.socialImage = '/missing.png'
+  assert.ok(f.check().errors.some((item) => item.startsWith('socialImage:')))
+})

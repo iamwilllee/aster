@@ -21,6 +21,8 @@ Aster 使用 React、TanStack Router / Query、Tailwind CSS、shadcn/ui base-nov
 
 示例只维护当前页面的临时状态，刷新即重置，不创建项目或调用提供商。该页在预发布/生产及非匹配回环来源返回 404。
 
+每个页面有且只有一个 `<main>`（用 `Main` 组件，id 为 `main-content`），根布局的第一个可聚焦元素是“跳到主要内容”链接，键盘用户可以跳过页眉和导航；新增页面沿用 `Main`，不要自己再写 `<main>`。公开页面带 Open Graph 和 Twitter 卡片标签（`src/lib/social-meta.ts`），内容详情页用文章的封面和摘要覆盖站点默认值；预览图来自 `brand.json` 的 `socialImage`，未设置则只显示文字。
+
 新增或调整公共组件后先更新样板，再检查桌面/手机、深浅主题、键盘焦点和实际渲染尺寸。新增 Base UI 子路径时同时维护 `vite.config.ts` 中客户端/SSR 的预打包列表，验证首次路由加载与水合。
 
 Button、Input、Select、Textarea、Checkbox、Switch 和 TabsTrigger 在水合完成前保持禁用，避免首个操作或输入丢失。语言切换会重新加载页面，必须保留这层保护；测试用延迟脚本加载验证 SSR 与就绪后的行为，不靠固定等待掩盖问题。CI 失败附件包含 HTML 报告、截图与 trace，均使用隔离测试数据。
