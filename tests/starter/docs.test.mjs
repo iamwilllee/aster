@@ -64,3 +64,12 @@ test('an English-only public topic cannot silently escape the bilingual catalog'
   writeFileSync(join(root, 'docs/en/EXTRA.md'), '# Extra topic\n')
   assert.ok(checkDocs(root).errors.some((x) => x.includes('Uncatalogued English')))
 })
+
+test('the README artwork and archived original README are not template content', async () => {
+  const { excludedTemplatePath } = await import('../../scripts/starter-files.mjs')
+  assert.equal(excludedTemplatePath('docs/readme'), true)
+  assert.equal(excludedTemplatePath('docs/project-guide.md'), true)
+  // Ordinary documentation is still copied.
+  assert.equal(excludedTemplatePath('docs/FRONTEND.md'), false)
+  assert.equal(excludedTemplatePath('docs/en/README.md'), false)
+})

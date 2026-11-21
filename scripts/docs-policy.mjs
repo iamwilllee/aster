@@ -74,9 +74,10 @@ export function checkDocs(root) {
         errors.push(`Translation needs review / fingerprint update: ${path}`)
     }
   }
-  // Branch-only roadmap is internal, not part of the stable public documentation catalog.
+  // Not part of the stable bilingual catalog: the branch-only roadmap is internal, and
+  // project-guide.md is the archived Chinese-only original README that the README links.
   const publicFiles = readdirSync(resolve(root, 'docs')).filter(
-    (x) => x.endsWith('.md') && !['README.md', 'ROADMAP-0.3.md'].includes(x),
+    (x) => x.endsWith('.md') && !['README.md', 'ROADMAP-0.3.md', 'project-guide.md'].includes(x),
   )
   for (const file of publicFiles)
     if (!files.has(file)) errors.push(`Uncatalogued public document: ${file}`)

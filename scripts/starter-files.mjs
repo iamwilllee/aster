@@ -54,6 +54,10 @@ const ignored = new Set([
   'private',
   '.local',
   'qa',
+  // The README's illustrated design (docs/readme) and the archived original README
+  // (docs/project-guide.md) describe Aster itself, not a generated product.
+  'readme',
+  'project-guide.md',
 ])
 export function excludedTemplatePath(path) {
   const name = basename(path)
