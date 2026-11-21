@@ -104,6 +104,12 @@
   --fp-page-max: 1280px;                 /* Page container max width: shared by header, pages and footer so their edges line up */
   --fp-duration: 150ms;
   --fp-ease: ease;
+  --fp-reveal-duration: 240ms;
+  --fp-reveal-step: 40ms;
+  --fp-reveal-distance: 0px;
+  --fp-reveal-ease: cubic-bezier(0.2, 0.75, 0.2, 1);
+  --fp-reveal-duration-sm: 240ms;
+  --fp-reveal-distance-sm: 0px;
 }
 
 [data-theme="dark"] {
@@ -258,6 +264,11 @@
   --fp-scrim: rgba(0, 0, 0, 0.4);
   --fp-radius-surface: 4px;
   --fp-sans: Arial, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --fp-reveal-duration: 480ms;
+  --fp-reveal-step: 50ms;
+  --fp-reveal-distance: 10px;
+  --fp-reveal-duration-sm: 400ms;
+  --fp-reveal-distance-sm: 6px;
 }
 [data-theme="dark"] [data-fp-theme="catalog"], [data-theme="dark"][data-fp-theme="catalog"] {
   --fp-bg: #121212;
@@ -287,6 +298,11 @@
   --fp-radius-control: 10px;
   --fp-radius-surface: 10px;
   --fp-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --fp-reveal-duration: 560ms;
+  --fp-reveal-step: 70ms;
+  --fp-reveal-distance: 14px;
+  --fp-reveal-duration-sm: 440ms;
+  --fp-reveal-distance-sm: 8px;
 }
 [data-theme="dark"] [data-fp-theme="sage"], [data-theme="dark"][data-fp-theme="sage"] {
   --fp-bg: #141a16;
@@ -1406,4 +1422,30 @@ svg.lucide { stroke-width: 1.5; }
 [data-slot="chip"][data-disabled] { opacity: 0.4; pointer-events: none; }
 [data-slot="chip-count"] { font-family: var(--fp-mono); font-size: var(--fp-text-xs); font-variant-numeric: tabular-nums; color: var(--fp-muted); }
 [data-slot="chip"][data-pressed] [data-slot="chip-count"] { color: var(--fp-line-strong); }
+/* ---- entrance reveal (opt-in) -------------------------------------------- */
+/* Only elements with data-reveal animate. "enter" plays once on load; "scroll" waits until
+ * RevealGroup sees it. Pace and distance come from the theme. The end state has no transform,
+ * so text stays crisp. Nothing hides content for keyboard users, reduced motion or no script. */
+[data-reveal-step="1"] { --fp-reveal-delay: var(--fp-reveal-step); }
+[data-reveal-step="2"] { --fp-reveal-delay: calc(var(--fp-reveal-step) * 2); }
+[data-reveal-step="3"] { --fp-reveal-delay: calc(var(--fp-reveal-step) * 3); }
+[data-reveal-step="4"] { --fp-reveal-delay: calc(var(--fp-reveal-step) * 4); }
+@keyframes fp-reveal {
+  from { opacity: 0; transform: translateY(var(--fp-reveal-distance)); }
+  to { opacity: 1; transform: none; }
+}
+@media (max-width: 639px) {
+  [data-reveal] { --fp-reveal-distance: var(--fp-reveal-distance-sm); --fp-reveal-duration: var(--fp-reveal-duration-sm); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal="enter"], [data-reveal-state="shown"] {
+    animation: fp-reveal var(--fp-reveal-duration) var(--fp-reveal-ease) var(--fp-reveal-delay, 0ms) backwards;
+  }
+  [data-reveal-state="pending"] { opacity: 0; transform: translateY(var(--fp-reveal-distance)); }
+}
+/* Keyboard interaction never waits for an entrance animation. */
+[data-reveal]:focus-within { opacity: 1; transform: none; animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1 !important; transform: none !important; animation: none !important; }
+}
 }

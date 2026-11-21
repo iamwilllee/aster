@@ -7,7 +7,7 @@ Use React, TanStack Router/Query, Tailwind, shadcn/ui base-nova (Base UI) and Lu
 ## Components and brand
 
 - src/components/ui holds editable primitives; shared page elements live in common.tsx.
-- styles.css centralizes colors/radii/fonts/light/dark; site.ts holds name/descriptions.
+- The Flatpack layer (src/styles/flatpack.css) holds colors/radii/fonts/light/dark and the per-theme entrance pace; styles.css only maps Tailwind color names and keeps Aster's card hover; site.ts holds name/descriptions.
 - [Brand](BRAND.md) and [Icon workflow](BRAND-WORKFLOW.md) cover context-driven identity and acceptance; brand.json centralizes paths. Functional icons use Lucide independently of branding.
 - Grid/Flex for layout, RevealGroup/CSS for finite entrances. Add resizing/drag/state/animation libraries only for real business needs.
 
@@ -48,7 +48,7 @@ At 100% browser zoom after fonts/styles settle, inspect both locales, desktop/mo
 
 ## Page motion
 
-Marketing uses finite light motion: heading → description → action → display, then one-time below-fold reveals. Dense tools/forms do not wait. Sage uses 560ms/70ms steps; Catalog 480ms/50ms, with smaller/faster mobile motion. Adjust shared variables, not scattered timings.
+Marketing uses finite light motion: heading → description → action → display, then one-time below-fold reveals. Dense tools/forms do not wait. Sage uses 560ms/70ms steps; Catalog 480ms/50ms, with smaller/faster mobile motion. The pace comes from the Flatpack theme's --fp-reveal-* variables: adjust those, not scattered timings.
 
 Reuse ui/reveal.tsx RevealGroup without changing Grid/Flex or heading/list/link semantics. It renders div, not ol/li or a reason to override controls.
 

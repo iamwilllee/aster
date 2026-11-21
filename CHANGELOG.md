@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- 2026-11-23: Move the entrance motion (`data-reveal`, `RevealGroup`) into Flatpack. Each theme carries its own pace as `--fp-reveal-*` tokens (Sage 560ms/70ms/14px, Catalog 480ms/50ms/10px, the default theme fades without moving); the keyframe is now `fp-reveal`. Aster keeps only its card hover lift in `src/styles.css`.
+
 - 2026-11-22: Adopt Flatpack's Alert (error notices), Empty (empty states, with a heading title) and Sidebar (workspace navigation, with active links through `render`). Tabs triggers lay out icon and text in a row. Pagination and Breadcrumb are not adopted: Aster's pagination shows a summary with previous/next, which Flatpack's numbered pager does not replace.
 
 - 2026-11-21: Adopt Flatpack component source. `src/components/flatpack/` is copied unmodified by `pnpm flatpack:sync` (with per-file hashes and `--check`); Aster's Button, Badge, Card, Table, Skeleton, Input, Textarea, Progress, Tabs, Checkbox, Switch, Dialog, Select and DropdownMenu now wrap it and add only hydration guards, localized close text and Aster's compound Select. Tooltip and Toast follow in the same pass: Flatpack gained a compound Tooltip and a request-local `ToastProvider`/`useToast()`, so nothing in `src/components/ui` is implemented locally any more except Label, Disclosure and Reveal.

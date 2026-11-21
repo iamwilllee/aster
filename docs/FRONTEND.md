@@ -7,7 +7,7 @@ Aster 使用 React、TanStack Router / Query、Tailwind CSS、shadcn/ui base-nov
 ## 组件与品牌
 
 - `src/components/ui/` 保存可维护的基础组件源码；通用页面组件位于 `src/components/common.tsx`。
-- 颜色、圆角、字体、控件尺寸和深浅主题来自 Flatpack 样式层 `src/styles/flatpack.css`（用 `pnpm flatpack:sync` 从 Flatpack 仓库同步，不在这里手改）；`src/styles.css` 只把 Tailwind 颜色名映射到 Flatpack token，并保存 Aster 的入场动效；品牌名称与描述位于 `src/config/site.ts`。
+- 颜色、圆角、字体、控件尺寸和深浅主题来自 Flatpack 样式层 `src/styles/flatpack.css`（用 `pnpm flatpack:sync` 从 Flatpack 仓库同步，不在这里手改）；`src/styles.css` 只把 Tailwind 颜色名映射到 Flatpack token，并保存卡片悬停等 Aster 自己的样式；入场动效（`data-reveal`、`RevealGroup`）及其按主题的节奏同样来自 Flatpack；品牌名称与描述位于 `src/config/site.ts`。
 - Logo、favicon 与使用说明见 [品牌文档](BRAND.md)，新产品按 [图标设计流程](BRAND-WORKFLOW.md) 自主设计、接入并验收；资产路径集中在 `src/config/brand.json`。业务图标统一使用 Lucide，品牌图形独立管理。
 - 常规布局使用 CSS Grid / Flex；基础入场动效复用 RevealGroup 与 CSS，可拖动面板、拖拽和复杂状态/动画库按实际业务需要添加。
 
@@ -54,7 +54,7 @@ Button、Input、Select、Textarea、Checkbox、Switch 和 TabsTrigger 在水合
 
 ## 页面动效
 
-官网默认采用轻量、有限的动效：首屏标题 → 说明 → 主要操作 → 展示依次入场，下方内容首次进入视口时出现。后台表单、密集列表与高频操作不默认加入入场等待。Sage 使用 560ms / 70ms 分组间隔，Catalog 更克制（480ms / 50ms）；手机降低位移和时长。品牌可在 styles.css 调整统一变量，不在各页散写时间。
+官网默认采用轻量、有限的动效：首屏标题 → 说明 → 主要操作 → 展示依次入场，下方内容首次进入视口时出现。后台表单、密集列表与高频操作不默认加入入场等待。Sage 使用 560ms / 70ms 分组间隔，Catalog 更克制（480ms / 50ms）；手机降低位移和时长。节奏由 Flatpack 主题的 `--fp-reveal-*` 变量决定，不在各页散写时间。
 
 复用 `src/components/ui/reveal.tsx` 的 RevealGroup，保留现有 Grid/Flex 与标题、列表、链接语义。它渲染 div；不能替代 ol/li 或给控件加额外几何样式。
 

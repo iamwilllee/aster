@@ -18,7 +18,7 @@ test('entrances animate in order, settle without text transforms and reveal scro
     const records: { target: Element; delay: number }[] = []
     Object.defineProperty(window, '__asterMotionEvents', { value: records })
     document.addEventListener('animationstart', (event) => {
-      if (event.animationName !== 'aster-reveal' || !(event.target instanceof HTMLElement)) return
+      if (event.animationName !== 'fp-reveal' || !(event.target instanceof HTMLElement)) return
       records.push({
         target: event.target,
         delay: Number.parseFloat(getComputedStyle(event.target).animationDelay),

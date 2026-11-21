@@ -34,6 +34,7 @@ export const components = [
   'alert',
   'empty',
   'sidebar',
+  'reveal',
 ]
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')

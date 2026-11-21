@@ -1,8 +1,8 @@
 {
-  "commit": "7743c72eb443fddeb01bba910909dad0195ada3c",
+  "commit": "2763b798eed0afd518354158a2853119efc8f1fa",
   "uncommittedChanges": false,
   "files": {
-    "src/styles/flatpack.css": "def140fdf124f7623ad68d96186e87296c02068ecb13a41193741cdb24cc5ba4",
+    "src/styles/flatpack.css": "e6f884edcdde110147789b120291e0bbdb645f66a8903ebce12d247a5c0844b1",
     "src/components/flatpack/button.tsx": "24f3e9e9c315bcbdcaa6890731ef42da6f2fd2bc1de41c4dcb361fb50a3be06d",
     "src/components/flatpack/badge.tsx": "1bde6f5fdeff6937a0781c9f4ec332bd4311e04f310612406b3077a73c9cad79",
     "src/components/flatpack/card.tsx": "7d1e5e788aaa3fb3b7be3f7806868e0ae7fb53eccbe80f2976a9b2ec9deddc30",
@@ -21,6 +21,7 @@
     "src/components/flatpack/toast.tsx": "87da11aedfb01cb62b0ed2b066b36485080702caf8db7deaf5277caa35ae1767",
     "src/components/flatpack/alert.tsx": "868c2dea66942c26c8c18069349103db47915330bc4f14066dd30d706049701d",
     "src/components/flatpack/empty.tsx": "fae360130afa33054bf8f9fb523d3196592564cad235b5c6d7ac8ef2ba05b5ce",
-    "src/components/flatpack/sidebar.tsx": "80e2e1f0f3b60d2cc4501f8b2bb322ac828fcf317a18feb9b956dcd2ffafc8b7"
+    "src/components/flatpack/sidebar.tsx": "80e2e1f0f3b60d2cc4501f8b2bb322ac828fcf317a18feb9b956dcd2ffafc8b7",
+    "src/components/flatpack/reveal.tsx": "fa59d0d48f55fa54e95f79eadbfad895114c07e7cd9c148ed41d523100b2b007"
   }
 }
