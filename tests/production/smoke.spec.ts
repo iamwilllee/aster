@@ -1,5 +1,17 @@
 import { expect, test } from '@playwright/test'
 
+// Every capability profile serves the same security headers on pages, API and redirects.
+test('built Worker sends security headers on every kind of response', async ({ request }) => {
+  for (const path of ['/', '/zh', '/api/health', '/app']) {
+    const response = await request.get(path, { maxRedirects: 0 })
+    const headers = response.headers()
+    expect(headers['content-security-policy'], path).toContain("frame-ancestors 'none'")
+    expect(headers['x-frame-options'], path).toBe('DENY')
+    expect(headers['x-content-type-options'], path).toBe('nosniff')
+    expect(headers['referrer-policy'], path).toBe('no-referrer')
+  }
+})
+
 test.describe('default authenticated starter', () => {
   test.skip(
     !['default', 'web-app'].includes(process.env.STARTER_SMOKE_PROFILE ?? ''),

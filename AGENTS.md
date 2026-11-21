@@ -17,7 +17,7 @@ Use the bundled `aster-new` Skill in the current project by default; explicit ta
 - `tests/starter`: initializer isolation and overwrite protection checks.
 - `src/routes`: file routes, public pages, protected `/app` workspace, API catch-all.
 - `src/modules`: authentication, mail, Stripe/Creem test integrations, project validation.
-- `src/server`: server functions, request validation, authorization, private API.
+- `src/server`: server functions, request validation, authorization, private API. `src/start.ts`: request middleware (security headers, server-function CSRF); keep `src/server/security-headers.ts` pure and unit-tested.
 - `src/db/schema.ts` and `migrations`: authoritative schema and generated SQL.
 - `src/components/flatpack`: Flatpack components copied unmodified by `pnpm flatpack:sync`; never hand-edit. `src/components/ui`: Aster wrappers that re-export them and add only Aster behavior (hydration guard, i18n). `src/styles/flatpack.css`: the Flatpack theme layer, copied by `pnpm flatpack:sync`; never hand-edit it. `src/styles.css`: Tailwind color mapping and Aster motion.
 - `src/config/site.ts`: name, localized description and plan limits.

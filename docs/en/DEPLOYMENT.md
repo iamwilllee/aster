@@ -104,6 +104,12 @@ On real HTTPS, test direct locale navigation/refresh, selected signup/receipt/re
 
 Measure logs/CPU/D1 rows/usage and backup/recovery; plan selection uses actual load. Source tests do not establish each product's live providers. Live payments/refunds/disputes/taxes/provider-linked deletion/privacy/retention need concrete product work. [Lifecycle](ACCOUNT-LIFECYCLE.md) must map new business ownership/cleanup.
 
+## Response headers
+
+The request middleware in `src/start.ts` adds security headers to every response: pages, API, redirects and server functions. They are `frame-ancestors 'none'` (with `X-Frame-Options: DENY`), `base-uri`, `object-src 'none'`, `form-action 'self'`, `X-Content-Type-Options`, `Referrer-Policy: no-referrer`, `Permissions-Policy` and `Cross-Origin-Opener-Policy: same-origin`. HTTPS requests also get `Strict-Transport-Security: max-age=31536000`; local http does not. It has no `includeSubDomains` or preload, which are the domain owner's decision. A header a handler sets itself, such as the strict CSP on file downloads, wins.
+
+This is not a full Content-Security-Policy: it does not restrict script or style sources. A script-src policy needs a nonce or hash for the theme-initialization script and the router's hydration script, and is separate follow-up work. The middleware also rejects cross-site requests to server-function endpoints. During cloud acceptance check these headers on the real domain with browser tools or `curl -I`; the pre-deploy checks only prove the code sets them.
+
 ## Optional private images
 
 Selected files require independent private staging/production ASSETS_BUCKET and reviewed additive migration0005 before compatible code. deploy creates no bucket, rejects shared/placeholders and requires current files-live target evidence. Local simulation is not cloud/cost acceptance; disabling UI does not erase resources or deletion-cleanup duties. See [Files](FILES.md).

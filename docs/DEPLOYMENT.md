@@ -119,6 +119,12 @@ INSERT INTO admin_user (user_id) VALUES ('目标用户ID') ON CONFLICT(user_id) 
 
 目前仍未完成这些远端验收。真实收费、退款、争议、税务、真实供应商账务注销验收、数据保留与隐私策略由后续具体产品补齐。账号注销和个人数据导出见 [账号生命周期](ACCOUNT-LIFECYCLE.md)，新业务需补全其数据归属及清理范围。
 
+## 响应头
+
+`src/start.ts` 的请求中间件给页面、API、重定向和服务端函数的每个响应加安全头：`frame-ancestors 'none'`（同时发 `X-Frame-Options: DENY`）、`base-uri`、`object-src 'none'`、`form-action 'self'`、`X-Content-Type-Options`、`Referrer-Policy: no-referrer`、`Permissions-Policy`、`Cross-Origin-Opener-Policy: same-origin`。HTTPS 请求另发 `Strict-Transport-Security: max-age=31536000`，本地 http 不发；不含 `includeSubDomains` 与 preload，它们由域名所有者决定。处理器自己设置的头（例如文件下载的严格 CSP）优先。
+
+这不是完整的 Content-Security-Policy：没有限制脚本和样式来源。完整的 script-src 需要给深浅色初始化脚本和路由的水合脚本配 nonce 或哈希，是单独的后续工作。中间件同时对服务端函数端点拒绝跨站请求。云端验收时用浏览器开发者工具或 `curl -I` 检查真实域名上的这些头，部署前的检查只证明代码里有它们。
+
 ## 可选私有图片
 
 files 选中时按 [图片指南](FILES.md) 在授权内配置 ASSETS_BUCKET；预发布与生产使用不同私有 bucket。先审查并应用 additive migration 0005，再发布兼容代码。deploy 不创建 bucket，拒绝占位/共用目标，正式发布还要求当前产品 files-live 的真实目标环境证据。本地 R2 模拟不证明云端可用或账单安全。关闭入口不删除历史资源，也不绕过账号注销的对象清理。
