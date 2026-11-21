@@ -101,7 +101,7 @@ pnpm setup
 pnpm dev
 ```
 
-Use Node24/pnpm12.11.2. Existing secrets/data survive setup. Default English/Chinese URLs are http://127.0.0.1:3100 and /zh. Local signup verification/reset uses /dev/inbox or /zh/dev/inbox, not a real provider. Links are sensitive, local-only and never tunneled. There is no seeded admin/shared account/password.
+Use Node 22.12 or newer (24 recommended; CI verifies 24) and pnpm 12.11.2. Existing secrets/data survive setup. Default English/Chinese URLs are http://127.0.0.1:3100 and /zh. Local signup verification/reset uses /dev/inbox or /zh/dev/inbox, not a real provider. Links are sensitive, local-only and never tunneled. There is no seeded admin/shared account/password.
 
 1. Verify reused capabilities vs business work/provider prerequisites.
 2. Record users/flow/ownership/scope/acceptance in PROJECT.md; avoid rebuilding the architecture or a generic plugin platform.

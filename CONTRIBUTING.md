@@ -2,7 +2,7 @@
 
 欢迎提交改进。请先阅读 README、AGENTS.md 和开发手册。建议围绕一个明确问题提交小改动，说明触发条件、行为变化和验证结果。
 
-使用 Node.js 24、pnpm 12.11.2。首次运行 `pnpm install --frozen-lockfile && pnpm setup`；修改后执行 `pnpm format`、`pnpm check`。涉及登录、业务操作或界面时执行浏览器验收。不要上传账户、密钥、`.wrangler` 数据、收件箱截图或私有日志。
+使用 Node.js 22.12 或更高（推荐 24，CI 用 24 验证）、pnpm 12.11.2。首次运行 `pnpm install --frozen-lockfile && pnpm setup`；修改后执行 `pnpm format`、`pnpm check`。涉及登录、业务操作或界面时执行浏览器验收。不要上传账户、密钥、`.wrangler` 数据、收件箱截图或私有日志。
 
 新增依赖需说明已有库不能满足的原因；新增云服务需写明开通、成本、失败状态及验证方式。数据变更需提交 Drizzle schema 和新迁移。支付与授权变更需要相应行为测试。
 

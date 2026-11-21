@@ -22,7 +22,7 @@
 
 ## 开始使用
 
-需要 Node.js 24、pnpm 12.11.2。不需要 Cloudflare、Stripe 或邮件账户即可运行本地核心功能。
+需要 Node.js 22.12 或更高（推荐 24，CI 用 24 验证）和 pnpm 12.11.2。不需要 Cloudflare、Stripe 或邮件账户即可运行本地核心功能。
 
 ```bash
 git clone https://github.com/iamwilllee/aster.git

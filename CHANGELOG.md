@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- 2026-11-27: Split CI into parallel jobs: static checks and unit tests, local e2e, and the production Worker once per capability profile in a matrix (a failing profile no longer hides the others). The shared setup is a local composite action, the Chromium download is cached by Playwright version, and a newer push cancels the older run on non-default branches. Documentation now states the supported Node range (22.12 or newer, 24 recommended and verified by CI) consistently with `engines`.
+
 - 2026-11-26: Add a skip-to-content link and one `Main` landmark per page (the content list had none), and Open Graph and Twitter card tags on public pages with article-specific overrides on content details. `brand.json` gains an optional `socialImage` (PNG, JPEG or WebP; the brand check rejects SVG and ICO); without it, shared links show a text-only card.
 
 - 2026-11-25: Identify server errors by message keys instead of Chinese text. `HttpError` takes a key and parameters (162 call sites migrated, zod messages included); responses translate from the key, a guard test rejects literals that are not keys and Chinese strings in server code, and text from outside libraries never reaches the user. This also fixes an unmapped admin-permission message and five webhook messages that fell back to a generic error in English. Every response now carries `X-Request-Id` (Cloudflare's cf-ray or a UUID), 5xx API errors and the storage and mail failures that were turned into 503 or generic errors log a line with the request id and error class only, never messages.

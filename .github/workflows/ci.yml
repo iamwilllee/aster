@@ -4,36 +4,64 @@ on:
   pull_request:
 permissions:
   contents: read
+# A newer push to the same branch makes the older run pointless. The default branch keeps every run.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 jobs:
+  # Static checks, build and unit tests. No browser.
   check:
     runs-on: ubuntu-latest
-    # Browser dependencies can take several minutes; retain time for every Worker profile.
-    timeout-minutes: 25
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
-      - uses: pnpm/action-setup@v6.1.0
-        with:
-          version: 12.11.2
-      - uses: actions/setup-node@v7.1.0
-        with:
-          node-version: 24
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm setup
+      - uses: ./.github/actions/setup
       - run: pnpm format:check
       - run: pnpm check
-      - run: pnpm exec playwright install --with-deps chromium
+  # Local browser and API acceptance against the development server.
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          browser: 'true'
       - run: pnpm test:e2e
-      - run: pnpm test:production
-      - run: pnpm test:production --profile web-app
-      - run: pnpm test:production --profile showcase
-      - run: pnpm test:production --profile google-only
       - uses: actions/upload-artifact@v7.0.2
         if: failure()
         with:
-          name: playwright-report
+          name: e2e-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+  # The built Worker, once per capability profile. Each runs in its own job, so they
+  # run in parallel and one failing profile does not hide the others.
+  production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [default, web-app, showcase, google-only]
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          browser: 'true'
+      - name: Run the production acceptance
+        run: pnpm test:production ${{ matrix.profile != 'default' && format('--profile {0}', matrix.profile) || '' }}
+      - uses: actions/upload-artifact@v7.0.2
+        if: failure()
+        with:
+          name: production-report-${{ matrix.profile }}
           path: |
             playwright-report/
             test-results/

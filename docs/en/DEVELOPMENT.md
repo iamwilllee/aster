@@ -6,7 +6,7 @@ For a new product first read [Agent guide](AGENT-GUIDE.md), initialize through $
 
 ## Local workflow
 
-Use Node.js 24 and pnpm 12.11.2. Default origin is http://127.0.0.1:3100. Do not mix localhost/ports: auth and local inbox must match APP_ORIGIN. An intentional change must update .dev.vars, dev scripts, Playwright and tests consistently. Existing products/worktrees retain their own configured loopback origin.
+Use Node.js 22.12 or newer (24 recommended; CI verifies 24) and pnpm 12.11.2. Default origin is http://127.0.0.1:3100. Do not mix localhost/ports: auth and local inbox must match APP_ORIGIN. An intentional change must update .dev.vars, dev scripts, Playwright and tests consistently. Existing products/worktrees retain their own configured loopback origin.
 
 setup generates .dev.vars without overwriting it; commit only placeholder .dev.vars.example. Generate Worker types using pnpm cf:typegen; build/dev generates the route tree. Local D1/R2 use Cloudflare simulation, no Docker.
 
