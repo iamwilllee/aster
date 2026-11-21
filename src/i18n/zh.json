@@ -781,5 +781,10 @@
   "ui_motion_title": "动效与阅读节奏",
   "ui_motion_description": "分组依次入场，悬停提供轻量反馈。开启减少动态效果时直接显示内容。重播只影响当前本地演示。",
   "ui_motion_replay": "重播入场",
-  "ui_motion_scroll": "此区块到达视口时出现一次；键盘聚焦操作时直接显示。"
+  "ui_motion_scroll": "此区块到达视口时出现一次；键盘聚焦操作时直接显示。",
+  "error_subscription_syncing": "订阅状态正在同步，请重试事件",
+  "error_subscription_user_missing": "订阅缺少有效的用户关联",
+  "error_subscription_user_changed": "订阅用户关联发生变化",
+  "error_stripe_test_only": "当前仅接受 Stripe 测试事件",
+  "error_payment_signature_missing": "缺少支付事件签名"
 }

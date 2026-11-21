@@ -7,7 +7,8 @@ import { accountSecurity } from '@/modules/auth/security.server'
 import { accountLifecycle } from '@/modules/auth/lifecycle.server'
 import { database } from '@/server/database.server'
 import { env } from 'cloudflare:workers'
-import { requestLocale, localizedError } from '@/i18n/core'
+import { requestLocale, translate } from '@/i18n/core'
+import { getRequestId, logFailure } from './observability'
 import { z } from 'zod'
 import { requireUser, isAdmin } from '@/modules/auth/auth.server'
 import {
@@ -27,6 +28,7 @@ import {
   bufferRequestBody,
   isLocalRequest,
   json,
+  publicErrorMessage,
 } from './http.server'
 
 export async function handleApi(request: Request): Promise<Response> {
@@ -55,7 +57,7 @@ export async function handleApi(request: Request): Promise<Response> {
     }
     if (path.startsWith('/api/content')) return await handlePublicContent(request)
     if (!features.content && path.startsWith('/api/admin/content'))
-      throw new HttpError(404, '接口不存在')
+      throw new HttpError(404, 'error_api_missing')
     if (
       (!features.auth && path !== '/api/dev/mail') ||
       (!features.files && path.startsWith('/api/files')) ||
@@ -63,7 +65,7 @@ export async function handleApi(request: Request): Promise<Response> {
       (!features.billing && path.startsWith('/api/billing')) ||
       ((!features.mail || !features.database) && path === '/api/dev/mail')
     )
-      throw new HttpError(404, '接口不存在')
+      throw new HttpError(404, 'error_api_missing')
     if (
       [
         '/api/billing/webhook',
@@ -76,7 +78,7 @@ export async function handleApi(request: Request): Promise<Response> {
     if (!['GET', 'HEAD'].includes(method)) assertOrigin(request)
     if (path === '/api/dev/mail' && method === 'GET') {
       if (!isLocalRequest(request) || env.MAIL_MODE !== 'local')
-        throw new HttpError(404, '页面不存在')
+        throw new HttpError(404, 'error_not_found')
       const result = await database()
         .prepare(
           'SELECT id, recipient, subject, url, created_at FROM dev_mail ORDER BY created_at DESC LIMIT 30',
@@ -98,9 +100,9 @@ export async function handleApi(request: Request): Promise<Response> {
     if (path === '/api/workspace' && method === 'GET') return json(await workspace(request))
     const user = await requireUser(request)
     if (!['GET', 'HEAD'].includes(method) && !(await allowPrivateMutation(user.id)))
-      throw new HttpError(429, '请求过于频繁，请稍后重试')
+      throw new HttpError(429, 'error_throttled')
     if (path.startsWith('/api/admin/content')) {
-      if (!(await isAdmin(user.id))) throw new HttpError(403, '你没有管理员权限')
+      if (!(await isAdmin(user.id))) throw new HttpError(403, 'error_admin')
       return await handleAdminContent(request, user.id)
     }
     if (path.startsWith('/api/files')) return await handleFiles(request, user.id)
@@ -127,8 +129,8 @@ export async function handleApi(request: Request): Promise<Response> {
             .bind(input.coverAssetId, user.id)
             .first())
         )
-          throw new HttpError(400, '图片不可用或账号状态已变化。')
-        if (input.coverAssetId && !features.files) throw new HttpError(400, '图片资源功能未启用。')
+          throw new HttpError(400, 'files_unavailable_error')
+        if (input.coverAssetId && !features.files) throw new HttpError(400, 'files_disabled_error')
         const billing = await getBilling(user.id)
         const id = crypto.randomUUID()
         const now = Date.now()
@@ -158,7 +160,7 @@ export async function handleApi(request: Request): Promise<Response> {
           )
           .run()
         if (!result.meta.changes)
-          throw new HttpError(409, `当前套餐最多创建 ${billing.projectLimit} 个项目`)
+          throw new HttpError(409, 'error_project_limit', { count: billing.projectLimit })
         return json(
           {
             id,
@@ -176,7 +178,7 @@ export async function handleApi(request: Request): Promise<Response> {
       const id = match[1]!
       if (method === 'PATCH') {
         const input = await body(request, projectInput)
-        if (input.coverAssetId && !features.files) throw new HttpError(400, '图片资源功能未启用。')
+        if (input.coverAssetId && !features.files) throw new HttpError(400, 'files_disabled_error')
         const result = await database()
           .prepare(
             `UPDATE project SET name=?,description=?,status=?,updated_at=?,cover_asset_id=CASE WHEN ? THEN ? ELSE cover_asset_id END WHERE id=? AND user_id=? AND NOT EXISTS (SELECT 1 FROM account_access WHERE user_id=project.user_id AND disabled_at IS NOT NULL) AND NOT EXISTS (SELECT 1 FROM billing_account_state WHERE user_id=? AND (closed_at IS NOT NULL OR lock_until>unixepoch('subsec')*1000)) AND (? IS NULL OR EXISTS (SELECT 1 FROM file_asset WHERE id=? AND user_id=? AND state='ready'))`,
@@ -196,7 +198,7 @@ export async function handleApi(request: Request): Promise<Response> {
             user.id,
           )
           .run()
-        if (!result.meta.changes) throw new HttpError(404, '项目不存在')
+        if (!result.meta.changes) throw new HttpError(404, 'error_project_missing')
         return json({ ok: true })
       }
       if (method === 'DELETE') {
@@ -206,7 +208,7 @@ export async function handleApi(request: Request): Promise<Response> {
           )
           .bind(id, user.id)
           .run()
-        if (!result.meta.changes) throw new HttpError(404, '项目不存在')
+        if (!result.meta.changes) throw new HttpError(404, 'error_project_missing')
         return json({ ok: true })
       }
     }
@@ -227,17 +229,19 @@ export async function handleApi(request: Request): Promise<Response> {
         .prepare('SELECT status FROM checkout WHERE id = ? AND user_id = ?')
         .bind(id, user.id)
         .first<{ status: string }>()
-      if (!record) throw new HttpError(404, '订单不存在')
+      if (!record) throw new HttpError(404, 'error_order_missing')
       return json(record)
     }
     if (path.startsWith('/api/admin/')) {
-      if (!(await isAdmin(user.id))) throw new HttpError(403, '需要管理员权限')
+      if (!(await isAdmin(user.id))) throw new HttpError(403, 'error_admin')
       return await handleAdmin(request, user.id)
     }
     if (path === '/api/profile' && method === 'PATCH') {
       const input = await body(
         request,
-        z.object({ name: z.string().trim().min(1, '请输入姓名').max(60, '姓名不超过 60 个字符') }),
+        z.object({
+          name: z.string().trim().min(1, 'error_name_required').max(60, 'error_name_long'),
+        }),
       )
       const updated = await database()
         .prepare(
@@ -245,23 +249,23 @@ export async function handleApi(request: Request): Promise<Response> {
         )
         .bind(input.name, Date.now(), user.id)
         .run()
-      if (!updated.meta.changes) throw new HttpError(401, '账号当前不可用，请联系网站管理员。')
+      if (!updated.meta.changes) throw new HttpError(401, 'admin_account_disabled')
       return json({ ok: true })
     }
-    throw new HttpError(404, '接口不存在')
+    throw new HttpError(404, 'error_api_missing')
   } catch (error) {
-    if (error instanceof HttpError)
-      return json({ error: localizedError(error.message, requestLocale(request)) }, error.status)
-    console.error(
-      JSON.stringify({
-        event: 'api_error',
+    const status = error instanceof HttpError ? error.status : 500
+    // Client mistakes (4xx) are expected; a failure on our side leaves a line to find.
+    if (status >= 500)
+      logFailure('api_error', error, {
+        requestId: getRequestId(request),
+        method: request.method,
         path: new URL(request.url).pathname,
-        error: error instanceof Error ? error.name : 'UnknownError',
-      }),
-    )
-    return json(
-      { error: localizedError('服务暂时不可用，请稍后重试', requestLocale(request)) },
-      500,
-    )
+        status,
+        ...(error instanceof HttpError && error.code ? { code: error.code } : {}),
+      })
+    if (error instanceof HttpError)
+      return json({ error: publicErrorMessage(error, requestLocale(request)) }, error.status)
+    return json({ error: translate(requestLocale(request), 'error_unavailable') }, 500)
   }
 }

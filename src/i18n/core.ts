@@ -4,6 +4,7 @@ import zh from './zh.json'
 export type Locale = 'en' | 'zh'
 export type MessageKey = keyof typeof en
 const messages: Record<Locale, Record<MessageKey, string>> = { en, zh }
+export const isMessageKey = (value: string): value is MessageKey => Object.hasOwn(en, value)
 export function translate(
   locale: Locale,
   key: MessageKey,

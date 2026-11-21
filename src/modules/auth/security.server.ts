@@ -25,13 +25,13 @@ async function credentialPassword(userId: string) {
 }
 
 export async function accountSecurity(request: Request): Promise<Response> {
-  if (!features.auth) throw new HttpError(404, '接口不存在')
+  if (!features.auth) throw new HttpError(404, 'error_api_missing')
   const auth = createAuth(request)
   const viewer = await auth.api.getSession({
     headers: request.headers,
     query: { disableCookieCache: true },
   })
-  if (!viewer?.user.emailVerified) throw new HttpError(401, '请先登录并验证邮箱')
+  if (!viewer?.user.emailVerified) throw new HttpError(401, 'error_unauthorized')
   await assertAccountEnabled(viewer.user.id)
   const userId = viewer.user.id
   const currentId = viewer.session.id
@@ -67,13 +67,13 @@ export async function accountSecurity(request: Request): Promise<Response> {
     }
     return json(result)
   }
-  if (!(await allowPrivateMutation(userId))) throw new HttpError(429, '请求过于频繁，请稍后重试')
+  if (!(await allowPrivateMutation(userId))) throw new HttpError(429, 'error_throttled')
   if (path === '/api/account/password' && request.method === 'POST') {
-    if (!(await credentialPassword(userId))) throw new HttpError(404, '此账号未启用密码登录。')
+    if (!(await credentialPassword(userId))) throw new HttpError(404, 'account_no_password_error')
     const input = await body(request, passwordInput)
     if (input.currentPassword === input.newPassword)
-      throw new HttpError(400, '新密码必须与当前密码不同。')
-    if (!(await allowPasswordChange(userId))) throw new HttpError(429, '请求过于频繁，请稍后重试')
+      throw new HttpError(400, 'account_different_password_error')
+    if (!(await allowPasswordChange(userId))) throw new HttpError(429, 'error_throttled')
     const changed = await auth.api.changePassword({
       headers: request.headers,
       body: { ...input, revokeOtherSessions: true },
@@ -87,9 +87,9 @@ export async function accountSecurity(request: Request): Promise<Response> {
         'code' in payload &&
         payload.code === 'INVALID_PASSWORD'
       )
-        throw new HttpError(400, '当前密码不正确。')
-      if (changed.status === 401) throw new HttpError(401, '请先登录并验证邮箱')
-      throw new HttpError(503, '修改密码未完成，请重试或重新登录。')
+        throw new HttpError(400, 'account_current_password_error')
+      if (changed.status === 401) throw new HttpError(401, 'error_unauthorized')
+      throw new HttpError(503, 'account_password_failed_error')
     }
     // Better Auth rotates the current session when revoking others. Discard its token/user JSON.
     const response = json({ ok: true })
@@ -109,15 +109,15 @@ export async function accountSecurity(request: Request): Promise<Response> {
   }
   const match = /^\/api\/account\/sessions\/([a-zA-Z0-9_-]{1,128})$/.exec(path)
   if (match && request.method === 'DELETE') {
-    if (match[1] === currentId) throw new HttpError(409, '当前设备请使用退出登录。')
+    if (match[1] === currentId) throw new HttpError(409, 'account_current_session_error')
     const deleted = await database()
       .prepare(
         'DELETE FROM session WHERE id = ? AND user_id = ? AND EXISTS (SELECT 1 FROM session AS active WHERE active.id = ? AND active.user_id = ? AND active.expires_at > ?)',
       )
       .bind(match[1], userId, currentId, userId, now)
       .run()
-    if (!deleted.meta.changes) throw new HttpError(404, '会话已失效或不存在。')
+    if (!deleted.meta.changes) throw new HttpError(404, 'account_missing_session_error')
     return json({ ok: true })
   }
-  throw new HttpError(404, '接口不存在')
+  throw new HttpError(404, 'error_api_missing')
 }

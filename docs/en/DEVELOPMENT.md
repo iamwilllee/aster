@@ -35,6 +35,10 @@ English uses /, /login, /app; Chinese uses /zh, /zh/login, /zh/app. Bidirectiona
 
 Typed t(key, values) reads src/i18n/en.json and zh.json. pnpm locale:check validates keys/placeholders. Full navigation preserves query/hash, auth/payment returns retain locale, and API/auth requests send a language header. Only known public errors map to dictionaries; never display raw provider messages.
 
+Server errors are identified by message keys: `throw new HttpError(409, 'error_project_limit', { count: 3 })`. The key is the stable identifier and the response is translated from it, so rewording a message cannot silently drop English users to a generic error. `message` keeps the Chinese text for logs and tests. zod schema messages are keys too. A string literal is for text from an outside library only and is never shown verbatim (unknown text shows the generic error). `tests/unit/error-messages.test.ts` rejects `HttpError` literals that are not keys and any Chinese string in the server directories.
+
+Logs carry categories and identifiers, never messages: a library error text can hold an address, a link, a credential or a query argument. `logFailure(event, error, fields)` in `src/server/observability.ts` writes the event name, the error class, our own keys and numbers. `getRequestId` uses Cloudflare's `cf-ray` (a random UUID when its shape is unsafe) and every response carries `X-Request-Id`, the same value as `requestId` in the logs, so a user's report finds its log line. 5xx responses and storage or mail failures turned into 503 leave a line.
+
 PUBLIC_INDEXABLE=false blocks robots and empties sitemap. Enable explicitly for public release; include only selected public pages/live content, never billing pages when disabled. Private pages stay noindex.
 
 Local Google testing requires GOOGLE_AUTH_ENABLED=true, GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET with exact callback http://127.0.0.1:3100/api/auth/callback/google, then restart. Unselected/unconfigured Google shows no visitor placeholder button. Selected Google needs staging configuration and real acceptance before production.

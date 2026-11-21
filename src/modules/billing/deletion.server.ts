@@ -22,7 +22,7 @@ export async function acquireBillingLock(userId: string): Promise<BillingLock> {
     )
     .bind(userId, lock.id, lock.until, userId, now)
     .run()
-  if (!result.meta.changes) throw new HttpError(409, '账号正在核对注销条件，请稍后重试。')
+  if (!result.meta.changes) throw new HttpError(409, 'error_billing_deletion_busy')
   return lock
 }
 export async function releaseBillingLock(lock: BillingLock) {

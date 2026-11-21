@@ -14,8 +14,8 @@ import { sendAuthMail } from '@/modules/mail/mail.server'
 import { HttpError, isLocalRequest } from '@/server/http.server'
 import { assertVerificationOwner, bindVerificationLink } from './verification.server'
 
-export function createAuth(request: Request, requestId = crypto.randomUUID()) {
-  if (!features.auth) throw new HttpError(404, '接口不存在')
+export function createAuth(request: Request, requestId: string = crypto.randomUUID()) {
+  if (!features.auth) throw new HttpError(404, 'error_api_missing')
   if (!env.BETTER_AUTH_SECRET || env.BETTER_AUTH_SECRET.length < 32)
     throw new Error('BETTER_AUTH_SECRET must contain at least 32 characters')
   return betterAuth({
@@ -112,7 +112,7 @@ export function createAuth(request: Request, requestId = crypto.randomUUID()) {
 }
 export async function requireUser(request: Request) {
   const session = await createAuth(request).api.getSession({ headers: request.headers })
-  if (!session?.user.emailVerified) throw new HttpError(401, '请先登录并验证邮箱')
+  if (!session?.user.emailVerified) throw new HttpError(401, 'error_unauthorized')
   await assertAccountEnabled(session.user.id)
   return session.user
 }

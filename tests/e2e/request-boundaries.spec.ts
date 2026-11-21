@@ -57,6 +57,7 @@ test('every response carries the security headers, including redirects and API e
     expect(headers['x-frame-options'], path).toBe('DENY')
     expect(headers['x-content-type-options'], path).toBe('nosniff')
     expect(headers['referrer-policy'], path).toBe('no-referrer')
+    expect(headers['x-request-id'], path).toMatch(/^[A-Za-z0-9-]{8,40}$/)
     expect(headers['permissions-policy'], path).toContain('camera=()')
     // The local origin is plain http, where HSTS must not be sent.
     expect(headers['strict-transport-security'], path).toBeUndefined()

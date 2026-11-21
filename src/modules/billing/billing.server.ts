@@ -68,16 +68,16 @@ export async function getBilling(userId: string) {
 }
 export async function checkout(userId: string, email: string, locale: Locale = 'en') {
   const provider = paymentProvider(env)
-  if (!provider) throw new HttpError(503, '未选择可用的支付渠道。')
+  if (!provider) throw new HttpError(503, 'error_payment_provider')
   if ((await getBilling(userId)).plan === 'pro')
-    throw new HttpError(409, '已有有效订阅，请通过账单门户管理')
+    throw new HttpError(409, 'error_active_subscription')
   const conflict = await database()
     .prepare(
       "SELECT id FROM subscription WHERE user_id=? AND provider<>? AND status NOT IN ('canceled','incomplete_expired') UNION ALL SELECT id FROM checkout WHERE user_id=? AND provider<>? AND status NOT IN ('complete','expired') LIMIT 1",
     )
     .bind(userId, provider, userId, provider)
     .first()
-  if (conflict) throw new HttpError(409, '其他支付渠道仍有待处理记录，请先核对账务。')
+  if (conflict) throw new HttpError(409, 'error_payment_switch_pending')
   return provider === 'creem'
     ? creemCheckout(userId, email, locale)
     : stripe.checkout(userId, email, locale)
@@ -86,14 +86,14 @@ export async function portal(userId: string, locale: Locale = 'en', chosen?: str
   const provider = chosen ?? paymentProvider(env)
   if (provider === 'creem') return creemPortal(userId)
   if (provider === 'stripe') return stripe.portal(userId, locale)
-  throw new HttpError(400, '未选择可用的支付渠道。')
+  throw new HttpError(400, 'error_payment_provider')
 }
 export async function webhook(request: Request) {
   const path = new URL(request.url).pathname
   const creem = request.headers.has('creem-signature'),
     stripeHeader = request.headers.has('stripe-signature')
-  if (creem === stripeHeader) throw new HttpError(400, '支付事件签名无效')
+  if (creem === stripeHeader) throw new HttpError(400, 'error_payment_signature')
   if ((path.endsWith('/stripe') && !stripeHeader) || (path.endsWith('/creem') && !creem))
-    throw new HttpError(400, '支付事件签名无效')
+    throw new HttpError(400, 'error_payment_signature')
   return creem ? creemWebhook(request) : stripe.webhook(request)
 }

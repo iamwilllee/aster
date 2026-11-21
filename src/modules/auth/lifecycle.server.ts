@@ -28,13 +28,13 @@ const deletionInput = z
   .strict()
 
 export async function accountLifecycle(request: Request): Promise<Response> {
-  if (!features.auth) throw new HttpError(404, '接口不存在')
+  if (!features.auth) throw new HttpError(404, 'error_api_missing')
   const auth = createAuth(request)
   const viewer = await auth.api.getSession({
     headers: request.headers,
     query: { disableCookieCache: true },
   })
-  if (!viewer?.user.emailVerified) throw new HttpError(401, '请先登录并验证邮箱')
+  if (!viewer?.user.emailVerified) throw new HttpError(401, 'error_unauthorized')
   const db = database()
   await assertAccountEnabled(viewer.user.id)
   const userId = viewer.user.id
@@ -44,7 +44,7 @@ export async function accountLifecycle(request: Request): Promise<Response> {
     .prepare('SELECT created_at FROM session WHERE id = ? AND user_id = ? AND expires_at > ?')
     .bind(currentId, userId, Date.now())
     .first<{ created_at: number }>()
-  if (!active) throw new HttpError(401, '请先登录并验证邮箱')
+  if (!active) throw new HttpError(401, 'error_unauthorized')
   const credentials = await db
     .prepare('SELECT id, provider_id, password FROM account WHERE user_id = ?')
     .bind(userId)
@@ -87,13 +87,13 @@ export async function accountLifecycle(request: Request): Promise<Response> {
       billing: { state: history ? 'unchecked' : 'none', canCloseCheckouts: false },
     } satisfies AccountLifecycle)
   }
-  if (request.method !== 'POST') throw new HttpError(404, '接口不存在')
-  if (!(await allowPrivateMutation(userId))) throw new HttpError(429, '请求过于频繁，请稍后重试')
+  if (request.method !== 'POST') throw new HttpError(404, 'error_api_missing')
+  if (!(await allowPrivateMutation(userId))) throw new HttpError(429, 'error_throttled')
   if (path === '/api/account/billing-review' || path === '/api/account/close-checkouts') {
     const closing = path.endsWith('/close-checkouts')
     if (closing) await body(request, z.object({ confirmation: z.literal('CLOSE') }).strict())
     if (!(await allowAccountAction(userId, closing ? 'close-checkouts' : 'billing-review')))
-      throw new HttpError(429, '请求过于频繁，请稍后重试')
+      throw new HttpError(429, 'error_throttled')
     const lock = await acquireBillingLock(userId)
     try {
       return json(await reviewBilling(lock, closing))
@@ -102,8 +102,7 @@ export async function accountLifecycle(request: Request): Promise<Response> {
     }
   }
   if (path === '/api/account/export') {
-    if (!(await allowAccountAction(userId, 'export')))
-      throw new HttpError(429, '请求过于频繁，请稍后重试')
+    if (!(await allowAccountAction(userId, 'export'))) throw new HttpError(429, 'error_throttled')
     // A single batch gives a consistent owner-scoped snapshot. Never SELECT * from auth/billing tables.
     const snapshot = await db.batch([
       db
@@ -134,9 +133,9 @@ export async function accountLifecycle(request: Request): Promise<Response> {
         .bind(userId),
     ])
     const profile = snapshot[0]!.results[0]
-    if (!profile) throw new HttpError(401, '请先登录并验证邮箱')
+    if (!profile) throw new HttpError(401, 'error_unauthorized')
     if (snapshot.slice(1).some((part) => part.results.length > 1000))
-      throw new HttpError(413, '数据量超过即时导出上限，请联系站点支持。')
+      throw new HttpError(413, 'error_export_too_large')
     const result = {
       version: 1,
       exportedAt: new Date().toISOString(),
@@ -149,7 +148,7 @@ export async function accountLifecycle(request: Request): Promise<Response> {
     }
     const output = JSON.stringify(result)
     if (new TextEncoder().encode(output).byteLength > 2_000_000)
-      throw new HttpError(413, '数据量超过即时导出上限，请联系站点支持。')
+      throw new HttpError(413, 'error_export_too_large')
     return new Response(output, {
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
@@ -159,13 +158,12 @@ export async function accountLifecycle(request: Request): Promise<Response> {
       },
     })
   }
-  if (path !== '/api/account/delete') throw new HttpError(404, '接口不存在')
+  if (path !== '/api/account/delete') throw new HttpError(404, 'error_api_missing')
   const input = await body(request, deletionInput)
-  if (!(await allowAccountAction(userId, 'delete')))
-    throw new HttpError(429, '请求过于频繁，请稍后重试')
-  if (mode === 'unavailable') throw new HttpError(409, '无法验证当前登录方式，请联系站点支持。')
+  if (!(await allowAccountAction(userId, 'delete'))) throw new HttpError(429, 'error_throttled')
+  if (mode === 'unavailable') throw new HttpError(409, 'error_deletion_method')
   if (credential) {
-    if (!input.currentPassword) throw new HttpError(400, '请输入当前密码以确认注销。')
+    if (!input.currentPassword) throw new HttpError(400, 'error_deletion_password')
     const verified = await auth.api.verifyPassword({
       headers: request.headers,
       body: { password: input.currentPassword },
@@ -173,19 +171,18 @@ export async function accountLifecycle(request: Request): Promise<Response> {
     })
     await verified.body?.cancel()
     if (!verified.ok) {
-      if (verified.status === 400) throw new HttpError(400, '当前密码不正确。')
-      throw new HttpError(401, '请重新登录后确认注销。')
+      if (verified.status === 400) throw new HttpError(400, 'account_current_password_error')
+      throw new HttpError(401, 'error_deletion_relogin')
     }
-  } else if (!recent || input.currentPassword)
-    throw new HttpError(401, '请重新登录后在五分钟内确认注销。')
+  } else if (!recent || input.currentPassword) throw new HttpError(401, 'error_deletion_fresh')
   const lock = await acquireBillingLock(userId)
   let committed = false
   try {
     if ((await siteContributions()) > 0 && input.retainSiteContent !== true)
-      throw new HttpError(409, '注销前请确认共享网站内容与素材的保留规则。')
+      throw new HttpError(409, 'content_retention_error')
     const billing = await reviewBilling(lock)
     if (!['ready', 'none'].includes(billing.state))
-      throw new HttpError(409, '支付状态尚不满足注销条件，请先核对账务。')
+      throw new HttpError(409, 'error_billing_deletion_not_ready')
     await assertAdministratorDeletion(userId)
     await cleanAccountFiles(lock)
     const now = Date.now()
@@ -248,7 +245,7 @@ export async function accountLifecycle(request: Request): Promise<Response> {
         .bind(now, userId, lock.id, userId),
     ])
     if (!results[5]?.meta.changes) {
-      throw new HttpError(401, '请重新登录后确认注销。')
+      throw new HttpError(401, 'error_deletion_relogin')
     }
     committed = true
     // The row and all sessions are already gone. Sign-out only clears the browser's matching auth cookies.

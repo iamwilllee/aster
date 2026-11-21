@@ -11,8 +11,7 @@ export async function accountEnabled(userId: string) {
     .first())
 }
 export async function assertAccountEnabled(userId: string) {
-  if (!(await accountEnabled(userId)))
-    throw new HttpError(401, '账号当前不可用，请联系网站管理员。')
+  if (!(await accountEnabled(userId))) throw new HttpError(401, 'admin_account_disabled')
 }
 export async function lastAdministrator(userId: string) {
   return !!(await database()
@@ -21,6 +20,5 @@ export async function lastAdministrator(userId: string) {
     .first())
 }
 export async function assertAdministratorDeletion(userId: string) {
-  if (await lastAdministrator(userId))
-    throw new HttpError(409, '请先指定另一位有效管理员，再注销当前管理员账号。')
+  if (await lastAdministrator(userId)) throw new HttpError(409, 'admin_last_delete')
 }

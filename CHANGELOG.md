@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- 2026-11-25: Identify server errors by message keys instead of Chinese text. `HttpError` takes a key and parameters (162 call sites migrated, zod messages included); responses translate from the key, a guard test rejects literals that are not keys and Chinese strings in server code, and text from outside libraries never reaches the user. This also fixes an unmapped admin-permission message and five webhook messages that fell back to a generic error in English. Every response now carries `X-Request-Id` (Cloudflare's cf-ray or a UUID), 5xx API errors and the storage and mail failures that were turned into 503 or generic errors log a line with the request id and error class only, never messages.
+
 - 2026-11-24: Add security response headers to every page, API, redirect and server-function response through a request middleware (`src/start.ts`): `frame-ancestors 'none'`, `base-uri`, `object-src`, `form-action`, `Referrer-Policy`, `Permissions-Policy`, `Cross-Origin-Opener-Policy` and, over HTTPS, HSTS. Server-function endpoints now reject cross-site requests. A script-src CSP remains separate work. Upgrade better-auth to 1.7.26, wrangler, the Cloudflare Vite plugin and miniflare (removing the high-severity `undici` advisories from dev tooling) and pin two dev-tool transitive dependencies; `pnpm audit` is clean. Drop the stale vite release-age exclusion.
 
 - 2026-11-23: Move the entrance motion (`data-reveal`, `RevealGroup`) into Flatpack. Each theme carries its own pace as `--fp-reveal-*` tokens (Sage 560ms/70ms/14px, Catalog 480ms/50ms/10px, the default theme fades without moving); the keyframe is now `fp-reveal`. Aster keeps only its card hover lift in `src/styles.css`.

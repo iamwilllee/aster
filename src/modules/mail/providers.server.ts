@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { logFailure } from '@/server/observability'
 
 export type MailProvider = 'brevo' | 'resend'
 
@@ -24,6 +25,8 @@ export async function sendProviderMail(
 ) {
   const sender = mailSender(message.from)
   if (!sender || !key.trim()) throw new Error('Transactional email is not configured')
+  // How it failed, never why in words: error bodies can hold the recipient, a link or a credential.
+  let outcome = 'request_failed'
   try {
     const brevo = provider === 'brevo'
     const response = await fetch(
@@ -52,8 +55,12 @@ export async function sendProviderMail(
     // Neither error bodies nor message IDs are needed here. They can contain
     // recipient addresses, credentials or links; discard without buffering/logging.
     await response.body?.cancel()
-    if (response.status !== (brevo ? 201 : 200)) throw new Error('not accepted')
-  } catch {
+    if (response.status !== (brevo ? 201 : 200)) {
+      outcome = `http_${response.status}`
+      throw new Error('not accepted')
+    }
+  } catch (error) {
+    logFailure('mail_not_accepted', error, { provider, outcome })
     throw new Error('Transactional email provider did not confirm acceptance')
   }
 }

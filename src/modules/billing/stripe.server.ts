@@ -27,7 +27,7 @@ export function stripeStatus() {
   return { enabled, configured, mode: 'test' as const, ready: enabled && configured }
 }
 export function stripeClient(options: { timeout?: number; maxNetworkRetries?: number } = {}) {
-  if (!stripeStatus().configured) throw new HttpError(503, 'Stripe 测试支付尚未配置')
+  if (!stripeStatus().configured) throw new HttpError(503, 'error_stripe_config')
   return new Stripe(env.STRIPE_SECRET_KEY!, {
     httpClient: Stripe.createFetchHttpClient(),
     maxNetworkRetries: 2,
@@ -65,10 +65,10 @@ export async function getBilling(userId: string) {
   }
 }
 export async function checkout(userId: string, email: string, locale: Locale = 'en') {
-  if (!stripeStatus().ready) throw new HttpError(503, 'Stripe 测试支付尚未配置或结账已关闭')
+  if (!stripeStatus().ready) throw new HttpError(503, 'error_checkout_disabled')
   const stripe = stripeClient()
   if ((await getBilling(userId)).plan === 'pro')
-    throw new HttpError(409, '已有有效订阅，请通过账单门户管理')
+    throw new HttpError(409, 'error_active_subscription')
   const existing = await database()
     .prepare(
       "SELECT customer_id FROM subscription WHERE provider = 'stripe' AND user_id = ? ORDER BY updated_at DESC LIMIT 1",
@@ -87,8 +87,8 @@ export async function checkout(userId: string, email: string, locale: Locale = '
     .run()
   if (!reserved.meta.changes) {
     if (!(await database().prepare('SELECT id FROM user WHERE id = ?').bind(userId).first()))
-      throw new HttpError(401, '请先登录并验证邮箱')
-    throw new HttpError(409, '账号正在核对注销条件，请稍后重试。')
+      throw new HttpError(401, 'error_unauthorized')
+    throw new HttpError(409, 'error_billing_deletion_busy')
   }
   const result = await stripe.checkout.sessions.create(
     {
@@ -105,7 +105,7 @@ export async function checkout(userId: string, email: string, locale: Locale = '
       idempotencyKey: `checkout:${userId}:${env.STRIPE_PRICE_ID}:${Math.floor(Date.now() / 300_000)}`,
     },
   )
-  if (!result.url) throw new HttpError(502, '支付服务没有返回结账地址')
+  if (!result.url) throw new HttpError(502, 'error_checkout_url')
   await database().batch([
     database()
       .prepare(
@@ -126,7 +126,7 @@ export async function portal(userId: string, locale: Locale = 'en') {
     )
     .bind(userId)
     .first<{ customer_id: string }>()
-  if (!sub) throw new HttpError(404, '还没有可管理的订阅')
+  if (!sub) throw new HttpError(404, 'error_subscription_missing')
   const result = await stripe.billingPortal.sessions.create({
     customer: sub.customer_id,
     return_url: `${env.APP_ORIGIN}${localizePath('/app/billing', locale)}`,
@@ -155,20 +155,21 @@ async function reconcile(
       .first<{ revision: number; owner_ref: string }>()
     const sub = await stripe.subscriptions.retrieve(subscriptionId)
     const userId = sub.metadata.userId
-    if (!userId) throw new HttpError(422, '订阅缺少有效的用户关联')
+    if (!userId) throw new HttpError(422, 'error_subscription_user_missing')
     const state = await database()
       .prepare('SELECT closed_at,lock_until FROM billing_account_state WHERE user_id=?')
       .bind(userId)
       .first<{ closed_at: number | null; lock_until: number }>()
     if (state && state.lock_until > Date.now())
-      throw new HttpError(503, '订阅状态正在同步，请重试事件')
+      throw new HttpError(503, 'error_subscription_syncing')
     const archived = state?.closed_at != null
     if (
       !archived &&
       !(await database().prepare('SELECT id FROM user WHERE id = ?').bind(userId).first())
     )
-      throw new HttpError(422, '订阅缺少有效的用户关联')
-    if (previous && previous.owner_ref !== userId) throw new HttpError(422, '订阅用户关联发生变化')
+      throw new HttpError(422, 'error_subscription_user_missing')
+    if (previous && previous.owner_ref !== userId)
+      throw new HttpError(422, 'error_subscription_user_changed')
     const customerId = typeof sub.customer === 'string' ? sub.customer : sub.customer.id
     if (
       archived &&
@@ -179,8 +180,8 @@ async function reconcile(
         .bind(userId, customerId)
         .first())
     )
-      throw new HttpError(422, '订阅缺少有效的用户关联')
-    if (sub.livemode) throw new HttpError(400, '当前仅接受 Stripe 测试事件')
+      throw new HttpError(422, 'error_subscription_user_missing')
+    if (sub.livemode) throw new HttpError(400, 'error_stripe_test_only')
     const table = archived ? 'billing_subscription_archive' : 'subscription'
     const ownerColumn = archived ? 'owner_ref' : 'user_id'
     const checkoutTable = archived ? 'billing_checkout_archive' : 'checkout'
@@ -241,12 +242,12 @@ async function reconcile(
       return
     }
   }
-  throw new HttpError(503, '订阅状态正在同步，请重试事件')
+  throw new HttpError(503, 'error_subscription_syncing')
 }
 export async function webhook(request: Request) {
   const stripe = stripeClient()
   const signature = request.headers.get('stripe-signature')
-  if (!signature) throw new HttpError(400, '缺少支付事件签名')
+  if (!signature) throw new HttpError(400, 'error_payment_signature_missing')
   let event: Stripe.Event
   try {
     event = await stripe.webhooks.constructEventAsync(
@@ -257,9 +258,9 @@ export async function webhook(request: Request) {
       Stripe.createSubtleCryptoProvider(),
     )
   } catch {
-    throw new HttpError(400, '支付事件签名无效')
+    throw new HttpError(400, 'error_payment_signature')
   }
-  if (event.livemode) throw new HttpError(400, '当前仅接受 Stripe 测试事件')
+  if (event.livemode) throw new HttpError(400, 'error_stripe_test_only')
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object
     const subscriptionId =

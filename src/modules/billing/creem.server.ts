@@ -73,7 +73,7 @@ async function request<T extends z.ZodType>(
   schema: T,
   data?: unknown,
 ): Promise<z.infer<T>> {
-  if (!creemStatus().configured) throw new HttpError(503, 'Creem 测试支付尚未配置。')
+  if (!creemStatus().configured) throw new HttpError(503, 'error_creem_config')
   // Fixed sandbox host, no redirects or automatic retries. Never log provider bodies or keys.
   const response = await fetch('https://test-api.creem.io' + path, {
     method: data === undefined ? 'GET' : 'POST',
@@ -87,7 +87,7 @@ async function request<T extends z.ZodType>(
   })
   if (!response.ok) {
     await response.body?.cancel()
-    throw new HttpError(503, '支付服务暂时不可用，请稍后重试。')
+    throw new HttpError(503, 'error_payment_unavailable')
   }
   const value: unknown = JSON.parse(
     await boundedText(
@@ -100,7 +100,7 @@ async function request<T extends z.ZodType>(
     ),
   )
   const parsed = schema.safeParse(value)
-  if (!parsed.success) throw new HttpError(503, '支付服务返回了无法验证的数据。')
+  if (!parsed.success) throw new HttpError(503, 'error_payment_response')
   return parsed.data
 }
 function safeUrl(value: string) {
@@ -111,7 +111,7 @@ function safeUrl(value: string) {
     url.password ||
     !(url.hostname === 'creem.io' || url.hostname.endsWith('.creem.io'))
   )
-    throw new HttpError(503, '支付服务返回了无法验证的数据。')
+    throw new HttpError(503, 'error_payment_response')
   return url.toString()
 }
 const storedId = (value: string) => 'creem:' + value
@@ -119,7 +119,7 @@ const nativeId = (value: string) => id.parse(value.replace(/^creem:/, ''))
 const guard =
   "NOT EXISTS (SELECT 1 FROM billing_account_state WHERE user_id=? AND (closed_at IS NOT NULL OR lock_until > unixepoch('subsec')*1000))"
 export async function creemCheckout(userId: string, email: string, locale: Locale) {
-  if (!creemStatus().ready) throw new HttpError(503, 'Creem 测试支付尚未配置或结账已关闭。')
+  if (!creemStatus().ready) throw new HttpError(503, 'error_creem_checkout_disabled')
   const db = database(),
     nonce = crypto.randomUUID(),
     reservation = storedId('pending:' + nonce)
@@ -129,7 +129,7 @@ export async function creemCheckout(userId: string, email: string, locale: Local
     )
     .bind(reservation, userId, Date.now(), userId, userId)
     .run()
-  if (!reserved.meta.changes) throw new HttpError(409, '账号正在核对注销条件，请稍后重试。')
+  if (!reserved.meta.changes) throw new HttpError(409, 'error_billing_deletion_busy')
   const result = await request('/v1/checkouts', checkoutSchema, {
     request_id: nonce,
     product_id: env.CREEM_PRODUCT_ID,
@@ -142,7 +142,7 @@ export async function creemCheckout(userId: string, email: string, locale: Local
     reference(result.product) !== env.CREEM_PRODUCT_ID ||
     !result.checkout_url
   )
-    throw new HttpError(503, '支付服务返回了无法验证的数据。')
+    throw new HttpError(503, 'error_payment_response')
   const url = safeUrl(result.checkout_url)
   const saved = await db.batch([
     db
@@ -163,7 +163,7 @@ export async function creemCheckout(userId: string, email: string, locale: Local
       .bind(storedId(result.id), userId)
       .first())
   )
-    throw new HttpError(409, '账号正在核对注销条件，请稍后重试。')
+    throw new HttpError(409, 'error_billing_deletion_busy')
   return { url }
 }
 export async function creemPortal(userId: string) {
@@ -173,7 +173,7 @@ export async function creemPortal(userId: string) {
     )
     .bind(userId)
     .first<{ customer_id: string }>()
-  if (!row) throw new HttpError(404, '还没有可管理的订阅')
+  if (!row) throw new HttpError(404, 'error_subscription_missing')
   const result = await request(
     '/v1/customers/billing',
     z.object({ customer_portal_link: z.string() }),
@@ -202,7 +202,7 @@ async function syncSubscription(
       '/v1/subscriptions?subscription_id=' + encodeURIComponent(subscriptionId),
       subscriptionSchema,
     )
-    if (sub.id !== subscriptionId) throw new HttpError(422, '支付记录缺少有效的账号关联。')
+    if (sub.id !== subscriptionId) throw new HttpError(422, 'error_payment_association')
     let userId = previous?.owner_ref
     if (checkout) {
       if (
@@ -212,7 +212,7 @@ async function syncSubscription(
         reference(checkout.product) !== reference(sub.product) ||
         checkout.order?.status !== 'paid'
       )
-        throw new HttpError(422, '支付记录缺少有效的账号关联。')
+        throw new HttpError(422, 'error_payment_association')
       const owner = await db
         .prepare(
           "SELECT user_id AS owner_ref FROM checkout WHERE provider='creem' AND id IN (?,?) UNION ALL SELECT owner_ref FROM billing_checkout_archive WHERE provider='creem' AND id IN (?,?)",
@@ -225,29 +225,29 @@ async function syncSubscription(
         )
         .all<{ owner_ref: string }>()
       const owners = new Set(owner.results.map((row) => row.owner_ref))
-      if (owners.size !== 1) throw new HttpError(422, '支付记录缺少有效的账号关联。')
+      if (owners.size !== 1) throw new HttpError(422, 'error_payment_association')
       const matched = owner.results[0]!.owner_ref
-      if (userId && userId !== matched) throw new HttpError(422, '支付记录缺少有效的账号关联。')
+      if (userId && userId !== matched) throw new HttpError(422, 'error_payment_association')
       userId = matched
     }
     // Out-of-order subscription events retry until an owned checkout establishes the association.
-    if (!userId) throw new HttpError(503, '订阅状态正在同步，请重试事件')
+    if (!userId) throw new HttpError(503, 'error_subscription_syncing')
     if (previous?.customer_id && previous.customer_id !== reference(sub.customer))
-      throw new HttpError(422, '支付记录缺少有效的账号关联。')
+      throw new HttpError(422, 'error_payment_association')
     if (sub.metadata?.userId !== undefined && sub.metadata.userId !== userId)
-      throw new HttpError(422, '支付记录缺少有效的账号关联。')
+      throw new HttpError(422, 'error_payment_association')
     const state = await db
       .prepare('SELECT closed_at,lock_until FROM billing_account_state WHERE user_id=?')
       .bind(userId)
       .first<{ closed_at: number | null; lock_until: number }>()
     if (state && state.lock_until > Date.now())
-      throw new HttpError(503, '订阅状态正在同步，请重试事件')
+      throw new HttpError(503, 'error_subscription_syncing')
     const archived = state?.closed_at != null
     const table = archived ? 'billing_subscription_archive' : 'subscription',
       ownerColumn = archived ? 'owner_ref' : 'user_id',
       checkoutTable = archived ? 'billing_checkout_archive' : 'checkout'
     if (!archived && !(await db.prepare('SELECT id FROM user WHERE id=?').bind(userId).first()))
-      throw new HttpError(422, '支付记录缺少有效的账号关联。')
+      throw new HttpError(422, 'error_payment_association')
     const expires = sub.current_period_end_date
       ? Math.floor(Date.parse(sub.current_period_end_date) / 1000)
       : 0
@@ -337,13 +337,13 @@ async function syncSubscription(
       return
     }
   }
-  throw new HttpError(503, '订阅状态正在同步，请重试事件')
+  throw new HttpError(503, 'error_subscription_syncing')
 }
 export async function creemWebhook(req: Request) {
-  if (!creemStatus().configured) throw new HttpError(503, 'Creem 测试支付尚未配置。')
+  if (!creemStatus().configured) throw new HttpError(503, 'error_creem_config')
   const raw = await boundedText(req, 262144),
     signature = req.headers.get('creem-signature') ?? ''
-  if (!/^[a-f0-9]{64}$/i.test(signature)) throw new HttpError(400, '支付事件签名无效')
+  if (!/^[a-f0-9]{64}$/i.test(signature)) throw new HttpError(400, 'error_payment_signature')
   const key = await crypto.subtle.importKey(
     'raw',
     new TextEncoder().encode(env.CREEM_WEBHOOK_SECRET),
@@ -359,17 +359,17 @@ export async function creemWebhook(req: Request) {
       new TextEncoder().encode(raw),
     ))
   )
-    throw new HttpError(400, '支付事件签名无效')
+    throw new HttpError(400, 'error_payment_signature')
   let payload: unknown
   try {
     payload = JSON.parse(raw)
   } catch {
-    throw new HttpError(400, '支付事件签名无效')
+    throw new HttpError(400, 'error_payment_signature')
   }
   const event = z
     .object({ id, eventType: z.string().max(100), object: z.object({ id, mode }) })
     .safeParse(payload)
-  if (!event.success) throw new HttpError(400, '当前仅接受测试支付事件。')
+  if (!event.success) throw new HttpError(400, 'error_payment_test_only')
   if (
     await database()
       .prepare('SELECT id FROM billing_event WHERE id=?')
@@ -387,7 +387,7 @@ export async function creemWebhook(req: Request) {
       checkout.status !== 'completed' ||
       !checkout.subscription
     )
-      throw new HttpError(503, '订阅状态正在同步，请重试事件')
+      throw new HttpError(503, 'error_subscription_syncing')
     await syncSubscription(
       reference(checkout.subscription),
       event.data.id,

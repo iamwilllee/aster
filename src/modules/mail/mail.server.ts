@@ -4,6 +4,7 @@ import { env } from 'cloudflare:workers'
 import { authMail, type AuthMailKind } from './template'
 import { requestLocale } from '@/i18n/core'
 import { isLocalRequest } from '@/server/http.server'
+import { logFailure } from '@/server/observability'
 import { mailSender, sendProviderMail } from './providers.server'
 
 function emailBinding(): SendEmail | undefined {
@@ -61,7 +62,9 @@ export async function sendAuthMail(
     }
     try {
       await email.send(message)
-    } catch {
+    } catch (error) {
+      // The class of failure only: its message can hold the recipient or a link.
+      logFailure('mail_not_accepted', error, { provider: 'cloudflare' })
       throw new Error('Transactional email provider did not confirm acceptance')
     }
     return

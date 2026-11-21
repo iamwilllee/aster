@@ -781,5 +781,10 @@
   "ui_motion_title": "Motion and reading rhythm",
   "ui_motion_description": "A short, staggered entrance and subtle hover feedback. Reduced motion shows content immediately. Replay affects only this local preview.",
   "ui_motion_replay": "Replay entrance",
-  "ui_motion_scroll": "This block appears once when you reach it. Keyboard focus reveals its action immediately."
+  "ui_motion_scroll": "This block appears once when you reach it. Keyboard focus reveals its action immediately.",
+  "error_subscription_syncing": "The subscription state is still syncing. Retry the event.",
+  "error_subscription_user_missing": "The subscription has no valid user link.",
+  "error_subscription_user_changed": "The subscription user link changed.",
+  "error_stripe_test_only": "Only Stripe test events are accepted.",
+  "error_payment_signature_missing": "The payment event signature is missing."
 }

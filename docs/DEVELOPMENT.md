@@ -35,6 +35,10 @@
 
 消息位于 `src/i18n/en.json` 与 `zh.json`，组件使用类型化 `t(key, values)`。运行 `pnpm locale:check` 检查键与占位符一致。语言切换使用完整导航，保留 query/hash；认证/支付回跳保留前缀。API 与 Better Auth 请求发送语言 header，服务端只将已知公共错误映射到字典，不直接显示供应商原始错误。
 
+服务端错误用消息键标识：`throw new HttpError(409, 'error_project_limit', { count: 3 })`。键是稳定的标识，响应据此翻译，改措辞或改文案不会让英文用户静默退回通用错误；`message` 只保存中文文本，供日志和测试。zod 校验消息同样写键。字符串字面量只允许来自外部库，且不会原样显示（未知文本只显示通用错误）。`tests/unit/error-messages.test.ts` 拒绝不是键的 `HttpError` 字面量，也拒绝服务端目录里的中文字符串。
+
+日志只记类别和标识，不记消息：库的错误文本可能含地址、链接、凭据或查询参数。`src/server/observability.ts` 的 `logFailure(event, error, fields)` 写事件名、错误类名、我们自己的键和数字；`getRequestId` 取 Cloudflare 的 `cf-ray`（形态不安全时用随机 UUID），每个响应带 `X-Request-Id`，与日志里的 `requestId` 相同，用户反馈时可以直接按它查日志。5xx 响应和被转成 503 的存储、邮件失败都会留一行。
+
 根配置 `PUBLIC_INDEXABLE=false` 时 robots 禁止索引、sitemap 为空；公开发布时显式开启，只列已选择能力的公开页面与已发布内容，未选支付时不列套餐页。私有页面始终 noindex。
 
 本地 Google 联调需要 `.dev.vars` 中同时设置 `GOOGLE_AUTH_ENABLED=true`、`GOOGLE_CLIENT_ID`、`GOOGLE_CLIENT_SECRET`，回调为 `http://127.0.0.1:3100/api/auth/callback/google`。重启服务后验证。未选择或未配置时不向访客显示 Google 占位按钮；选择 Google 后需先在 staging 配置并真实验收，再发布。

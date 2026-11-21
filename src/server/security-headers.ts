@@ -36,8 +36,12 @@ export function securityHeaders(request: Request): Record<string, string> {
  * Adds the headers a response does not already set (a handler's own, stricter Content-Security-Policy
  * for file downloads wins). Responses with immutable headers, such as redirects, are rebuilt.
  */
-export function withSecurityHeaders(response: Response, request: Request): Response {
-  const wanted = Object.entries(securityHeaders(request)).filter(
+export function withSecurityHeaders(
+  response: Response,
+  request: Request,
+  extra: Record<string, string> = {},
+): Response {
+  const wanted = Object.entries({ ...securityHeaders(request), ...extra }).filter(
     ([name]) => !response.headers.has(name),
   )
   if (wanted.length === 0) return response

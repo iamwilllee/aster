@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { features } from '@/config/features'
 import { database } from '@/server/database.server'
 import { body, boundedBytes, HttpError, json } from '@/server/http.server'
+import { logFailure } from '@/server/observability'
 import { assetBucket, filesConfigured } from '@/modules/files/files.server'
 import { fileLimits, imageType } from '@/modules/files/policy'
 import { contentInput, contentLimits, type ContentRecord, type PublicContent } from './policy'
@@ -28,7 +29,7 @@ const record = (r: Entry): ContentRecord => ({
   updatedAt: r.updated_at,
 })
 function changed(result: D1Result) {
-  if (!result.meta.changes) throw new HttpError(409, '内容已变化或暂不可用，请刷新后重试。')
+  if (!result.meta.changes) throw new HttpError(409, 'content_conflict')
 }
 async function save(statement: D1PreparedStatement) {
   try {
@@ -37,7 +38,7 @@ async function save(statement: D1PreparedStatement) {
     return result
   } catch (error) {
     if (error instanceof Error && error.message.includes('UNIQUE constraint'))
-      throw new HttpError(409, '该发布网址已被占用。')
+      throw new HttpError(409, 'content_slug_conflict')
     throw error
   }
 }
@@ -48,7 +49,7 @@ export async function publicEntries(input: {
   category?: string
   page?: number
 }) {
-  if (!features.content) throw new HttpError(404, '接口不存在')
+  if (!features.content) throw new HttpError(404, 'error_api_missing')
   const { locale, q = '', kind = '', category = '' } = input,
     page = Math.max(1, Math.floor(Math.min(10000, input.page ?? 1))),
     db = database()
@@ -115,9 +116,9 @@ async function assetContent(id: string, admin: boolean, method: string) {
     )
     .bind(id)
     .first<{ object_key: string; content_type: string }>()
-  if (!row) throw new HttpError(404, '网站素材不存在。')
+  if (!row) throw new HttpError(404, 'content_asset_missing')
   const object = await assetBucket().get(row.object_key)
-  if (!object) throw new HttpError(404, '网站素材不存在。')
+  if (!object) throw new HttpError(404, 'content_asset_missing')
   if (method === 'HEAD') await object.body.cancel()
   return new Response(method === 'HEAD' ? null : object.body, {
     headers: {
@@ -131,7 +132,7 @@ async function assetContent(id: string, admin: boolean, method: string) {
   })
 }
 export async function handlePublicContent(request: Request) {
-  if (!features.content) throw new HttpError(404, '接口不存在')
+  if (!features.content) throw new HttpError(404, 'error_api_missing')
   const url = new URL(request.url),
     match = /^\/api\/content\/assets\/([a-f0-9-]{36})$/.exec(url.pathname)
   if (match && features.files && ['GET', 'HEAD'].includes(request.method))
@@ -146,24 +147,24 @@ export async function handlePublicContent(request: Request) {
         page: Number(url.searchParams.get('page')) || 1,
       }),
     )
-  throw new HttpError(404, '接口不存在')
+  throw new HttpError(404, 'error_api_missing')
 }
 async function upload(request: Request, userId: string) {
   const store = assetBucket(),
     bytes = await boundedBytes(request, fileLimits.maxFileBytes),
     type = imageType(bytes)
   if (!type || type !== request.headers.get('content-type'))
-    throw new HttpError(400, '仅支持文件头匹配的 PNG、JPEG 或 WebP 图片。')
+    throw new HttpError(400, 'files_format_error')
   let name: string
   try {
     name = decodeURIComponent(request.headers.get('x-file-name') ?? '')
       .normalize('NFC')
       .trim()
   } catch {
-    throw new HttpError(400, '图片名称无效。')
+    throw new HttpError(400, 'files_name_error')
   }
   if (!name || name.length > 160 || /[\x00-\x1f\x7f/\\]/.test(name))
-    throw new HttpError(400, '图片名称无效。')
+    throw new HttpError(400, 'files_name_error')
   const id = crypto.randomUUID(),
     key = 'content/' + id,
     db = database()
@@ -202,19 +203,20 @@ async function upload(request: Request, userId: string) {
         .bind(id, userId, userId)
         .run(),
     )
-  } catch {
-    throw new HttpError(503, '网站素材上传尚未确认，请先检查素材，不要重复上传。')
+  } catch (error) {
+    logFailure('storage_failed', error, { operation: 'content_upload_confirm' })
+    throw new HttpError(503, 'content_upload_pending')
   }
   return json({ id }, 201)
 }
 export async function handleAdminContent(request: Request, userId: string) {
-  if (!features.content) throw new HttpError(404, '接口不存在')
+  if (!features.content) throw new HttpError(404, 'error_api_missing')
   // The API entrypoint authenticates and checks current admin membership before dispatch.
   const path = new URL(request.url).pathname,
     method = request.method,
     db = database()
   if (path.startsWith('/api/admin/content/assets')) {
-    if (!features.files) throw new HttpError(404, '接口不存在')
+    if (!features.files) throw new HttpError(404, 'error_api_missing')
     if (path === '/api/admin/content/assets') {
       if (method === 'POST') return upload(request, userId)
       if (method === 'GET')
@@ -232,7 +234,7 @@ export async function handleAdminContent(request: Request, userId: string) {
     const match = /^\/api\/admin\/content\/assets\/([a-f0-9-]{36})(?:\/(content|reconcile))?$/.exec(
       path,
     )
-    if (!match) throw new HttpError(404, '接口不存在')
+    if (!match) throw new HttpError(404, 'error_api_missing')
     const id = match[1]!
     if (match[2] === 'content' && ['GET', 'HEAD'].includes(method))
       return assetContent(id, true, method)
@@ -240,9 +242,9 @@ export async function handleAdminContent(request: Request, userId: string) {
       .prepare('SELECT * FROM content_asset WHERE id=?')
       .bind(id)
       .first<{ object_key: string; size: number; content_type: string; state: string }>()
-    if (!row) throw new HttpError(404, '网站素材不存在。')
+    if (!row) throw new HttpError(404, 'content_asset_missing')
     if (match[2] === 'reconcile' && method === 'POST') {
-      if (row.state !== 'pending') throw new HttpError(409, '内容已变化或暂不可用，请刷新后重试。')
+      if (row.state !== 'pending') throw new HttpError(409, 'content_conflict')
       const object = await assetBucket().head(row.object_key)
       if (
         !object ||
@@ -250,7 +252,7 @@ export async function handleAdminContent(request: Request, userId: string) {
         object.httpMetadata?.contentType !== row.content_type ||
         object.customMetadata?.contentAssetId !== id
       )
-        throw new HttpError(409, '网站素材上传尚未确认，请先检查素材，不要重复上传。')
+        throw new HttpError(409, 'content_upload_pending')
       changed(
         await db
           .prepare(
@@ -272,8 +274,9 @@ export async function handleAdminContent(request: Request, userId: string) {
       )
       try {
         await assetBucket().delete(row.object_key)
-      } catch {
-        throw new HttpError(503, '图片清理尚未完成，请重试删除。')
+      } catch (error) {
+        logFailure('storage_failed', error, { operation: 'content_asset_delete' })
+        throw new HttpError(503, 'files_cleanup_error')
       }
       // Delete only this fenced record; a concurrent draft cannot attach a deleting asset.
       changed(
@@ -284,7 +287,7 @@ export async function handleAdminContent(request: Request, userId: string) {
       )
       return json({ ok: true })
     }
-    throw new HttpError(404, '接口不存在')
+    throw new HttpError(404, 'error_api_missing')
   }
   if (path === '/api/admin/content') {
     if (method === 'GET') {
@@ -306,7 +309,7 @@ export async function handleAdminContent(request: Request, userId: string) {
       const input = await body(request, contentInput, 65536),
         id = crypto.randomUUID(),
         now = Date.now()
-      if (input.coverAssetId && !features.files) throw new HttpError(400, '图片资源功能未启用。')
+      if (input.coverAssetId && !features.files) throw new HttpError(400, 'files_disabled_error')
       await save(
         db
           .prepare(
@@ -331,7 +334,7 @@ export async function handleAdminContent(request: Request, userId: string) {
     }
   }
   const match = /^\/api\/admin\/content\/([a-f0-9-]{36})(?:\/(publish|withdraw))?$/.exec(path)
-  if (!match) throw new HttpError(404, '接口不存在')
+  if (!match) throw new HttpError(404, 'error_api_missing')
   const id = match[1]!
   if (method === 'PATCH' && !match[2]) {
     const input = await body(
@@ -340,7 +343,7 @@ export async function handleAdminContent(request: Request, userId: string) {
         65536,
       ),
       d = input.draft
-    if (d.coverAssetId && !features.files) throw new HttpError(400, '图片资源功能未启用。')
+    if (d.coverAssetId && !features.files) throw new HttpError(400, 'files_disabled_error')
     await save(
       db
         .prepare(
@@ -376,9 +379,9 @@ export async function handleAdminContent(request: Request, userId: string) {
         .prepare('SELECT draft FROM content_entry WHERE id=? AND revision=?')
         .bind(id, revision)
         .first<{ draft: string }>()
-      if (!entry) throw new HttpError(409, '内容已变化或暂不可用，请刷新后重试。')
+      if (!entry) throw new HttpError(409, 'content_conflict')
       const d = contentInput.parse(JSON.parse(entry.draft))
-      if (d.coverAssetId && !features.files) throw new HttpError(400, '图片资源功能未启用。')
+      if (d.coverAssetId && !features.files) throw new HttpError(400, 'files_disabled_error')
       await save(
         db
           .prepare(
@@ -412,5 +415,5 @@ export async function handleAdminContent(request: Request, userId: string) {
     )
     return json({ ok: true })
   }
-  throw new HttpError(404, '接口不存在')
+  throw new HttpError(404, 'error_api_missing')
 }

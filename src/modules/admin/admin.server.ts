@@ -78,7 +78,7 @@ export async function handleAdmin(request: Request, actorId: string) {
     })
   }
   const match = /^\/api\/admin\/users\/([a-zA-Z0-9_-]{1,128})(?:\/(access))?$/.exec(path)
-  if (!match) throw new HttpError(404, '接口不存在')
+  if (!match) throw new HttpError(404, 'error_api_missing')
   const id = match[1]!
   if (!match[2] && request.method === 'GET') {
     const row = await db
@@ -87,7 +87,7 @@ export async function handleAdmin(request: Request, actorId: string) {
       )
       .bind(id)
       .first<UserRow>()
-    if (!row) throw new HttpError(404, '用户不存在。')
+    if (!row) throw new HttpError(404, 'admin_missing')
     const count = await db
       .prepare(`SELECT ${activeAdminCountSQL} AS total`)
       .first<{ total: number }>()
@@ -116,7 +116,7 @@ export async function handleAdmin(request: Request, actorId: string) {
   }
   if (match[2] && request.method === 'POST') {
     const input = await body(request, accessInput)
-    if (id === actorId) throw new HttpError(409, '不能停用或更改当前账号的访问状态。')
+    if (id === actorId) throw new HttpError(409, 'admin_self_error')
     const nonce = crypto.randomUUID(),
       now = Date.now()
     const eligible = `EXISTS(SELECT 1 FROM user WHERE id=?) AND ${actor} AND NOT EXISTS(SELECT 1 FROM billing_account_state WHERE user_id=? AND (closed_at IS NOT NULL OR lock_until>unixepoch('subsec')*1000)) AND ${input.disabled ? 'NOT EXISTS' : 'EXISTS'}(SELECT 1 FROM account_access WHERE user_id=? AND disabled_at IS NOT NULL) AND COALESCE((SELECT revision FROM account_access WHERE user_id=?),0)=? AND (?=0 OR NOT EXISTS(SELECT 1 FROM admin_user JOIN user ON user.id=admin_user.user_id WHERE user_id=? AND user.email_verified=1) OR ${activeAdminCountSQL}>1)`
@@ -161,9 +161,8 @@ export async function handleAdmin(request: Request, actorId: string) {
           nonce,
         ),
     ])
-    if (!result[0]?.meta.changes)
-      throw new HttpError(409, '账号状态或权限已变化，请刷新后重试；至少保留一位有效管理员。')
+    if (!result[0]?.meta.changes) throw new HttpError(409, 'admin_changed')
     return json({ ok: true })
   }
-  throw new HttpError(404, '接口不存在')
+  throw new HttpError(404, 'error_api_missing')
 }

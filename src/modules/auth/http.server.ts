@@ -4,12 +4,19 @@ import { isMailConfigured } from '@/modules/mail/mail.server'
 import { createAuth } from './auth.server'
 import { reserveVerificationResend } from './resend.server'
 import { authError } from '@/i18n/auth-errors'
-import { requestLocale, translate, localizedError } from '@/i18n/core'
-import { boundedText, HttpError, json, assertOrigin } from '@/server/http.server'
+import { requestLocale, translate } from '@/i18n/core'
+import {
+  boundedText,
+  HttpError,
+  json,
+  assertOrigin,
+  publicErrorMessage,
+} from '@/server/http.server'
+import { getRequestId } from '@/server/observability'
 import { authLog } from './logging.server'
 
 export async function handleAuthRequest(request: Request) {
-  const requestId = crypto.randomUUID()
+  const requestId = getRequestId(request)
   let release: (() => Promise<void>) | null = null
   async function releaseReservation() {
     const reserved = release
@@ -37,7 +44,7 @@ export async function handleAuthRequest(request: Request) {
             path,
           ))
       )
-        throw new HttpError(404, '接口不存在')
+        throw new HttpError(404, 'error_api_missing')
       if (
         [
           '/api/auth/sign-up/email',
@@ -46,17 +53,17 @@ export async function handleAuthRequest(request: Request) {
         ].includes(path) &&
         !isMailConfigured(request)
       )
-        throw new HttpError(503, '邮件服务未配置，暂时无法注册或重置密码。')
+        throw new HttpError(503, 'mail_disabled')
       if (path === '/api/auth/send-verification-email') {
         assertOrigin(request)
         let input: unknown
         try {
           input = JSON.parse(text)
         } catch {
-          throw new HttpError(400, 'JSON 格式不正确')
+          throw new HttpError(400, 'error_json_invalid')
         }
         const parsed = z.object({ email: z.email().max(254) }).safeParse(input)
-        if (!parsed.success) throw new HttpError(400, '参数不正确')
+        if (!parsed.success) throw new HttpError(400, 'error_parameters')
         release = await reserveVerificationResend(parsed.data.email)
         if (!release) {
           const response = json(
@@ -79,7 +86,7 @@ export async function handleAuthRequest(request: Request) {
           path,
         ))
     )
-      throw new HttpError(404, '接口不存在')
+      throw new HttpError(404, 'error_api_missing')
     const response = await createAuth(request, requestId).handler(request)
     if (response.status >= 500) authLog('error', 'auth runtime', requestId)
     if (!response.ok) await releaseReservation()
@@ -117,7 +124,7 @@ export async function handleAuthRequest(request: Request) {
       {
         message:
           error instanceof HttpError
-            ? localizedError(error.message, requestLocale(request))
+            ? publicErrorMessage(error, requestLocale(request))
             : translate(requestLocale(request), 'error_auth_unavailable'),
         code: 'AUTH_UNAVAILABLE',
       },
