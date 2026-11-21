@@ -11,7 +11,7 @@ Aster code/Skill are MIT-licensed without a separate software license fee. Agent
 1. Local: D1, local inbox and mocks; no actual cloud calls. Never expose the inbox publicly.
 2. Free cloud data: prefer Workers Free+D1 with workers.dev/existing domain and only necessary resources. Separate staging/production data but aggregate account-wide allowances.
 3. Auth/transactional mail: preserve explicit/working providers. Without one, prefer CF only for an already suitable Workers Paid account with sending/domain/quota eligibility; otherwise choose Brevo/Resend from preference, environment, activation and volume. CF sending's paid eligibility does not make Workers/D1 paid prerequisites. Both external adapters exist; verify real receipt, reset, sessions and permissions under [Mail](MAIL.md).
-4. Evidence-based upgrade: when measured limits or requested paid capabilities justify it, present free alternatives, fixed/metered costs, estimates and budget, then follow actual authorization.
+4. Evidence-based upgrade: when measured limits or requested paid capabilities justify it, present free alternatives, fixed/metered costs, estimates and budget, then follow actual authorization. Do not add paid or metered bindings the product does not use, and do not weaken authentication to fit a free tier.
 
 Initial target: **USD 0/month in new cloud charges**, not a permanent zero-cost promise. Existing paid accounts may incur usage; never downgrade unasked or count one shared fixed fee once per project.
 

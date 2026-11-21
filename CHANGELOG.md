@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- 2026-11-28: Shorten `AGENTS.md` from 16 KB to 12.5 KB. Rules that always apply (security, data, payments TEST-only, locale and errors, no unrequested commits, acting within authorization) stay whole; the 17 topic rules become a "before you change one of these, read the document" list with the invariant kept per topic, and the detail lives in the documents. Two sentences that were only in the rules (no unused paid or metered bindings; existing products adopt motion explicitly) moved into the cost and frontend documents.
+
 - 2026-11-27: Split CI into parallel jobs: static checks and unit tests, local e2e, and the production Worker once per capability profile in a matrix (a failing profile no longer hides the others). The shared setup is a local composite action, the Chromium download is cached by Playwright version, and a newer push cancels the older run on non-default branches. Documentation now states the supported Node range (22.12 or newer, 24 recommended and verified by CI) consistently with `engines`.
 
 - 2026-11-26: Add a skip-to-content link and one `Main` landmark per page (the content list had none), and Open Graph and Twitter card tags on public pages with article-specific overrides on content details. `brand.json` gains an optional `socialImage` (PNG, JPEG or WebP; the brand check rejects SVG and ICO); without it, shared links show a text-only card.

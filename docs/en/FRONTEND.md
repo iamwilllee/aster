@@ -66,7 +66,7 @@ enter is CSS-driven with data-reveal-step 0–4. Observer progressively enhances
 
 Reduced-motion shows content immediately and preference changes clear pending reveals. Missing/failed Observer or no scripts remain readable. Keyboard focus reveals hidden content immediately. Availability/permissions/loading/errors must not depend on animation completion. No dependency is required for basic motion; add libraries only for real complexity.
 
-/dev/ui has replay examples; product/shop blueprints show entrances/reveals. Validate actual starts/order/ends, natural settled text, one-time scroll, keyboard/reduced-motion/no-script, themes/locales/mobile. Static screenshots or disabled-animation tests cannot establish temporal behavior.
+Existing products adopt the code, styles and pages explicitly: updating only the Skill adds no motion. /dev/ui has replay examples; product/shop blueprints show entrances/reveals. Validate actual starts/order/ends, natural settled text, one-time scroll, keyboard/reduced-motion/no-script, themes/locales/mobile. Static screenshots or disabled-animation tests cannot establish temporal behavior.
 
 ## Full page blueprints
 
