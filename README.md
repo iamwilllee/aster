@@ -8,7 +8,7 @@
 
 **v0.2.0-beta.1 · MIT · 无支付公开预览版**
 
-[下载与版本说明](https://github.com/iamwilllee/aster/releases/tag/v0.2.0-beta.1) · [开始使用](#先跑起本地预览) · [交给 Agent](#让-agent-接着做) · [完整原说明](docs/project-guide.md)
+[官网](https://aster.iamwilllee.com/) · [下载与版本说明](https://github.com/iamwilllee/aster/releases/tag/v0.2.0-beta.1) · [开始使用](#先跑起本地预览) · [交给 Agent](#让-agent-接着做) · [完整原说明](docs/project-guide.md)
 
 <sub>封面为 AI 概念配图，用构筑与连接表达产品底座；不是软件界面。</sub>
 
@@ -32,7 +32,7 @@
 | `showcase` | 官网、作品集、产品展示站               | 保留双语、主题与 SEO；不需要数据库、账号、邮件或支付   |
 | `web-app`  | 私人资料库、工具应用、带登录的数据产品 | D1、邮箱密码账号、邮件和私有项目示例；其他能力按需选择 |
 
-Google、私有图片与内容管理是可选模块。源码预览展示了部分可选能力，不代表每个新产品都默认启用。Sage 与 Catalog 两套主题都支持浅色和深色；新产品可以拥有自己的视觉方向。
+Google、私有图片与内容管理是可选模块。源码预览展示了部分可选能力，不代表每个新产品都默认启用。Sage 与 Catalog 两套主题都支持浅色和深色；新产品可以拥有自己的视觉方向。界面的组件与主题来自独立的设计系统 [Flatpack](https://github.com/iamwilllee/flatpack)（[在线文档与案例](https://iamwilllee.github.io/flatpack/)），Sage 与 Catalog 是它的两个主题；产品里是同步来的源码副本，运行时不依赖它。
 
 **支付默认关闭。** Stripe / Creem 保留为实验 TEST 适配，不属于正式收款支持；AI 和用量账本尚未接入。详见[模块选择](docs/MODULES.md)、[版本边界](docs/releases/0.2.0-beta.1.md)。
 
@@ -89,6 +89,7 @@ pnpm format:check
 pnpm exec playwright install chromium
 pnpm test:e2e
 pnpm test:production
+pnpm flatpack:sync --check   # 同步来的组件与样式没有被手改
 pnpm project:doctor
 pnpm project:status
 pnpm project:resume
@@ -102,6 +103,6 @@ pnpm project:resume
 
 ## 继续了解
 
-[完整原说明](docs/project-guide.md) · [主题](docs/THEMES.md) · [图片](docs/FILES.md) · [内容管理](docs/CONTENT.md) · [安全](https://github.com/iamwilllee/aster/blob/d5f0ee8d16ae39e736f4d7f1e0c0fb37ac03ca3a/SECURITY.md) · [MIT 许可](LICENSE)
+[完整原说明](docs/project-guide.md) · [English docs](docs/en/README.md) · [主题](docs/THEMES.md) · [图片](docs/FILES.md) · [内容管理](docs/CONTENT.md) · [安全](SECURITY.md) · [MIT 许可](LICENSE)
 
 开源许可免费，云服务、域名、邮件、模型与其他服务费用分别计算；不承诺完整产品可以永久零成本运行。
