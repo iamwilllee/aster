@@ -58,6 +58,7 @@ const ignored = new Set([
   // (docs/project-guide.md) describe Aster itself, not a generated product.
   'readme',
   'project-guide.md',
+  'README.zh-CN.md',
 ])
 export function excludedTemplatePath(path) {
   const name = basename(path)

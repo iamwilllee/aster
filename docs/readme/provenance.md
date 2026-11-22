@@ -38,3 +38,7 @@
 ## 第二次调整
 
 重写开头两段，直接写明技术栈和 Agent 用法；新增“用 Aster 做出的产品”（Makenue，描述依据其公开首页文字，截图待补）；把支付、AI 与成本边界集中到“现状与限制”；Node 要求与 CI 实际验证对齐。封面、结构图、Agent 示例和维护者命令保持不变。
+
+## 英文版
+
+`README.md` 改为英文，原中文版移到 `README.zh-CN.md`，两者顶部互链。结构图有英文（`product-path.svg`）和中文（`product-path.zh-CN.svg`）两版。英文版链接指向 `docs/en/`；原说明存档只有中文。`README.zh-CN.md` 与 `docs/readme` 一样不进入新产品模板。
