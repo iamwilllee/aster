@@ -94,6 +94,7 @@ test('classifies two-sided changes, pristine updates, protected config, deletion
   put(target, 'src/custom.ts', 'customized only in product')
   put(source, 'src/config/site.ts', 'new upstream brand')
   put(source, 'src/config/features.json', '{"auth":false}')
+  put(source, 'src/config/brand.json', '{"icon":"/brand/upstream.svg"}')
   put(source, 'wrangler.jsonc', '{"vars":{"MAIL_MODE":"brevo"}}')
   put(source, 'migrations/0000.sql', 'changed upstream applied migration')
   rmSync(join(source, 'src/retired.ts'))
@@ -107,6 +108,7 @@ test('classifies two-sided changes, pristine updates, protected config, deletion
     'src/custom.ts': 'customized',
     'src/config/site.ts': 'review',
     'src/config/features.json': 'review',
+    'src/config/brand.json': 'review',
     'wrangler.jsonc': 'review',
     'migrations/0000.sql': 'review',
     'src/retired.ts': 'removed-upstream',

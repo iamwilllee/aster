@@ -1,0 +1,9 @@
+{
+  "icon": "/brand/aster-icon.svg",
+  "iconDark": null,
+  "favicon": {
+    "href": "/favicon.svg",
+    "type": "image/svg+xml"
+  },
+  "appleTouchIcon": null
+}

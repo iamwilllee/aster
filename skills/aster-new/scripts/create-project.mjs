@@ -15,7 +15,12 @@ import {
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parse } from 'jsonc-parser'
-import { initialPlan, savePlan, resumeProject } from '../../../scripts/project-workflow.mjs'
+import {
+  initialPlan,
+  parsePlan,
+  savePlan,
+  resumeProject,
+} from '../../../scripts/project-workflow.mjs'
 
 import {
   templateFiles as files,
@@ -192,6 +197,30 @@ export function createProject({
     brief,
     plan ? JSON.parse(readFileSync(resolve(plan), 'utf8')) : profilePlan,
   )
+  if (!productPlan.tasks.some((item) => item.id === 'brand-identity'))
+    productPlan.tasks.push({
+      id: 'brand-identity',
+      title: '根据产品上下文设计或沿用品牌图标并统一接入',
+      status: 'todo',
+      evidence: [],
+    })
+  if (!productPlan.acceptance.some((item) => item.id === 'brand-identity'))
+    productPlan.acceptance.push({
+      id: 'brand-identity',
+      title: '当前产品图标与品牌实际显示验收',
+      kind: 'baseline',
+      scope: 'local',
+      steps: [
+        '运行 pnpm brand:check',
+        '检查导航、16/32px favicon、手机与深浅主题，审查模板品牌残留',
+      ],
+      expected: '使用当前产品品牌；实际显示清晰，无缺失资源或变形；按需主屏图标检查真实文件',
+      required: true,
+      status: 'pending',
+      verification: 'unverified',
+      evidence: [],
+    })
+  parsePlan(productPlan) // Validate added checkpoints before writing any product files.
   const selectedFeatures = featuresFromPlan(productPlan)
   const visual = productPlan.decisions.find((item) => item.id === 'visual-theme')
   const appearance = parseAppearance({

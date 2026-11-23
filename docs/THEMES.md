@@ -1,5 +1,7 @@
 # Sage 与 Catalog 视觉主题
 
+[English](en/THEMES.md)
+
 Aster 共用 shadcn/ui base-nova（Base UI）组件，提供两套产品视觉主题。base-nova 是组件风格；Sage / Catalog 是本项目的主题名。两者都支持英文/中文、浅色/深色和手机布局，不增加组件框架或云服务。
 
 | 主题           | 视觉方向                                                         | 常见用途                           |

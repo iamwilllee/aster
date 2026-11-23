@@ -1,5 +1,7 @@
 先按 [能力选择](MODULES.md) 确认需要的绑定。纯展示站无需 D1 或认证密钥，所选模块才进入对应的配置与验收步骤。
 
+[English](en/CLOUDFLARE.md)
+
 # Cloudflare 架构
 
 Aster 使用 TanStack Start / React / Vite，由 Cloudflare Workers 承载 SSR、服务端函数和 HTTP API。Drizzle 管理 D1 schema 与迁移。
@@ -9,7 +11,7 @@ Aster 使用 TanStack Start / React / Vite，由 Cloudflare Workers 承载 SSR�
 | Web、API 与静态资源 | Workers + Cloudflare Vite plugin                                       |
 | 数据                | D1：用户、会话、私有项目、限流与测试订阅状态                           |
 | 邮件                | 本地收件箱；Cloudflare / Brevo / Resend 适配，需独立配置与真实投递验收 |
-| 文件                | 尚无文件业务；默认不声明 R2 binding                                    |
+| 文件                | 可选私有图片与网站封面；新产品按需启用 files                           |
 | AI、队列与定时任务  | 尚未接入，按具体产品需求增加                                           |
 
 ## 隔离与一致性
@@ -18,7 +20,7 @@ Aster 使用 TanStack Start / React / Vite，由 Cloudflare Workers 承载 SSR�
 
 Cloudflare bindings 仅从服务端模块导入。认证按请求构建，私有 SQL 限定当前用户。项目上限通过原子条件写入保证；测试支付事件验签、去重并以提供商当前状态同步，不能依赖成功跳转或进程内变量授予权益。
 
-KV 不能作为余额、权限或锁的唯一权威来源。文件业务接入时需要额外完成归属、访问控制与失败处理。
+KV 不能作为余额、权限或锁的唯一权威来源。图片业务保持所属用户、访问控制与失败恢复边界，详见 [图片指南](FILES.md)。
 
 ## 成本与部署
 

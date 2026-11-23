@@ -12,6 +12,7 @@ import { Providers, useI18n } from '@/components/providers'
 import { appearance } from '@/config/appearance'
 import type { VisualTheme } from '@/config/appearance-policy.mjs'
 import { site } from '@/config/site'
+import { brand } from '@/config/brand'
 import { translate, localizePath, type Locale } from '@/i18n/core'
 import { getPublicConfig } from '@/server/functions'
 import { Button } from '@/components/ui/button'
@@ -44,7 +45,8 @@ export const Route = createRootRoute({
       ],
       links: [
         { rel: 'stylesheet', href: css },
-        { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' },
+        { rel: 'icon', ...brand.favicon },
+        ...(brand.appleTouchIcon ? [{ rel: 'apple-touch-icon', href: brand.appleTouchIcon }] : []),
         ...(publicPage && origin
           ? [
               { rel: 'canonical', href: origin + localizePath(path, locale) },

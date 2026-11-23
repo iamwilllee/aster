@@ -2,10 +2,18 @@
 
 ## 0.3.0-dev.0 — 2026-10-26（开发中，未发布）
 
+- 2026-10-29: Add local Codex development-task Token reports, inclusive turn boundaries and deferred final-reply settlement. Keep unavailable/partial data honest, receipts private, billing amounts unknown, and product AI quota modules unchanged.
+
+- 2026-10-27: Add English Skill/reference and bilingual public documentation with coverage, source-fingerprint and link/anchor checks. Preserve this checkout's 0.3 development scope and origin guidance.
+
+- 2026-10-27 (unreleased): Add context-driven product icon design, optional style references, centralized brand assets and explicit new-product branding checkpoints; preserve existing identities and require rendered acceptance separately from file checks.
+
 - Start the next development line from the validated 0.2.0-beta.1 candidate. Keep billing off and existing adapters TEST ONLY.
 - Let local browser tests follow the checkout-specific loopback APP_ORIGIN or ASTER_TEST_ORIGIN, so parallel worktrees use separate preview/test ports.
 
 ## 0.2.0-beta.1 — 2026-10-26（发布候选，未发布）
+
+- Add finite, staggered homepage entrances and one-time viewport reveals with Sage/Catalog timing, mobile/reduced-motion adjustments and readable no-script/unsupported-observer fallbacks. Include replayable UI examples and Agent guidance; retain control geometry and natural text rendering after motion.
 
 - Prepare the first non-payment public preview: disable billing in the source default, retain experimental TEST adapters and legacy billing safeguards, and align support/version documentation.
 - Route unexpected SDK failures through the sanitized auth HTTP boundary while preserving expected API error statuses/cookies and error observability. Add actual request-path sentinel regression.

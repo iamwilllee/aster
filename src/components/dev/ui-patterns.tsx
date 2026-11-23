@@ -9,6 +9,7 @@ import {
   Palette,
   ArrowUpRight,
 } from 'lucide-react'
+import { MotionExamples } from '@/components/dev/motion-examples'
 import { useI18n } from '@/components/providers'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -405,6 +406,7 @@ export function DesignExamples() {
           </p>
         </div>
       </section>
+      <MotionExamples />
     </div>
   )
 }

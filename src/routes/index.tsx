@@ -14,6 +14,7 @@ import {
 import { Logo, Preferences } from '@/components/common'
 import { useI18n } from '@/components/providers'
 import { site } from '@/config/site'
+import { RevealGroup } from '@/components/ui/reveal'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
 
@@ -22,7 +23,7 @@ function Home() {
   const { t, locale } = useI18n()
   const { registrationReady, features } = getRouteApi('__root__').useLoaderData()
   return (
-    <div className="min-h-screen">
+    <RevealGroup className="min-h-screen">
       <header className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-6 sm:px-8">
         <Logo />
         <div className="flex min-w-0 flex-wrap items-center justify-end gap-2 sm:gap-4">
@@ -54,23 +55,30 @@ function Home() {
         <section className="mx-auto grid max-w-6xl items-center gap-12 px-5 pb-20 pt-14 sm:px-8 sm:pt-20 lg:grid-cols-[1.05fr_1fr]">
           <div>
             <Badge
+              data-reveal="enter"
               variant="outline"
               className="mb-7 gap-2 bg-card px-3 py-1.5 text-[10px] tracking-widest"
             >
               <span className="size-1.5 rounded-full bg-primary" /> OPEN SOURCE · CLOUDFLARE NATIVE
             </Badge>
             <h1
+              data-reveal="enter"
+              data-reveal-step="1"
               className={`text-[clamp(2.8rem,5.5vw,4.4rem)] leading-[1.18] font-bold ${locale === 'zh' ? 'tracking-normal' : 'tracking-[-0.03em]'}`}
             >
               {t('less_setup')}
               <br />
               <span className="text-primary">{t('more_possibility')}</span>
             </h1>
-            <p className="mt-6 max-w-md text-base leading-8 text-muted-foreground sm:text-lg">
+            <p
+              data-reveal="enter"
+              data-reveal-step="2"
+              className="mt-6 max-w-md text-base leading-8 text-muted-foreground sm:text-lg"
+            >
               {t('selected_product_foundation')}
             </p>
             {features.auth && (
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div data-reveal="enter" data-reveal-step="3" className="mt-8 flex flex-wrap gap-3">
                 <Link
                   to={registrationReady ? '/signup' : '/login'}
                   className={buttonVariants({ size: 'lg' })}
@@ -84,7 +92,11 @@ function Home() {
                 </Link>
               </div>
             )}
-            <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground">
+            <div
+              data-reveal="enter"
+              data-reveal-step="4"
+              className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground"
+            >
               {[
                 t('mit_licensed'),
                 t('your_own_cloudflare_account'),
@@ -97,9 +109,9 @@ function Home() {
               ))}
             </div>
           </div>
-          <div className="relative pb-5">
+          <div data-reveal="enter" data-reveal-step="4" className="relative pb-5">
             <div className="absolute inset-0 -z-10 rounded-full bg-accent blur-3xl" />
-            <div className="overflow-hidden rounded-xl border bg-card shadow-xl shadow-primary/10">
+            <div className="motion-hover overflow-hidden rounded-xl border bg-card shadow-xl shadow-primary/10">
               <div className="flex items-center justify-between border-b px-4 py-3">
                 <div className="flex gap-1.5">
                   {[0, 1, 2].map((i) => (
@@ -210,8 +222,8 @@ function Home() {
                 title: t('make_it_your_own'),
                 body: t('run_in_your_account_shape_the_brand_and_build_what_matters_to_you'),
               },
-            ].map((f) => (
-              <div key={f.n}>
+            ].map((f, index) => (
+              <div key={f.n} data-reveal="scroll" data-reveal-step={index}>
                 <span className="font-mono text-[10px] text-primary">/{f.n}</span>
                 <h2 className="mt-3 text-sm font-semibold">{f.title}</h2>
                 <p className="mt-2 text-xs leading-6 text-muted-foreground">{f.body}</p>
@@ -227,6 +239,6 @@ function Home() {
         <span>TanStack Start × Cloudflare · MIT</span>
         <span>{t('start_small_build_thoughtfully')}</span>
       </footer>
-    </div>
+    </RevealGroup>
   )
 }

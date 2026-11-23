@@ -1,6 +1,7 @@
 import { useRef, useState, type FormEvent } from 'react'
 import { ArrowRight, Check, FileText, Layers, ListChecks, PencilLine } from 'lucide-react'
 import { ErrorNotice } from '@/components/common'
+import { RevealGroup } from '@/components/ui/reveal'
 import { useI18n } from '@/components/providers'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -35,7 +36,7 @@ export function ProductBlueprint() {
     setResult({ title: title.trim(), audience: audience.trim(), outcome: outcome.trim() })
   }
   return (
-    <div className="overflow-hidden rounded-2xl border bg-card">
+    <RevealGroup className="overflow-hidden rounded-2xl border bg-card">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b px-6 py-4 sm:px-10">
         <span className="flex items-center gap-2 font-semibold">
           <PencilLine className="size-5 text-primary" /> Fieldnote{' '}
@@ -48,19 +49,36 @@ export function ProductBlueprint() {
           <p className="mb-4 font-mono text-xs tracking-widest text-primary">
             {t('bp_product_kicker')}
           </p>
-          <h2 className="max-w-xl text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
+          <h2
+            data-reveal="enter"
+            className="max-w-xl text-4xl font-semibold leading-tight tracking-tight sm:text-5xl"
+          >
             {t('bp_product_headline')}
           </h2>
-          <p className="mt-6 max-w-lg text-base leading-8 text-muted-foreground">
+          <p
+            data-reveal="enter"
+            data-reveal-step="1"
+            className="mt-6 max-w-lg text-base leading-8 text-muted-foreground"
+          >
             {t('bp_product_body')}
           </p>
-          <Button size="lg" className="mt-7" onClick={() => firstInput.current?.focus()}>
+          <Button
+            data-reveal="enter"
+            data-reveal-step="2"
+            size="lg"
+            className="mt-7"
+            onClick={() => firstInput.current?.focus()}
+          >
             {t('bp_try_demo')}
             <ArrowRight />
           </Button>
           <p className="mt-3 text-xs text-muted-foreground">{t('bp_no_account')}</p>
         </div>
-        <div className="self-center rounded-xl border bg-background p-6 shadow-sm">
+        <div
+          data-reveal="enter"
+          data-reveal-step="3"
+          className="motion-hover self-center rounded-xl border bg-background p-6 shadow-sm"
+        >
           <div className="mb-6 flex items-center justify-between border-b pb-4">
             <span className="flex items-center gap-2 text-sm">
               <FileText className="size-4" />
@@ -204,6 +222,6 @@ export function ProductBlueprint() {
           <ArrowRight />
         </Button>
       </footer>
-    </div>
+    </RevealGroup>
   )
 }

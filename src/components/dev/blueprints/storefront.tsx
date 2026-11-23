@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowUpRight, ShoppingBag, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { RevealGroup } from '@/components/ui/reveal'
 import { useI18n } from '@/components/providers'
 import { ContentHeading, FaqList } from '@/components/patterns/content-patterns'
 
@@ -36,7 +37,7 @@ export function StorefrontBlueprint() {
   ]
   const product = goods.find((item) => item.id === selected)
   return (
-    <div className="border bg-card">
+    <RevealGroup className="border bg-card">
       <header className="flex flex-wrap items-center justify-between gap-4 border-b px-6 py-6 sm:px-10">
         <span className="text-lg font-semibold">
           Ordinary Objects <Badge variant="outline">{t('bp_fictional')}</Badge>
@@ -99,18 +100,33 @@ export function StorefrontBlueprint() {
               <p className="mb-4 text-xs tracking-widest text-muted-foreground">
                 {t('shop_series')}
               </p>
-              <h2 className="max-w-lg text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
+              <h2
+                data-reveal="enter"
+                className="max-w-lg text-4xl font-semibold leading-tight tracking-tight sm:text-5xl"
+              >
                 {t('shop_headline')}
               </h2>
-              <p className="mt-5 max-w-md text-sm leading-8 text-muted-foreground">
+              <p
+                data-reveal="enter"
+                data-reveal-step="1"
+                className="mt-5 max-w-md text-sm leading-8 text-muted-foreground"
+              >
                 {t('shop_intro')}
               </p>
-              <Button size="lg" className="mt-7" onClick={() => setSelected('organizer')}>
+              <Button
+                data-reveal="enter"
+                data-reveal-step="2"
+                size="lg"
+                className="mt-7"
+                onClick={() => setSelected('organizer')}
+              >
                 {t('shop_explore')}
                 <ArrowUpRight />
               </Button>
             </div>
             <img
+              data-reveal="enter"
+              data-reveal-step="3"
               src={goods[0]!.image}
               alt={goods[0]!.title}
               className="aspect-[4/3] w-full object-cover"
@@ -138,7 +154,7 @@ export function StorefrontBlueprint() {
                     .includes(query.trim().toLowerCase()),
                 )
                 .map((item) => (
-                  <article key={item.id} className="min-w-0">
+                  <article key={item.id} data-reveal="scroll" className="min-w-0">
                     <img
                       src={item.image}
                       alt={item.title}
@@ -186,6 +202,6 @@ export function StorefrontBlueprint() {
           </section>
         </>
       )}
-    </div>
+    </RevealGroup>
   )
 }

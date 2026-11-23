@@ -4,6 +4,7 @@ import { Button } from './ui/button'
 import { useI18n } from './providers'
 import type { ReactNode } from 'react'
 import { site } from '@/config/site'
+import { brand } from '@/config/brand'
 
 export function Logo({ compact = false }: { compact?: boolean }) {
   const { t } = useI18n()
@@ -13,7 +14,22 @@ export function Logo({ compact = false }: { compact?: boolean }) {
       className="flex items-center gap-2.5 font-semibold tracking-tight"
       aria-label={t('home_label', { name: site.name })}
     >
-      <img src="/brand/aster-icon.svg" alt="" width={32} height={32} className="size-8 shrink-0" />
+      <img
+        src={brand.icon}
+        alt=""
+        width={32}
+        height={32}
+        className={`size-8 shrink-0${brand.iconDark ? ' dark:hidden' : ''}`}
+      />
+      {brand.iconDark && (
+        <img
+          src={brand.iconDark}
+          alt=""
+          width={32}
+          height={32}
+          className="hidden size-8 shrink-0 dark:block"
+        />
+      )}
       {!compact && (
         <span className="text-xl">
           {site.name}

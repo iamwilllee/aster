@@ -1,4 +1,4 @@
 interface:
-  display_name: 'Aster 新建产品'
-  short_description: '在当前项目初始化或增量开发，自动判断目录并保留现有内容'
-  default_prompt: '使用 $aster-new，在当前项目实现我的站点想法，先判断目录状态，再初始化或增量开发并验收。'
+  display_name: 'Aster Build Product'
+  short_description: 'Build or extend a product safely in the current project'
+  default_prompt: 'Use $aster-new to implement my product idea in the current project, inspect its state first, then initialize or extend it and verify the result.'

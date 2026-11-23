@@ -73,6 +73,13 @@ test('products preserve license/lockfile, reset cloud config and generate indepe
   )
   assert.match(readFileSync(join(first.target, 'PROJECT.md'), 'utf8'), /私人片段库，按用户隔离。/)
   assert.match(readFileSync(join(first.target, 'README.md'), 'utf8'), /首次需求尚未实现/)
+  const plan = JSON.parse(readFileSync(join(first.target, 'starter.project.json'), 'utf8'))
+  assert.equal(plan.tasks.find((item) => item.id === 'brand-identity').status, 'todo')
+  const brandCase = plan.acceptance.find((item) => item.id === 'brand-identity')
+  assert.equal(brandCase.status, 'pending')
+  assert.equal(brandCase.required, true)
+  assert.equal(brandCase.kind, 'baseline')
+  assert.deepEqual(brandCase.evidence, [])
 })
 
 test('existing content is inspected in place; source descendants and aliases stay protected', (t) => {
@@ -330,4 +337,23 @@ test('appearance is selected per product and unknown themes fail before creating
     /Invalid appearance/,
   )
   assert.equal(existsSync(join(root, 'invalid-theme')), false)
+})
+
+test('branding checkpoints cannot overflow a plan after product files have been created', (t) => {
+  const root = scratch(t)
+  const target = join(root, 'not-created')
+  const plan = join(root, 'plan.json')
+  writeFileSync(
+    plan,
+    JSON.stringify({
+      tasks: Array.from({ length: 100 }, (_, i) => ({
+        id: `task-${i}`,
+        title: 'Product task',
+        status: 'todo',
+        evidence: [],
+      })),
+    }),
+  )
+  assert.throws(() => createProject({ source, target, plan, install: false }))
+  assert.equal(existsSync(target), false)
 })

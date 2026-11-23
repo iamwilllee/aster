@@ -1,5 +1,7 @@
 # 页面规划与可选组合
 
+[English](en/PAGE-BLUEPRINTS.md)
+
 Aster 的页面蓝图帮助 Agent 将产品需求变成有内容的用户流程，不是另一套技术能力开关。先读产品已有 PROJECT.md、页面、品牌与组件；已有站点优先增量保留。没有参考时根据实际用户与操作推导，不例行要求用户先选模板。
 
 ## 从需求到页面
@@ -41,6 +43,8 @@ Aster 的页面蓝图帮助 Agent 将产品需求变成有内容的用户流程�
 | `src/components/patterns/content-patterns.tsx` | ContentHeading、FeatureRows、ProcessSteps、FaqList，可独立复用 |
 | `src/components/ui/progress.tsx`               | 共享进度显示，提供范围与当前值的可访问语义                     |
 | `src/components/ui/disclosure.tsx`             | 原生 details/summary，支持 SSR 和键盘展开                      |
+
+产品官网与商品目录复用 RevealGroup 展示首屏渐次入场，FeatureRows / ProcessSteps 首次滚动出现；数据工作台不增加入场等待。规范与降级验收见 [页面动效](FRONTEND.md#页面动效)。
 
 样例不请求数据库、邮件、支付或模型，不保存账号记录。品牌和条目都是虚构；工作台进度只来自当前样例记录，不能作为产品运营数据。错误/加载由显式预览选项触发，不冒充真实网络失败。开发入口仅限 ENVIRONMENT=local 且匹配回环 origin；staging/production 均返回 404，两个语言都要检查，不加入公开导航或 sitemap。
 

@@ -777,5 +777,9 @@
   "admin_self_error": "You cannot change access to your current account.",
   "admin_changed": "Account state or permission changed. Refresh and retry; retain at least one active administrator.",
   "admin_missing": "Account not found.",
-  "admin_display_name": "Display name"
+  "admin_display_name": "Display name",
+  "ui_motion_title": "Motion and reading rhythm",
+  "ui_motion_description": "A short, staggered entrance and subtle hover feedback. Reduced motion shows content immediately. Replay affects only this local preview.",
+  "ui_motion_replay": "Replay entrance",
+  "ui_motion_scroll": "This block appears once when you reach it. Keyboard focus reveals its action immediately."
 }

@@ -155,3 +155,83 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Finite entrance motion. The natural end state has no transform or compositor layer. */
+:root {
+  --reveal-duration: 560ms;
+  --reveal-step: 70ms;
+  --reveal-distance: 14px;
+  --reveal-ease: cubic-bezier(0.2, 0.75, 0.2, 1);
+}
+[data-visual-theme='catalog'] {
+  --reveal-duration: 480ms;
+  --reveal-step: 50ms;
+  --reveal-distance: 10px;
+}
+[data-reveal-step='1'] {
+  --reveal-delay: var(--reveal-step);
+}
+[data-reveal-step='2'] {
+  --reveal-delay: calc(var(--reveal-step) * 2);
+}
+[data-reveal-step='3'] {
+  --reveal-delay: calc(var(--reveal-step) * 3);
+}
+[data-reveal-step='4'] {
+  --reveal-delay: calc(var(--reveal-step) * 4);
+}
+@keyframes aster-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(var(--reveal-distance));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal='enter'],
+  [data-reveal-state='shown'] {
+    animation: aster-reveal var(--reveal-duration) var(--reveal-ease) var(--reveal-delay, 0ms)
+      backwards;
+  }
+  [data-reveal-state='pending'] {
+    opacity: 0;
+    transform: translateY(var(--reveal-distance));
+  }
+}
+/* Keyboard interaction must never wait for an entrance animation. */
+[data-reveal]:focus-within {
+  opacity: 1;
+  transform: none;
+  animation: none;
+}
+.motion-hover {
+  transition: box-shadow 180ms ease;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .motion-hover:hover {
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--foreground) 8%, transparent);
+  }
+}
+@media (max-width: 639px) {
+  :root {
+    --reveal-distance: 8px;
+    --reveal-duration: 440ms;
+  }
+  [data-visual-theme='catalog'] {
+    --reveal-distance: 6px;
+    --reveal-duration: 400ms;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+  .motion-hover {
+    transition: none;
+  }
+}
